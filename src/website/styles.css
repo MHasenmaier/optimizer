@@ -1,0 +1,547 @@
+.Startscreen {
+    box-sizing: border-box;
+
+    position: relative;
+    width: 360px;
+    height: 800px;
+}
+
+.background {
+    background: #FAFAFA;
+    border: 1px solid #000000;
+}
+
+.add_todo_button {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    left: 140px;
+    top: 696px;
+}
+
+.add_todo_kreis {
+    box-sizing: border-box;
+
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 0%;
+    bottom: 0%;
+
+    border: 1px solid #000000;
+}
+
+.add_todo_strich_senkrecht {
+    position: absolute;
+    left: 50%;
+    right: -8.33%;
+    top: 21.09%;
+    bottom: 78.91%;
+
+    border: 7px solid #000000;
+    transform: rotate(90deg);
+}
+
+.add_todo_strich_waagerecht {
+    position: absolute;
+    left: 21.09%;
+    right: 20.57%;
+    top: 50%;
+    bottom: 50%;
+
+    border: 7px solid #000000;
+}
+
+.obere_linie {
+    position: absolute;
+    width: 321.02px;
+    height: 0px;
+    left: calc(50% - 321.02px/2 - 0.49px);
+    top: calc(50% - 0px/2 - 237px);
+
+    border: 1px solid #000000;
+}
+
+.untere_linie {
+    position: absolute;
+    width: 321.02px;
+    height: 0px;
+    left: calc(50% - 321.02px/2 - 0.49px);
+    top: calc(50% - 0px/2 + 278px);
+
+    border: 1px solid #000000;
+}
+
+.date_clock {
+    position: absolute;
+    width: 269px;
+    height: 138px;
+    left: 46px;
+    top: 25px;
+}
+
+.date {
+    position: absolute;
+    width: 269px;
+    height: 48px;
+    left: 46px;
+    top: 25px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 48px;
+
+    color: #000000;
+}
+
+.time {
+    position: absolute;
+    width: 149px;
+    height: 72px;
+    left: 106px;
+    top: 91px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 181.02%;
+    /*.or 101px*/
+    display: flex;
+    align-items: center;
+
+    color: #000000;
+}
+
+.Todo_begonnen {
+    position: absolute;
+    width: 281px;
+    height: 40px;
+    left: 40px;
+    top: 409px;
+}
+
+.grp_todo_bezeichnung {
+    position: absolute;
+    left: 24.44%;
+    right: 10.37%;
+    top: 0%;
+    bottom: 0%;
+}
+
+.todo_kasten {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 0%;
+    bottom: 0%;
+
+    background: #8CC1FF;
+    border-radius: 6px;
+}
+
+.todo_bezeichnung_text {
+    position: absolute;
+    left: 4.27%;
+    right: 30.76%;
+    top: 23.4%;
+    bottom: 29.1%;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+
+    color: #000000;
+}
+
+.grp_checkbox_todo {
+    box-sizing: border-box;
+}
+
+.checkbox_todo_auto_layout {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+
+    position: absolute;
+    left: 0%;
+    right: 85.36%;
+    top: 0%;
+    bottom: 0%;
+
+    background: #8CC1FF;
+}
+
+.background {
+    border: 3px solid #FAFAFA;
+    border-radius: 6px;
+
+
+}
+
+.checkbox_check {
+
+    display: none;
+    width: 25px;
+    height: 23.77px;
+
+    background: #FFFFFF;
+    opacity: 0.9;
+
+}
+
+.Inside_checkbox_check_auto_layout {
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+
+
+}
+
+.checkbox_check_auto_layout {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+    gap: 10px;
+
+    position: absolute;
+    left: 79.72%;
+    right: 0%;
+    top: -35%;
+    bottom: 65%;
+}
+
+.ellipse_angehängte_tasks {
+    width: 57px;
+    height: 28px;
+}
+
+.ellipse_angehängte_tasks_Inside_auto_layout {
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+}
+
+.ellipse_angehängte_tasks {
+    box-sizing: border-box;
+
+    position: absolute;
+    width: 57px;
+    height: 28px;
+    left: 0px;
+    top: 0px;
+}
+
+.background {
+    background: #FAFAFA;
+}
+
+
+.grp_dropdownbutton_angehängte_tasks {
+    position: absolute;
+    width: 19px;
+    height: 13.57px;
+    left: 28px;
+    top: 7px;
+}
+
+.symbol_dropdown_angehängte_tasks {
+    box-sizing: border-box;
+
+    position: absolute;
+    left: 100%;
+    right: -100%;
+    top: 100%;
+    bottom: -100%;
+
+    border: 1px solid #000000;
+    transform: rotate(180deg);
+}
+
+.anzahl_angehängte_tasks {
+    position: absolute;
+    width: 11px;
+    height: 18px;
+    right: 33px;
+    top: 6px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+    text-align: center;
+
+    color: #000000;
+}
+
+.todo_geplant {
+    position: absolute;
+    width: 281px;
+    height: 40px;
+    left: 40px;
+    top: 337px;
+}
+
+.grp_todo_bezeichnung {
+    position: absolute;
+    left: 24.44%;
+    right: 10.37%;
+    top: 0%;
+    bottom: 0%;
+}
+
+.todo_kasten {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 0%;
+    bottom: 0%;
+
+    background: #B9B9B9;
+    border-radius: 6px;
+}
+
+.todo_bezeichnung_text {
+    position: absolute;
+    left: 4.27%;
+    right: 41.13%;
+    top: 23.4%;
+    bottom: 29.1%;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+
+    color: #000000;
+}
+
+.Todo_fertig {
+    position: absolute;
+    width: 281px;
+    height: 40px;
+    left: 40px;
+    top: 265px;
+}
+
+.grp_todo_bezeichnung {
+    position: absolute;
+    left: 24.44%;
+    right: 10.37%;
+    top: 0%;
+    bottom: 0%;
+}
+
+.todo_kasten {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 0%;
+    bottom: 0%;
+
+    background: #436CFE;
+    border-radius: 6px;
+}
+
+.todo_bezeichnung_text {
+    position: absolute;
+    left: 4.27%;
+    right: 49.87%;
+    top: 23.4%;
+    bottom: 29.1%;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+    text-decoration-line: line-through;
+
+    color: #000000;
+}
+
+.grp_angehängte_tasks {
+    width: 57px;
+    height: 28px;
+}
+
+
+.background {
+    background: #FAFAFA;
+}
+
+.grp_dropdownbutton_angehängte_tasks {
+
+    position: absolute;
+    width: 19px;
+    height: 13.57px;
+    left: 28px;
+    top: 7px;
+}
+
+.symbol_dropdown_angehängte_tasks {
+
+    box-sizing: border-box;
+
+    position: absolute;
+    left: 100%;
+    right: -100%;
+    top: 100%;
+    bottom: -100%;
+
+    border: 1px solid #000000;
+    transform: rotate(180deg);
+
+
+}
+
+.anzahl_angehängte_tasks {
+
+    position: absolute;
+    width: 11px;
+    height: 18px;
+    right: 33px;
+    top: 6px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+    text-align: center;
+
+    color: #000000;
+}
+
+.Todo_neu_checkbox_buttonbox {
+
+    position: absolute;
+    width: 281px;
+    height: 40px;
+    right: 39px;
+    top: 193px;
+}
+
+.new {
+
+    position: absolute;
+    left: 24.44%;
+    right: 10.37%;
+    top: 0%;
+    bottom: 0%;
+}
+
+.todo_kasten {
+
+    box-sizing: border-box;
+
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 0%;
+    bottom: 0%;
+
+    background: #FFFFFF;
+}
+
+.todo_bezeichnung_text {
+
+    position: absolute;
+    left: 4.27%;
+    right: 47.14%;
+    top: 23.4%;
+    bottom: 29.1%;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+
+    color: #000000;
+}
+
+
+.border {
+    border: 3px solid #D3D3D3;
+    border-radius: 6px;
+}
+
+.background {
+    background: #FAFAFA;
+    opacity: 0.9;
+}
+
+.Inside_auto_layout {
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+}
+
+.Auto_layout {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+    gap: 10px;
+
+    position: absolute;
+    visibility: hidden;
+    left: 79.72%;
+    right: 0%;
+    top: -35%;
+    bottom: 65%;
+}
+
+.grp_burgermenu {
+
+    position: absolute;
+    width: 8px;
+    height: 32px;
+    left: 328px;
+    top: 118px;
+}
+
+.burgermenu_oberer_punkt {
+
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    left: 328px;
+    top: 118px;
+
+    background: #000000;
+}
+
+.burgermenu_mittlerer_punkt {
+
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    left: 328px;
+    top: 130px;
+
+    background: #000000;
+}
+
+.burgermenu_unterer_punkt {
+
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    left: 328px;
+    top: 142px;
+
+    background: #000000;
+}
