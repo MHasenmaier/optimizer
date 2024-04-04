@@ -1,84 +1,35 @@
-.Startscreen {
-    box-sizing: border-box;
-
+.main {
+    grid-template-areas:    'header'
+                            'content'
+                            'footer';
+    grid-template-rows: 1fr 3fr 1fr;
+    display: grid;
     position: relative;
     width: 360px;
     height: 800px;
-}
-
-.background {
     background: #FAFAFA;
     border: 1px solid #000000;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
 }
 
-.add_todo_button {
-    position: absolute;
-    width: 80px;
-    height: 80px;
-    left: 140px;
-    top: 696px;
+.header {
+    display: grid;
+    grid-area: header;
 }
 
-.add_todo_kreis {
-    box-sizing: border-box;
-
-    position: absolute;
-    left: 0%;
-    right: 0%;
-    top: 0%;
-    bottom: 0%;
-
-    border: 1px solid #000000;
+.content {
+    display: grid;
+    grid-area: content;
 }
 
-.add_todo_strich_senkrecht {
-    position: absolute;
-    left: 50%;
-    right: -8.33%;
-    top: 21.09%;
-    bottom: 78.91%;
-
-    border: 7px solid #000000;
-    transform: rotate(90deg);
+.footer {
+    display: grid;
+    grid-area: footer;
 }
 
-.add_todo_strich_waagerecht {
-    position: absolute;
-    left: 21.09%;
-    right: 20.57%;
-    top: 50%;
-    bottom: 50%;
-
-    border: 7px solid #000000;
-}
-
-.obere_linie {
-    position: absolute;
-    width: 321.02px;
-    height: 0px;
-    left: calc(50% - 321.02px/2 - 0.49px);
-    top: calc(50% - 0px/2 - 237px);
-
-    border: 1px solid #000000;
-}
-
-.untere_linie {
-    position: absolute;
-    width: 321.02px;
-    height: 0px;
-    left: calc(50% - 321.02px/2 - 0.49px);
-    top: calc(50% - 0px/2 + 278px);
-
-    border: 1px solid #000000;
-}
-
-.date_clock {
-    position: absolute;
-    width: 269px;
-    height: 138px;
-    left: 46px;
-    top: 25px;
-}
 
 .date {
     position: absolute;
@@ -86,10 +37,8 @@
     height: 48px;
     left: 46px;
     top: 25px;
-
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 400;
+    
+    
     font-size: 40px;
     line-height: 48px;
 
@@ -103,16 +52,26 @@
     left: 106px;
     top: 91px;
 
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 400;
     font-size: 56px;
     line-height: 181.02%;
     /*.or 101px*/
     display: flex;
     align-items: center;
-
+    
     color: #000000;
+}
+
+/**
+*   the following code is not in use
+*   figma-style
+*/
+
+.add_todo_button {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    left: 180px;
+    top: 725px;
 }
 
 .Todo_begonnen {
