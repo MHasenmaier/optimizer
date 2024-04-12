@@ -1,9 +1,9 @@
 .main {
+    display: grid;
     grid-template-areas:    'header'
                             'content'
                             'footer';
     grid-template-rows: 1fr 3fr 1fr;
-    display: grid;
     position: relative;
     width: 360px;
     height: 800px;
@@ -13,21 +13,78 @@
     font-family: 'Inter';
     font-style: normal;
     font-weight: 400;
+    color: #000000;
 }
 
 .header {
     display: grid;
     grid-area: header;
+    height: 162px;
+    box-shadow: inset 0px -1px #000000;
 }
 
 .content {
-    display: grid;
+    display: flex;
     grid-area: content;
+    padding: 0 40px;
+    flex-direction: column;
+    height: 515px;
+    overflow-y: auto;
+}
+
+.boxpair {
+    display: grid;
+    grid-template-columns: 40px 28px auto;
+    grid-template-areas: 'smallbox . largebox';
+    align-content: center;
+    padding: 16px 0;
+    margin: 16px;
+}
+
+.smallbox {
+    display: flex;
+    grid-area: smallbox;
+    justify-content: center;
+    border: darkgrey solid 3px;
+    border-radius: 6px;
+    width: 40px;
+    height: 40px;
+}
+
+.smallbox:active {
+    background-color: #b9b9b9;
+}
+
+.largebox {
+    display: flex;
+    grid-area: largebox;
+    border: darkgrey solid 3px;
+    border-radius: 6px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 6px;
+}
+
+.ellipse {
+    border-radius: 75%;
+    border: darkgrey solid 3px;
+    padding: 0 15px;
+    position: relative;
+    top: -20px;
+    right: -27px;
+}
+
+.ellipse:active {
+    background-color: #b9b9b9;
 }
 
 .footer {
-    display: grid;
+    display: flex;
     grid-area: footer;
+    box-shadow: inset 0px 1px #000000;
+    justify-content: center;
+    align-items: center;
+    height: 122px;
 }
 
 
@@ -37,42 +94,41 @@
     height: 48px;
     left: 46px;
     top: 25px;
-    
-    
     font-size: 40px;
     line-height: 48px;
 
-    color: #000000;
 }
 
 .time {
+    display: flex;
     position: absolute;
     width: 149px;
     height: 72px;
     left: 106px;
     top: 91px;
-
     font-size: 56px;
     line-height: 181.02%;
     /*.or 101px*/
-    display: flex;
     align-items: center;
-    
-    color: #000000;
+}
+
+.add_todo_button {
+    display: flex;
+    height: 50px;
+    width: 50px;
+    border: solid 5px;
+    border-radius: 75%;
+    font-size: 75px;
+    padding: 0.5em;
+    letter-spacing: 0;
+    justify-content: center;
+    align-items: center;
 }
 
 /**
 *   the following code is not in use
 *   figma-style
 */
-
-.add_todo_button {
-    position: absolute;
-    width: 80px;
-    height: 80px;
-    left: 180px;
-    top: 725px;
-}
 
 .Todo_begonnen {
     position: absolute;
@@ -159,8 +215,6 @@
     flex: none;
     order: 0;
     flex-grow: 0;
-
-
 }
 
 .checkbox_check_auto_layout {
@@ -198,11 +252,6 @@
     left: 0px;
     top: 0px;
 }
-
-.background {
-    background: #FAFAFA;
-}
-
 
 .grp_dropdownbutton_angehängte_tasks {
     position: absolute;
