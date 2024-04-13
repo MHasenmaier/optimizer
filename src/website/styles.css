@@ -18,9 +18,53 @@
 
 .header {
     display: grid;
+    grid-template-columns: 15% 70% 15%;
+    grid-template-areas:
+        ". date ."
+        ". time menu";
     grid-area: header;
     height: 162px;
     box-shadow: inset 0px -1px #000000;
+}
+
+.date {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    grid-area: date;
+    font-size: 40px;
+}
+
+.time {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    grid-area: time;
+    font-size: 56px;
+}
+
+.menu {
+    display: flex;
+    grid-area: menu;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.menu:active {
+    box-shadow: inset grey 0 0;
+}
+
+.menubutton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 75%;
+}
+
+.menubutton:active {
+    background-color: #b9b9b9;
+    box-shadow: #b9b9b9 0 0 2px 5px;
 }
 
 .content {
@@ -49,6 +93,7 @@
     border-radius: 6px;
     width: 40px;
     height: 40px;
+    cursor: pointer;
 }
 
 .smallbox:active {
@@ -63,15 +108,25 @@
     justify-content: space-between;
     align-items: center;
     padding: 0 6px;
+    cursor: pointer;
+}
+
+.largebox:active {
+    background-color: #B9B9B9;
 }
 
 .ellipse {
+    height: 25px;
+    width: 40px;
+    display: flex;
     border-radius: 75%;
     border: darkgrey solid 3px;
-    padding: 0 15px;
     position: relative;
-    top: -20px;
-    right: -27px;
+    top: -11px;
+    right: -168px;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
 }
 
 .ellipse:active {
@@ -88,30 +143,6 @@
 }
 
 
-.date {
-    position: absolute;
-    width: 269px;
-    height: 48px;
-    left: 46px;
-    top: 25px;
-    font-size: 40px;
-    line-height: 48px;
-
-}
-
-.time {
-    display: flex;
-    position: absolute;
-    width: 149px;
-    height: 72px;
-    left: 106px;
-    top: 91px;
-    font-size: 56px;
-    line-height: 181.02%;
-    /*.or 101px*/
-    align-items: center;
-}
-
 .add_todo_button {
     display: flex;
     height: 50px;
@@ -123,6 +154,11 @@
     letter-spacing: 0;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
+}
+
+.add_todo_button:active {
+    background-color: #B9B9B9;
 }
 
 /**
