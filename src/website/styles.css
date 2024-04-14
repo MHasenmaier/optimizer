@@ -1,4 +1,9 @@
-.main {
+/**
+*
+*   overview
+*
+*/
+.mainOverview {
     display: grid;
     grid-template-areas:    'header'
                             'content'
@@ -142,7 +147,6 @@
     height: 122px;
 }
 
-
 .add_todo_button {
     display: flex;
     height: 50px;
@@ -162,430 +166,81 @@
 }
 
 /**
-*   the following code is not in use
-*   figma-style
+*
+*   create Todo
+*
 */
 
-.Todo_begonnen {
-    position: absolute;
-    width: 281px;
-    height: 40px;
-    left: 40px;
-    top: 409px;
-}
-
-.grp_todo_bezeichnung {
-    position: absolute;
-    left: 24.44%;
-    right: 10.37%;
-    top: 0%;
-    bottom: 0%;
-}
-
-.todo_kasten {
-    position: absolute;
-    left: 0%;
-    right: 0%;
-    top: 0%;
-    bottom: 0%;
-
-    background: #8CC1FF;
-    border-radius: 6px;
-}
-
-.todo_bezeichnung_text {
-    position: absolute;
-    left: 4.27%;
-    right: 30.76%;
-    top: 23.4%;
-    bottom: 29.1%;
-
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 19px;
-
-    color: #000000;
-}
-
-.grp_checkbox_todo {
-    box-sizing: border-box;
-}
-
-.checkbox_todo_auto_layout {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 0px;
-
-    position: absolute;
-    left: 0%;
-    right: 85.36%;
-    top: 0%;
-    bottom: 0%;
-
-    background: #8CC1FF;
-}
-
-.background {
-    border: 3px solid #FAFAFA;
-    border-radius: 6px;
-
-
-}
-
-.checkbox_check {
-
-    display: none;
-    width: 25px;
-    height: 23.77px;
-
-    background: #FFFFFF;
-    opacity: 0.9;
-
-}
-
-.Inside_checkbox_check_auto_layout {
-    flex: none;
-    order: 0;
-    flex-grow: 0;
-}
-
-.checkbox_check_auto_layout {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding: 0px;
-    gap: 10px;
-
-    position: absolute;
-    left: 79.72%;
-    right: 0%;
-    top: -35%;
-    bottom: 65%;
-}
-
-.ellipse_angehängte_tasks {
-    width: 57px;
-    height: 28px;
-}
-
-.ellipse_angehängte_tasks_Inside_auto_layout {
-    flex: none;
-    order: 0;
-    flex-grow: 0;
-}
-
-.ellipse_angehängte_tasks {
-    box-sizing: border-box;
-
-    position: absolute;
-    width: 57px;
-    height: 28px;
-    left: 0px;
-    top: 0px;
-}
-
-.grp_dropdownbutton_angehängte_tasks {
-    position: absolute;
-    width: 19px;
-    height: 13.57px;
-    left: 28px;
-    top: 7px;
-}
-
-.symbol_dropdown_angehängte_tasks {
-    box-sizing: border-box;
-
-    position: absolute;
-    left: 100%;
-    right: -100%;
-    top: 100%;
-    bottom: -100%;
-
-    border: 1px solid #000000;
-    transform: rotate(180deg);
-}
-
-.anzahl_angehängte_tasks {
-    position: absolute;
-    width: 11px;
-    height: 18px;
-    right: 33px;
-    top: 6px;
-
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 19px;
-    text-align: center;
-
-    color: #000000;
-}
-
-.todo_geplant {
-    position: absolute;
-    width: 281px;
-    height: 40px;
-    left: 40px;
-    top: 337px;
-}
-
-.grp_todo_bezeichnung {
-    position: absolute;
-    left: 24.44%;
-    right: 10.37%;
-    top: 0%;
-    bottom: 0%;
-}
-
-.todo_kasten {
-    position: absolute;
-    left: 0%;
-    right: 0%;
-    top: 0%;
-    bottom: 0%;
-
-    background: #B9B9B9;
-    border-radius: 6px;
-}
-
-.todo_bezeichnung_text {
-    position: absolute;
-    left: 4.27%;
-    right: 41.13%;
-    top: 23.4%;
-    bottom: 29.1%;
-
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 19px;
-
-    color: #000000;
-}
-
-.Todo_fertig {
-    position: absolute;
-    width: 281px;
-    height: 40px;
-    left: 40px;
-    top: 265px;
-}
-
-.grp_todo_bezeichnung {
-    position: absolute;
-    left: 24.44%;
-    right: 10.37%;
-    top: 0%;
-    bottom: 0%;
-}
-
-.todo_kasten {
-    position: absolute;
-    left: 0%;
-    right: 0%;
-    top: 0%;
-    bottom: 0%;
-
-    background: #436CFE;
-    border-radius: 6px;
-}
-
-.todo_bezeichnung_text {
-    position: absolute;
-    left: 4.27%;
-    right: 49.87%;
-    top: 23.4%;
-    bottom: 29.1%;
-
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 19px;
-    text-decoration-line: line-through;
-
-    color: #000000;
-}
-
-.grp_angehängte_tasks {
-    width: 57px;
-    height: 28px;
-}
-
-
-.background {
+.mainAddTodo {
+    display: grid;
+    grid-template-areas:    'status'
+                            'todoItem'
+                            'taskAdd'
+                            'todoAdd';
+    grid-template-rows: 15% 70% 7% 8%;
+    width: 360px;
+    height: 800px;
     background: #FAFAFA;
-}
-
-.grp_dropdownbutton_angehängte_tasks {
-
-    position: absolute;
-    width: 19px;
-    height: 13.57px;
-    left: 28px;
-    top: 7px;
-}
-
-.symbol_dropdown_angehängte_tasks {
-
-    box-sizing: border-box;
-
-    position: absolute;
-    left: 100%;
-    right: -100%;
-    top: 100%;
-    bottom: -100%;
-
     border: 1px solid #000000;
-    transform: rotate(180deg);
-
-
-}
-
-.anzahl_angehängte_tasks {
-
-    position: absolute;
-    width: 11px;
-    height: 18px;
-    right: 33px;
-    top: 6px;
 
     font-family: 'Inter';
     font-style: normal;
     font-weight: 400;
-    font-size: 16px;
-    line-height: 19px;
-    text-align: center;
-
     color: #000000;
 }
 
-.Todo_neu_checkbox_buttonbox {
-
-    position: absolute;
-    width: 281px;
-    height: 40px;
-    right: 39px;
-    top: 193px;
-}
-
-.new {
-
-    position: absolute;
-    left: 24.44%;
-    right: 10.37%;
-    top: 0%;
-    bottom: 0%;
-}
-
-.todo_kasten {
-
-    box-sizing: border-box;
-
-    position: absolute;
-    left: 0%;
-    right: 0%;
-    top: 0%;
-    bottom: 0%;
-
-    background: #FFFFFF;
-}
-
-.todo_bezeichnung_text {
-
-    position: absolute;
-    left: 4.27%;
-    right: 47.14%;
-    top: 23.4%;
-    bottom: 29.1%;
-
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 19px;
-
-    color: #000000;
-}
-
-
-.border {
-    border: 3px solid #D3D3D3;
-    border-radius: 6px;
-}
-
-.background {
-    background: #FAFAFA;
-    opacity: 0.9;
-}
-
-.Inside_auto_layout {
-    flex: none;
-    order: 0;
-    flex-grow: 0;
-}
-
-.Auto_layout {
+.status {
     display: flex;
-    flex-direction: row;
+    grid-area: status;
     justify-content: center;
+    justify-self: right;
     align-items: center;
-    padding: 0px;
-    gap: 10px;
+    align-self: end;
+    margin: 15px;
+    width: 120px;
+    height: 35px;
+    border: none;
+}
 
-    position: absolute;
+.status:active {
+    border: solid 3px;
+    border-color: grey;
+    border-radius: 25%;
+}
+
+.statusButton {
+    display: flex;
+}
+
+.statusPopup {
     visibility: hidden;
-    left: 79.72%;
-    right: 0%;
-    top: -35%;
-    bottom: 65%;
 }
 
-.grp_burgermenu {
+/*
+.statusPopup:target {
+    visibility: visible;
+}
+*/
 
-    position: absolute;
-    width: 8px;
-    height: 32px;
-    left: 328px;
-    top: 118px;
+.todoItem {
+    display: flex;
+    grid-area: todoItem;
+    flex-direction: column;
 }
 
-.burgermenu_oberer_punkt {
-
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    left: 328px;
-    top: 118px;
-
-    background: #000000;
+#todoDescription {
+    display: flex;
+    height: 100%;
 }
 
-.burgermenu_mittlerer_punkt {
-
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    left: 328px;
-    top: 130px;
-
-    background: #000000;
+#todoDescription::placeholder {
+    align-self: flex-start;
 }
 
-.burgermenu_unterer_punkt {
+.taskAdd {
+    grid-area: taskAdd;
+}
 
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    left: 328px;
-    top: 142px;
-
-    background: #000000;
+.todoAdd {
+    grid-area: todoAdd;
 }
