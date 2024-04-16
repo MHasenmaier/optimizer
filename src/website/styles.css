@@ -62,14 +62,21 @@
 
 .menubutton {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 75%;
+    flex-direction: column;
 }
 
 .menubutton:active {
     background-color: #b9b9b9;
+    border-radius: 75%;
     box-shadow: #b9b9b9 0 0 2px 5px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    margin: 3px;
+    background: #000000;
+    border-radius: 100%;
 }
 
 .content {
@@ -244,3 +251,39 @@
 .todoAdd {
     grid-area: todoAdd;
 }
+
+
+
+/* grp burgermenu */
+
+position: absolute;
+width: 8px;
+height: 32px;
+
+
+
+/* burgermenu oberer punkt */
+
+position: absolute;
+width: 8px;
+height: 8px;
+
+background: #000000;
+
+
+/* burgermenu mittlerer punkt */
+
+position: absolute;
+width: 8px;
+height: 8px;
+
+background: #000000;
+
+
+/* burgermenu unterer punkt */
+
+position: absolute;
+width: 8px;
+height: 8px;
+
+background: #000000;
