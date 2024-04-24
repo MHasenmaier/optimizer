@@ -6,29 +6,39 @@
         <link rel="stylesheet" href="styles.css">
     </head>
     <body class="mainAddTodo">
-        <div class="status">
-            <a class="statusButton" href="#statusPopup">
-                <div>Status</div>
-                <div class="statusIcon">[]</div>
-            </a>
-            <div id="statusPopup" class="statusPopup">
-                <button>löschen</button>
-                <button>neu</button>
-                <button>geplant</button>
-                <button>begonnen</button>
-                <button>fertig</button>
-            </div>
-        </div>
+        <label for="status" class="status"></label>
+           <!-- <a class="statusButton" href="#statusPopup">
+                <span class="statusName">Status</span>
+                <span class="statusIcon">[]</span>
+            </a> -->
+            <select name="Status" id="statusPopup" class="statusPopup">
+                <option>löschen</option>
+                <option>neu</option>
+                <option>geplant</option>
+                <option>begonnen</option>
+                <option>fertig</option>
+            </select>
         <div class="todoItem">
-            <input id="todoTitle" type="text" placeholder="Titel eingeben">
-            <input id="todoDescription" type="text" placeholder="Beschreibung eingeben">
+            <input
+                id="todoTitle"
+                type="text"
+                placeholder="Titel eingeben"
+                required
+            >
+            <textarea id="todoDescription" type="text" placeholder="Beschreibung eingeben"></textarea>
         </div>
         <div class="taskAdd">
-            task
-            <span class="taskAddButton"></span>
+            <a class="taskAddText">
+                Task
+                <span class="taskAddButton">+</span>
+            </a>
         </div>
-        <button class="todoAdd">
-            Todo anlegen
+        <div class="taskAddTodo">
+            <a href="/src/website/overview.html">
+                <button class="taskAddTodoButton">
+                    Todo anlegen
+                </button>
+            </a>
         </div>
     </body>
 </html>
