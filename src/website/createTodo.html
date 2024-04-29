@@ -6,36 +6,35 @@
         <link rel="stylesheet" href="styles.css">
     </head>
     <body class="mainAddTodo">
-        <label for="status" class="status"></label>
-           <!-- <a class="statusButton" href="#statusPopup">
-                <span class="statusName">Status</span>
-                <span class="statusIcon">[]</span>
-            </a> -->
-            <select name="Status" id="statusPopup" class="statusPopup">
+
+            <select class="status" name="Status" id="statusPopup" class="statusPopup">
+                <option id="statusFirstElement" value="Status">Status</option>
                 <option>löschen</option>
                 <option>neu</option>
                 <option>geplant</option>
                 <option>begonnen</option>
                 <option>fertig</option>
             </select>
-        <div class="todoItem">
+
+        <form class="todoAddForms" action="http://localhost/optimizer/src/backend/backend.php" method="post">
             <input
+            name="todoTitle"
                 id="todoTitle"
                 type="text"
                 placeholder="Titel eingeben"
                 required
             >
             <textarea id="todoDescription" type="text" placeholder="Beschreibung eingeben"></textarea>
-        </div>
+        </form>
         <div class="taskAdd">
             <a class="taskAddText">
                 Task
-                <span class="taskAddButton">+</span>
+                <button class="taskAddButton">+</button>
             </a>
         </div>
-        <div class="taskAddTodo">
-            <a href="/src/website/overview.html">
-                <button class="taskAddTodoButton">
+        <div class="todoAdd">
+            <a href="http://localhost/optimizer/src/website/overview.html">
+                <button class="todoAddButton">
                     Todo anlegen
                 </button>
             </a>

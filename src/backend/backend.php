@@ -9,11 +9,6 @@
     
     <?php
 
-    $intZahl = 5;
-    $charText = "Hallo!";
-
-    echo nl2br ("Zahl: " .$intZahl ."\n");
-    echo "Text: " .$charText;
 
     ?>
 
