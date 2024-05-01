@@ -3,9 +3,9 @@
 1. php-"Konsolenausgabe"
 2. Verbindung zur Datenbank
     2.0 [X] Verbindungstest [Server läuft! /läuft nicht! - Ausgabe]
-    2.1 "Konsolenausgabe /-eingabe" von Datenbankeinträgen
-    2.2 GET requests
-    2.3 POST und UPDATE requests
+    2.1 [X] "Konsolenausgabe /-eingabe" von Datenbankeinträgen (Kommunikation php mit DB)
+    2.2 REST GET requests
+    2.3 REST POST und UPDATE requests
     2.4 usw.
 3. JS-php Kommunikation
 4. Durchstich
