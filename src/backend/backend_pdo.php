@@ -8,7 +8,6 @@
 </head>
 
 <body>
-
     <?php
     /**
      * initialize connection to db
@@ -48,39 +47,39 @@
 //      updateTodo($lookingForID, $newDescription, $dbObj);
 //      deleteTodo($lookingForID, $dbObj);
 //      readTodo($status, $dbObj);
+    
+    /**
+     * RESTversuch für createTodo
+     * TODO: testen! / modifizieren!
+     */
+    $app->post('/todo', function ($request, $response) use ($dbObj) {
+        $xml = simplexml_load_string($request->getBody());
+        $data = (array) $xml;
 
-/**
- * RESTversuch für createTodo
- * TODO: testen! / modifizieren!
- */
-$app->post('/todo', function ($request, $response) use ($dbObj) {
-    $xml = simplexml_load_string($request->getBody());
-    $data = (array)$xml;
+        $ID = $data['ID'];
+        $title = $data['title'];
+        $status = $data['status'];
+        $description = $data['description'];
+        $lastUpdate = $data['lastUpdate'];
 
-    $ID = $data['ID'];
-    $title = $data['title'];
-    $status = $data['status'];
-    $description = $data['description'];
-    $lastUpdate = $data['lastUpdate'];
+        createTodo($ID, null, $title, $status, $description, $lastUpdate, $dbObj);
 
-    createTodo($ID, null, $title, $status, $description, $lastUpdate, $dbObj);
+        // Prüfen, ob Tasks vorhanden sind
+        if (isset ($data['task'])) {
+            foreach ($data['task'] as $task) {
+                $task = (array) $task;
+                $taskID = $task['taskID'];
+                $taskTitle = $task['title'];
+                $taskStatus = $task['status'];
+                $taskDescription = $task['description'];
+                $taskLastUpdate = $task['lastUpdate'];
 
-    // Prüfen, ob Tasks vorhanden sind
-    if (isset($data['task'])) {
-        foreach ($data['task'] as $task) {
-            $task = (array)$task;
-            $taskID = $task['taskID'];
-            $taskTitle = $task['title'];
-            $taskStatus = $task['status'];
-            $taskDescription = $task['description'];
-            $taskLastUpdate = $task['lastUpdate'];
-
-            createTodo($ID, $taskID, $taskTitle, $taskStatus, $taskDescription, $taskLastUpdate, $dbObj);
+                createTodo($ID, $taskID, $taskTitle, $taskStatus, $taskDescription, $taskLastUpdate, $dbObj);
+            }
         }
-    }
 
-    return $response->withStatus(200);
-});
+        return $response->withStatus(200);
+    });
 
 
 
@@ -122,14 +121,14 @@ $app->post('/todo', function ($request, $response) use ($dbObj) {
         try {
             $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $readTodo = 'SELECT * FROM todotable WHERE status = :statusValue';         //suche nach gelöschten Todos (status = 5)
-
+    
             $stmt = $dbObj->prepare($readTodo);
             $stmt->execute(['statusValue' => $status]);
 
 
             //echo gettype($stmt);
             //echo $stmt;
-
+    
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 //print_r($row);
                 echo '<br>';
