@@ -146,7 +146,7 @@
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
 
     //ERSTES TODO
-    $idEins;
+    $idEins = '';
     $taskidEins = 1;
     $titleEins = $erstesTodo->getTitle();
     $statusEins = $erstesTodo->getStatus();
@@ -163,7 +163,7 @@
     }
 
     //ZweiTES TODO
-    $idZwei;
+    $idZwei = '';
     $taskidZwei = 1;
     $titleZwei = $ZweitesTodo->getTitle();
     $statusZwei = $ZweitesTodo->getStatus();
@@ -180,7 +180,7 @@
     }
 
     //DRITTES TODO
-    $iddrei;
+    $iddrei = '';
     $taskiddrei = 1;
     $titledrei = $drittesTodo->getTitle();
     $statusdrei = $drittesTodo->getStatus();

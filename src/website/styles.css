@@ -89,6 +89,20 @@ a:active {
   box-shadow: #b9b9b9 0 0 2px 5px;
 }
 
+.menubutton:visited {
+  background-color: #b9b9b9;
+  border-radius: 75%;
+  box-shadow: #b9b9b9 0 0 2px 5px;
+}
+
+.menubutton:focus {
+  background-color: #b9b9b9;
+  border-radius: 75%;
+  box-shadow: #b9b9b9 0 0 2px 5px;
+}
+
+
+
 .dot {
   width: 8px;
   height: 8px;

@@ -4,9 +4,8 @@
 2. Verbindung zur Datenbank
     2.0 [X] Verbindungstest [Server läuft! /läuft nicht! - Ausgabe]
     2.1 [X] "Konsolenausgabe /-eingabe" von Datenbankeinträgen (Kommunikation php mit DB)
-    2.2 REST GET requests
-    2.3 REST POST und UPDATE requests
-    2.4 usw.
+    2.2 [X] ~~REST~~ GET requests
+    2.3 [X] ~~REST~~ POST, DELETE und UPDATE requests
 3. JS-php Kommunikation
 4. Durchstich
 5. Frontend anpassen

@@ -1,6 +1,6 @@
 <?php
 
-class todo
+class optimizerTodo
 {
     private int $id;
     private string $title;
@@ -51,10 +51,9 @@ class todo
     {
         return $this->status;
     }
-
 }
 
-$erstesTodo = new Todo(1);
+$erstesTodo = new optimizerTodo(1);
 echo "ID: " .$erstesTodo->getID() . "<br>";
 
 $erstesTodo->setStatus(2);
@@ -66,8 +65,7 @@ echo "Titel: " . $erstesTodo->getTitle();
 $erstesTodo->setDescription("<p>Die ist die Beschreibung vom ersten Todo!<br>Hier könnte auch mehr stehen.<br>Tut es aber nicht!<br>12345678890</p>");
 echo "Inhalt: " . $erstesTodo->getDescription();
 
-
-$erstesTodo = new Todo(2);
+$erstesTodo = new optimizerTodo(2);
 echo "ID: " .$erstesTodo->getID() . "<br>";
 
 $erstesTodo->setStatus(1);
