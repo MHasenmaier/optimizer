@@ -1,14 +1,4 @@
-<!DOCTYPE html>
-<html lang="de">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>backend_pdo</title>
-</head>
-
-<body>
-    <?php
+  <?php
     /**
      * initialize connection to db
      */
@@ -33,7 +23,7 @@
         echo 'FEHLER beim Verbindungsaufbau:<br>' . $e->getMessage();
     }
 
-    $lookingForID = 59;
+    $lookingForID = 36;
     $newDescription = "Dont say anything.. I already know!";
 
     $ID = '';
@@ -43,16 +33,22 @@
     $description = "This could be an advertisement!";
     $lastUpdate = "JS takes care of update description";
 
+    //var_dump($_SERVER["REQUEST_URI"]);
+
 //    createTodo($ID, $taskID, $title, $status, $description, $lastUpdate, $dbObj);
 //    readStatusTodo($status, $dbObj);
-    readIDTodo($lookingForID, $dbObj);
+
 //    updateTodo($lookingForID, $newDescription, $dbObj);
 //    deleteTodo($lookingForID, $dbObj);
-      countData($dbObj);
+
+    if (!readIDTodo($lookingForID, $dbObj)) {
+      echo 'readIDTodo funktioniert NICHT!!';
+  }
 
     /**
-     * create function
+     * create function (alternate)
      * assoc in values
+     * if status != number 1-5, staus = 2 by default
      * @param $ID
      * @param $taskID
      * @param $title
@@ -62,7 +58,7 @@
      * @param $dbObj - database object
      * @return bool
      */
-    function createTodo($ID, $taskID, $title, $status, $description, $lastUpdate, $dbObj): bool
+    function altCreateTodo($ID, $taskID, $title, $status, $description, $lastUpdate, $dbObj): bool
     {
         // set status = 2 as default
         if ($status !== (1 || 2 || 3 || 4 || 5))
@@ -92,6 +88,51 @@
                     Titel: ' . $title . '<br>
                     Status: ' . $status . '<br
                     Beschreibung: ' . $description . '<br>';
+            return true;
+         } catch (PDOException $e) {
+            echo 'Der INSERT hat nicht geklappt:<br>' . $e->getMessage();
+            return false;
+        }
+    }
+
+  /**
+   *  create function
+   *  assoc in values
+   * if status != number 1-5, staus = 2 by default
+   * @param $todoData - properties for new todo item
+   * @param $dbObj - database object
+   * @return bool
+   */
+    function createTodo($todoData, $dbObj): bool
+    {
+        // set status = 2 as default
+        if ($todoData['status'] !== (1 || 2 || 3 || 4 || 5))
+        {
+            $todoData['status'] = 2;
+        }
+
+        try {
+            $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $insertTodo = "INSERT INTO todotable
+                           (ID, taskID, title, status, description, lastUpdate)
+                           VALUES (:ID, :taskID, :title, :status, :description, :lastUpdate)";
+            $stmt = $dbObj->prepare($insertTodo);
+            $stmt->execute([
+                'ID' => $todoData['ID'],
+                'taskID' => $todoData['taskID'],
+                'title' => $todoData['title'],
+                'status' => $todoData['status'],
+                'description' => $todoData['description'],
+                'lastUpdate' => $todoData['lastUpdate']
+            ]);
+
+            echo 'INSERT hat: ' . $stmt->rowCount() . ' Zeilen geändert.<br>';
+            echo 'INSERT hat ein Todo mit folgenden Werten erstellt:<br>
+                    ID: ' . $todoData['ID'] . '<br>
+                    Task ID: ' . $todoData['taskID'] . '<br>
+                    Titel: ' . $todoData['title'] . '<br>
+                    Status: ' . $todoData['status'] . '<br
+                    Beschreibung: ' . $todoData['description'] . '<br>';
             return true;
          } catch (PDOException $e) {
             echo 'Der INSERT hat nicht geklappt:<br>' . $e->getMessage();
@@ -146,14 +187,10 @@
             $stmt = $dbObj->prepare($readIDTodo);
             $stmt->execute(['IDValue' => $ID]);
 
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                print_r('ID: ' . $row['ID']);
-                echo '<br>';
-                print_r('Titel: ' . $row['title']);
-                echo '<br>';
-                print_r('Status: ' . $row['status']);
-                echo '<br>';
-            }
+            header('Content-Type: application/json');
+
+            echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC),JSON_PRETTY_PRINT);
+
             return true;
         } catch (PDOException $e) {
             echo 'READ hat nicht geklappt:<br>' . $e->getMessage();
@@ -239,16 +276,161 @@
             $stmt = $dbObj->prepare('SELECT COUNT(*) as dbSize FROM todotable');
             $stmt->execute();
             $row = $stmt->fetch();
-            echo 'countData hat: ' . $row['dbSize'] . ' Einträge gefunden.';
             return $row['dbSize'];
         } catch (PDOException $e) {
             echo 'countData hat nicht geklappt:<br>' . $e->getMessage();
             return -1;
         }
     }
-    
-    ?>
 
-</body>
+  /**
+   * Potenzielle Funktionen für
+   * Middleware
+   * Authentifizierung
+   * Validierungsfunktion
+   * Fehlerbehebung
+   * Datenformatierung
+   */
 
-</html>
+  /**
+   * Authentication middleware
+   * @param $request - incoming request
+   * @param $response - outgoing response
+   * @param $next - next middleware or controller
+   * @return mixed
+   */
+  function authMiddleware($request, $response, $next): mixed
+  {
+      // Überprüfen, ob ein Authentifizierungstoken vorhanden ist
+      $authHeader = $request->getHeader('Authorization');
+      $token = $authHeader ? $authHeader[0] : null;
+
+      if (validateToken($token)) {
+          // Wenn das Token gültig ist, fahre mit der nächsten Middleware oder dem Controller fort
+          return $next($request, $response);
+      } else {
+          // Wenn das Token ungültig ist, gib einen Fehler zurück
+          return $response->withStatus(401)->withJson(['error' => 'Unauthorized']);
+      }
+  }
+
+  /**
+   * Token validation function
+   * @param $token - authentication token
+   * @return bool
+   */
+  function validateToken($token): bool
+  {
+      // Hier würde die Logik zur Überprüfung des Tokens stehen.
+      // Zum Beispiel könnte hier eine Datenbankabfrage stattfinden
+      return $token === 'valid-token'; // Vereinfachtes Beispiel
+  }
+
+  /**
+   * Authenticate user and return token
+   * @param $username - User's username
+   * @param $password - User's password
+   * @param $dbObj - database object
+   * @return string|false
+   */
+  function authenticateUser($username, $password, $dbObj): false|string
+  {
+      try {
+          $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+          $query = 'SELECT * FROM users WHERE username = :username';
+
+          $stmt = $dbObj->prepare($query);
+          $stmt->execute(['username' => $username]);
+          $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+          if ($user && password_verify($password, $user['password'])) {
+              // Hier würde ein Token generiert und zurückgegeben werden
+              return generateToken($user['id']);
+          } else {
+              return false;
+          }
+      } catch (PDOException $e) {
+          echo 'Authentifizierung fehlgeschlagen:<br>' . $e->getMessage();
+          return false;
+      }
+  }
+
+  /**
+   * Generate a token for a user
+   * @param $userId - User's ID
+   * @return string
+   */
+  function generateToken($userId): string
+  {
+      // Hier würde ein sicheres Token generiert werden.
+      // Dies ist nur ein vereinfachtes Beispiel
+      return base64_encode(random_bytes(32)) . '.' . $userId;
+  }
+
+  /**
+   * Validate todo data
+   * @param $todoData - data for new todo item
+   * @return array|bool - returns true if valid or an array of errors
+   */
+  function validateTodoData($todoData): bool|array
+  {
+      $errors = [];
+
+      if (empty($todoData['title'])) {
+          $errors['title'] = 'Titel ist erforderlich.';
+      }
+
+      if (!isset($todoData['due_date']) || strtotime($todoData['due_date']) === false) {
+          $errors['due_date'] = 'Fälligkeitsdatum ist ungültig oder nicht gesetzt.';
+      }
+
+      // Weitere Validierungen können hier hinzugefügt werden
+
+      return empty($errors) ? true : $errors;
+  }
+
+  /**
+   * Error handling function
+   * @param $exception - caught exception
+   * @param $response - outgoing response
+   * @return mixed
+   */
+  function errorHandler($exception, $response): mixed
+  {
+      // Protokollieren des Fehlers für die Server-Logs
+      error_log($exception->getMessage());
+
+      // Erstellen einer Fehlerantwort für den Client
+      $errorResponse = [
+          'error' => [
+              'message' => 'Ein interner Fehler ist aufgetreten.',
+              'code' => $exception->getCode()
+          ]
+      ];
+
+      // Senden einer JSON-Antwort mit dem Fehlerstatus
+      return $response->withStatus(500)->withJson($errorResponse);
+  }
+
+  /**
+   * Datenformatierung zu XML
+   * @param array $todos - Array von Todos
+   * @return string - XML formatierte Todos
+   */
+  function formatTodosToXml(array $todos): string
+  {
+      $xml = new SimpleXMLElement('<todos/>');
+
+      foreach ($todos as $todo) {
+          $todoElement = $xml->addChild('todo');
+          foreach ($todo as $key => $value) {
+              $todoElement->addChild($key, htmlspecialchars($value));
+          }
+      }
+
+      header('Content-Type: application/xml');
+      return $xml->asXML();
+  }
+
+
+  ?>

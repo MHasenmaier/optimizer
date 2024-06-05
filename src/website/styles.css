@@ -47,7 +47,7 @@ a:active {
     ". time menu";
   grid-area: header;
   height: 162px;
-  box-shadow: inset 0px -1px #000000;
+  box-shadow: inset 0 -1px #000000;
 }
 
 .date {
@@ -101,8 +101,6 @@ a:active {
   box-shadow: #b9b9b9 0 0 2px 5px;
 }
 
-
-
 .dot {
   width: 8px;
   height: 8px;
@@ -111,72 +109,70 @@ a:active {
   border-radius: 100%;
 }
 
-.content {
+.contentOverview {
   display: flex;
   grid-area: content;
-  padding: 0 40px;
   flex-direction: column;
   height: 515px;
   overflow-y: auto;
+  padding: 12px 0;
 }
 
-.boxpair {
-  display: grid;
-  grid-template-columns: 40px 28px auto;
-  grid-template-areas: "smallbox . largebox";
-  align-content: center;
-  padding: 10px 0;
-  margin: 8px 0;
-}
-
-.smallbox {
+.contentOverview section {
   display: flex;
-  grid-area: smallbox;
+  align-items: center;
+  margin: 15px 0 15px 40px;
+}
+
+.contentOverview section input {
+  display: flex;
   justify-content: center;
   border: lightgrey solid 3px;
   border-radius: 6px;
+  margin-right: 24px;
   width: 40px;
   height: 40px;
   cursor: pointer;
   background-color: white;
 }
 
-.smallbox:active {
+.contentOverview section input:active {
   background-color: #b9b9b9;
 }
 
-.largebox {
+.contentOverview section a {
   display: flex;
-  grid-area: largebox;
   border: lightgrey solid 1px;
   border-radius: 6px;
   justify-content: space-between;
   align-items: center;
-  padding: 0 6px;
   cursor: pointer;
   background-color: white;
+  width: 60%;
+  height: 40px;
+  padding: 0 6px;
 }
 
-.largebox:active {
+.contentOverview section a:active {
   background-color: #b9b9b9;
 }
 
-.ellipse {
+.contentOverview section button {
   height: 25px;
   width: 40px;
   display: flex;
   border-radius: 75%;
   border: lightgrey solid 1px;
-  position: relative;
-  top: -11px;
-  right: -200px;
   cursor: pointer;
   justify-content: center;
   align-items: center;
   background-color: white;
+  position: relative;
+  bottom: 20px;
+  right: 20px;
 }
 
-.ellipse:active {
+.contentOverview section button:active {
   background-color: #b9b9b9;
 }
 
@@ -186,7 +182,7 @@ a:active {
   box-shadow: inset 0px 1px #000000;
   justify-content: center;
   align-items: center;
-  height: 122px;
+  height: 10vh;
 }
 
 .add_todo_button {
@@ -248,17 +244,24 @@ a:active {
   justify-self: right;
   align-self: end;
   margin: 0;
+  padding: 5px;
   border: none;
+  border-radius: 15px;
+  font-size: xx-large;
+  cursor: pointer;
 }
 
-.status:active {
-  border: solid 3px;
-  border-color: grey;
-  border-radius: 25%;
+.status:focus {
+  border: none;
+  box-shadow: none;
 }
 
-.status:target:first-child {
+.status option:first-child {
   display: none;
+}
+
+.status option:checked {
+  color: black;
 }
 
 .status::placeholder {
@@ -298,7 +301,6 @@ a:active {
   display: flex;
   height: 100%;
   padding: 9px 5px;
-  margin: 6px 0;
   border-radius: 6px;
   font-size: 18px;
   font-family: sans-serif;
@@ -317,6 +319,7 @@ a:active {
     grid-area: taskArea;
     align-items: center;
 }
+
 .taskAddText {
     display: flex;
     flex-direction: row;
@@ -343,14 +346,7 @@ a:active {
   background-color: #b9b9b9;
 }
 
-.todoAdd {
-    grid-area: todoAdd;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.todoAddButton {
+.footerButton {
     font-size: 35px;
     padding: 8px 60px;
     border-radius: 24px;
@@ -359,6 +355,176 @@ a:active {
     cursor: pointer;
 }
 
-.todoAddButton:active {
+.footerButton:active {
     background-color: #b9b9b9;
+}
+
+.addTodoFooter {
+  grid-area: todoAdd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/**
+*
+*   Archiv and delete
+*
+*/
+
+.archivBody {
+  display: grid;
+  grid-template-areas:
+        'header'
+        'main'
+        'footer';
+  grid-template-rows: 7% 83% 10%;
+  position: relative;
+  width: 360px;
+  height: 800px;
+  background: #fafafa;
+  border: 1px solid #000000;
+  padding: 10px 20px;
+}
+
+.archivHeader {
+  display: flex;
+  grid-area: header;
+  justify-content: space-between;
+  box-shadow: #000000 0px 1px 0px 0px;
+  align-items: center;
+}
+
+.archivHeader Button {
+  padding: 10px;
+  margin: 8px 0;
+}
+
+.archivHeader h1 {
+  padding: 0;
+  margin: 0 15px;
+}
+
+.archivHeader p {
+  padding: 0;
+  margin: 0 15px;
+}
+
+.archivMain {
+  display: grid;
+  grid-template-areas: 'mainheader'
+                        'mainsection';
+  grid-template-rows: 7% 93%;
+}
+
+.archivMain header {
+  display: flex;
+  grid-area: mainheader;
+}
+
+.archivMain header p {
+  padding: 0 0 0 15px;
+  margin: 20px 0 5px 0;
+}
+
+.archivMain header p:first-child {
+  float: left;
+  width: 30%;
+}
+
+.archivMain header p:last-child {
+  float: left;
+}
+
+.archivMainSection {
+  display: flex;
+  grid-area: mainsection;
+  flex-direction: column;
+}
+
+.archivMainSection section {
+  display: flex;
+  margin: 8px 0;
+  height: 40px;
+  border: 1px solid #d3d3d3;
+  border-radius: 6px;
+  align-items: center;
+}
+
+.archivMainSection section p {
+  display: block;
+  margin: 8px 0;
+  padding: 0 0 0 15px;
+}
+
+.archivMainSection section:hover {
+  box-shadow: #000000 0px 0px 2px;
+}
+
+.archivMainSection section p:first-child {
+  float: left;
+  width: 30%;
+}
+
+.archivMainSection section p:last-child {
+  float: left;
+  width: auto;
+}
+
+.archivFooter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* The switch - the box around the slider */
+.archivToggle {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.archivToggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #f32121;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #f32121;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
 }
