@@ -285,12 +285,47 @@
 
   /**
    * Potenzielle Funktionen für
+   * Routing
    * Middleware
    * Authentifizierung
    * Validierungsfunktion
    * Fehlerbehebung
    * Datenformatierung
    */
+
+  /**
+   * routing function with switch-case for different use of an url
+   * PUT and DELETE are still missing
+   * default is missing
+   * functions are missing
+   * return is mission (necessary?)
+   * parameter possibly wrong / not complete
+   *
+   * @param $id
+   * @return void
+   */
+  function routing ($id) :void
+  {
+      switch ($_SERVER['REQUEST_METHOD']) {
+          case 'GET':
+              if ($_SERVER['REQUEST_URI'] == '/api/todos') {
+//                  getAllTodos();
+              } elseif ($_SERVER['REQUEST_URI'] == '/api/todos/'. $id) {
+                  getTodoById($id);
+              }
+              break;
+          case 'POST':
+              if ($_SERVER['REQUEST_URI'] == '/api/todos'){
+//                  createTodo($todoData, $dbObj);
+              }
+              break;
+          //PUT
+
+          //DELETE
+
+          //default
+      }
+  }
 
   /**
    * Authentication middleware
