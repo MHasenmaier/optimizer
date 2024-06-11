@@ -3,6 +3,9 @@
 class Todo
 {
     private int $id;
+    private array $taskId;
+
+
     private string $title;
     private string $description;
     private int $status;
@@ -29,6 +32,16 @@ class Todo
     public function getID(): int
     {
         return $this->id;
+    }
+
+    public function getTaskId(): array
+    {
+        return $this->taskId;
+    }
+
+    public function setTaskId(array $inputTaskId): void
+    {
+        $this->taskId = $inputTaskId;
     }
 
     public function setTitle(string $inputTitle): void

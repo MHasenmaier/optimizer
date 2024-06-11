@@ -27,15 +27,19 @@ include 'Server.php';
     }
 
     //maybe not necessary when API and frontend are working
-    $neuesTodo = new Todo($todoDataArray['title']);
-    var_dump($neuesTodo);
+    //$neuesTodo = new Todo($todoDataArray['title']);
+    //var_dump($neuesTodo);
 
     //createTodo($todoDataArray, $dbObj);
     //getAllTodosByStatus(2, $dbObj);  // change "2" to generic integer variable
     //updateTodo($todoDataArray, $dbObj);
     //deleteTodo($todoDataArray, $dbObj);
-    //getAllTodos($dbObj);
+    getAllTodos($dbObj);
 
+$arrString = "[1,2,3,4,5,6,7,8,9,0]";
+
+// TODO einbauen!
+//json_decode($arrString);
 
     /**
  * create function

@@ -1,9 +1,3 @@
-let main = document.getElementsByTagName('main');
-//for(let i = 0; i < 12; i++) {
-//    main.innerHTML = '<section><input type="checkbox"><a>Neuer Todo Titel ' + (i+1) + '</a><button>' + (i+1) + '</button></section>';
-//}
-
-
 //const title = document.getElementById('todoTitle').value;
 //const status = document.getElementById('statusPopup').value;
 //const description = document.getElementById('todoDescription').value;
