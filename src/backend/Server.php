@@ -48,7 +48,6 @@ class Server
         $this->dsn = "mysql:host=$hostName;dbname=$dbName;charset=$charset";
     }
 
-
     public function getHostName(): string
     {
         return $this->hostName;
@@ -73,6 +72,4 @@ class Server
     {
         return $this->charset;
     }
-
-
 }

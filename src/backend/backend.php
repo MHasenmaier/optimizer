@@ -8,69 +8,77 @@ include 'Server.php';
 
     //to be replaced when API and frontend are working
     $todoDataArray = array(
-        'ID' => 52,
-        'taskID' => '',
+        'ID' => 36,
+        'taskID' => '[1,2,3,5,10,221]',
         'title' => 'some new title',
         'status' => 9,
         'description' => 'some new shit. you know. lot to do. more stuff than usually. some easy stuff. some hard stuff. but always stuff. a lot. i mean, really, a lot of stuff.',
-        'lastUpdate' => 'set up todo'
+        'lastUpdate' => 'add some tasks'
+    );
+
+    //to be replaced when API and frontend are working
+    $newTodoDataArray = array(
+        'taskID' => '[6,9,31,52,106,221]',
+        'title' => 'new title for new todo',
+
+        'description' => 'new todo. new description.',
+        'lastUpdate' => ''
     );
 
     try {
         $server = new Server();
         $dbObj = $server->startServer();
-        echo 'Verbinung aufgebaut
+        echo 'Verbinung zum Server wurde erfolgreich aufgebaut
+         
          ';
     } catch (PDOException $e) {
-        echo 'FEHLER beim Verbindungsaufbau:
-        ' . $e->getMessage();
+        echo '!!!!!!!!!!!!!
+        FEHLER beim Verbindungsaufbau:
+        ' . $e->getMessage() . '
+        !!!!!!!!!!!!!';
     }
 
-    //maybe not necessary when API and frontend are working
-    //$neuesTodo = new Todo($todoDataArray['title']);
-    //var_dump($neuesTodo);
-
-    //createTodo($todoDataArray, $dbObj);
     //getAllTodosByStatus(2, $dbObj);  // change "2" to generic integer variable
-    //updateTodo($todoDataArray, $dbObj);
+    echo json_encode(getAllActiveTodos($dbObj));
+    var_dump(getAllActiveTodos($dbObj));
+    //echo json_encode(getTodoById($todoDataArray, $dbObj), JSON_PRETTY_PRINT);
     //deleteTodo($todoDataArray, $dbObj);
-    getAllTodos($dbObj);
-
-$arrString = "[1,2,3,4,5,6,7,8,9,0]";
-
-// TODO einbauen!
-//json_decode($arrString);
 
     /**
  * create function
  * assoc in values
  * if status != number 1-5, staus = 2 by default
- * @param $todoData - properties for new todo item
+ * @param array $inputTodoData
  * @param $dbObj - database object
- * @return object|false
+ * @return string|false - if successful returns the created todo as json modified string
  */
-    function createTodo($todoData, $dbObj): object|false
+    function createTodo(array $inputTodoData, $dbObj): string|false
     {
-        // check if status is valid
-        $todoData['status'] = statusCheck($todoData['status']);
+        // check if status exists ant is valid
+        if (array_key_exists('status', $inputTodoData))
+        {
+            $inputTodoData['status'] = statusCheck($inputTodoData['status']);
+        } else {
+            //set status = 2 as default
+            $inputTodoData['status'] = 2;
+        }
+
 
         try {
             $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $insertTodo = "INSERT INTO todotable
-                           (ID, taskID, title, status, description, lastUpdate)
-                           VALUES (:ID, :taskID, :title, :status, :description, :lastUpdate)";
-            $stmt = $dbObj->prepare($insertTodo);
-            $stmt->execute([
-                'ID' => $todoData['ID'],
-                'taskID' => $todoData['taskID'],
-                'title' => $todoData['title'],
-                'status' => $todoData['status'],
-                'description' => $todoData['description'],
-                'lastUpdate' => $todoData['lastUpdate']
+                           (taskID, title, status, description, lastUpdate)
+                           VALUES (:taskID, :title, :status, :description, :lastUpdate)";
+            $createdTodo = $dbObj->prepare($insertTodo);
+            $createdTodo->execute([
+                'taskID' => $inputTodoData['taskID'],
+                'title' => $inputTodoData['title'],
+                'status' => $inputTodoData['status'],
+                'description' => $inputTodoData['description'],
+                'lastUpdate' => $inputTodoData['lastUpdate']
             ]);
 
-            echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC), JSON_PRETTY_PRINT);
-            return $stmt;
+            return json_encode($dbObj->query("SELECT * FROM todotable LIMIT " . (countData($dbObj) - 1) . ", 1")->fetch(PDO::FETCH_ASSOC));
          } catch (PDOException $e) {
             echo 'Der createTodo hat nicht geklappt:<br>' . $e->getMessage();
             return false;
@@ -83,20 +91,23 @@ $arrString = "[1,2,3,4,5,6,7,8,9,0]";
    * @param $dbObj
    * @return object|false
    */
-    function getAllTodos($dbObj): object|false
+    function getAllTodos($dbObj): array|false
     {
       try {
           $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-          header('Content-Type: application/json');
+          //TODO: delete the comment
+          //header('Content-Type: application/json');
 
           $collectAllTodo = "SELECT * FROM todotable";
 
           $stmt = $dbObj->prepare($collectAllTodo);
           $stmt->execute();
 
-          echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC), JSON_PRETTY_PRINT);
-          return $stmt;
+
+          //debugging console out
+          //echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC), JSON_PRETTY_PRINT);
+          return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
       } catch (PDOException $e) {
           echo 'Der getAllTodo hat nicht geklappt:<br>' . $e->getMessage();
@@ -105,24 +116,44 @@ $arrString = "[1,2,3,4,5,6,7,8,9,0]";
   }
 
     /**
- * read function (select) - is important for the archiv and the bin
- * assoc in rows
- * @param $status
- * @param $dbObj - database object
- * @return object|false
- */
-    function getAllTodosByStatus(int $status, $dbObj): object|false
+     * read function (select) - is important for the archiv and the bin
+     * assoc in rows
+     * @param $status
+     * @param $dbObj - database object
+     * @return object|false
+     */
+    function getAllTodosByStatus(int $inputStatus, $dbObj): array|false
     {
         try {
             $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $getAllTodosByStatus = 'SELECT * FROM todotable WHERE status = :statusValue';
-    
-            $stmt = $dbObj->prepare($getAllTodosByStatus);
-            $stmt->execute(['statusValue' => $status]);
+            $selectAllTodosByStatus = 'SELECT * FROM todotable WHERE status = :statusValue';
 
-            echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC), JSON_PRETTY_PRINT);
+            $expectedTodoByStatus = $dbObj->prepare($selectAllTodosByStatus);
+            $expectedTodoByStatus->execute(['statusValue' => $inputStatus]);
 
-            return $stmt;
+            echo json_encode($expectedTodoByStatus->fetchAll(PDO::FETCH_ASSOC), JSON_PRETTY_PRINT);
+
+            return ($expectedTodoByStatus->fetchAll(PDO::FETCH_ASSOC));
+        } catch (PDOException $e) {
+            echo 'getTodoByStatus hat nicht geklappt:<br>' . $e->getMessage();
+            return false;
+        }
+    }
+
+    /**
+     * function for all todos status != 5
+     * @param $dbObj
+     * @return array|false - returns all active todos as an array
+     */
+    function getAllActiveTodos($dbObj): array|false
+    {
+        try {
+            $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $selectAllActiveTodos = 'SELECT * FROM todotable WHERE status != 5';
+
+            $allActiveTodos = $dbObj->query($selectAllActiveTodos)->fetchAll(PDO::FETCH_ASSOC);
+
+            return $allActiveTodos;
         } catch (PDOException $e) {
             echo 'getTodoByStatus hat nicht geklappt:<br>' . $e->getMessage();
             return false;
@@ -136,19 +167,19 @@ $arrString = "[1,2,3,4,5,6,7,8,9,0]";
  * @param $dbObj - database object
  * @return object|false
  */
-    function getTodoById($todoDataArray, $dbObj): object|false
+    function getTodoById(array $inputTodoDataArray, $dbObj): array|false
     {
         try {
             $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $selectTodoByID = 'SELECT * FROM todotable WHERE id = :IDValue';
+            $sqlSelectTodoByID = 'SELECT * FROM todotable WHERE id = :IDValue';
 
-            $stmt = $dbObj->prepare($selectTodoByID);
-            $stmt->execute(['IDValue' => $todoDataArray['ID']]);
+            $expectedTodoById = $dbObj->prepare($sqlSelectTodoByID);
+            $expectedTodoById->execute(['IDValue' => $inputTodoDataArray['ID']]);
 
-            header('Content-Type: application/json');
+            //TODO de-comment this line!
+            //header('Content-Type: application/json');
 
-            echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC),JSON_PRETTY_PRINT);
-            return $stmt;
+            return ($expectedTodoById->fetchAll(PDO::FETCH_ASSOC))[0];
         } catch (PDOException $e) {
             echo 'getTodoById hat nicht geklappt:
             ' . $e->getMessage();
@@ -163,37 +194,38 @@ $arrString = "[1,2,3,4,5,6,7,8,9,0]";
  * @param $dbObj - database object
  * @return object|false
  */
-    function updateTodo($todoDataArray, $dbObj): object|false
+    function updateTodo(array $inputTodoDataArray, $dbObj): array|false
     {
+        //soll bei ungültiger ID den return auslösen
+        if (!($inputTodoDataArray['ID'] > 0))
+        {
+            echo "Ungültige ID: " . $inputTodoDataArray['ID'] . " in updateTodo.";
+            return false;
+        }
+
         try {
-            $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $updateTodo = "UPDATE todotable
-               SET taskID = :taskID,
-                   title = :title,
-                   status = :status,
-                   description = :description,
-                   lastUpdate = :lastUpdate
-               WHERE ID = :ID";
+                            SET taskID = :taskID,
+                                title = :title,
+                                status = :status,
+                                description = :description,
+                                lastUpdate = :lastUpdate
+                            WHERE ID = :ID";
 
             // check if status is valid
-            $todoDataArray['status'] = statusCheck($todoDataArray['status']);
+            $inputTodoDataArray['status'] = statusCheck($inputTodoDataArray['status']);
 
-
-            $stmt = $dbObj->prepare($updateTodo);
-            $stmt->execute([
-                'ID' => $todoDataArray['ID'],
-                'taskID' => $todoDataArray['taskID'],
-                'title' => $todoDataArray['title'],
-                'status' => $todoDataArray['status'],
-                'description' => $todoDataArray['description'],
-                'lastUpdate' => $todoDataArray['lastUpdate']
+            $prepUpdatedTodo = $dbObj->prepare($updateTodo);
+            $prepUpdatedTodo->execute([
+                'ID' => $inputTodoDataArray['ID'],
+                'taskID' => $inputTodoDataArray['taskID'],
+                'title' => $inputTodoDataArray['title'],
+                'status' => $inputTodoDataArray['status'],
+                'description' => $inputTodoDataArray['description'],
+                'lastUpdate' => $inputTodoDataArray['lastUpdate']
             ]);
 
-            echo "$-stmt = " . json_encode($stmt->fetchAll(PDO::FETCH_ASSOC),JSON_PRETTY_PRINT) . "
-            ";
-            echo "$-todoUpdateData = " .  json_encode($todoDataArray,JSON_PRETTY_PRINT) . "
-            ";
-            return $stmt;
+            return getTodoById($inputTodoDataArray, $dbObj);
         } catch (PDOException $e) {
             echo 'Das updateTodo hat nicht geklappt:
             ' . $e->getMessage();
@@ -250,12 +282,29 @@ $arrString = "[1,2,3,4,5,6,7,8,9,0]";
  * @param $statusInput - status as integer
  * @return int - status value, by default 2 if status was not 1, 2, 3, 4, or 5
  */
-    function statusCheck (int $statusInput): int
+    function statusCheck ($statusInput): int
     {
-        //set default status = 2
+        is_null($statusInput) ? 2 : $statusInput;
+        //set default status = 2 if not 1-5
         return (($statusInput !== (1 || 2 || 3 || 4 || 5)) ? 2 : $statusInput);
     }
 
+    /**
+     * @param int $id - ID to look for
+     * @param $dbObj
+     * @return array|false - returns the array of the questionable todo
+     */
+    function checkID (int $id, $dbObj): array|false
+    {
+           $allTodosArray = getAllTodos($dbObj);
+
+           foreach ($allTodosArray as $todo) {
+               if ($id == $todo['ID']) {
+                   return $todo;
+               }
+           }
+        return false;
+    }
 
 /**
      * Potenzielle Funktionen für
@@ -270,16 +319,13 @@ $arrString = "[1,2,3,4,5,6,7,8,9,0]";
     /**
  * routing function with switch-case for $_SERVER['REQUEST_METHOD']
  * PUT is still missing
- * default is missing
- * functions are missing
- * return is missing (necessary?)
  * parameter possibly wrong / not complete
  *
  * @param $todoDataArray - todo as an array
  * @param $dbObj
- * @return void
- */
-    function routing ($todoDataArray, $dbObj) :void
+ * @return bool - true if routing was successful
+     */
+    function routing ($todoDataArray, $dbObj) : bool
     {
         $id = $todoDataArray['ID'];
         $status = $todoDataArray['status'];
@@ -287,25 +333,30 @@ $arrString = "[1,2,3,4,5,6,7,8,9,0]";
         switch ($_SERVER['REQUEST_METHOD']) {
             case 'GET':
                 if ($_SERVER['REQUEST_URI'] == '/api/todos') {
-                    getAllTodos($dbObj);
+                    getAllActiveTodos($dbObj);
+                    return true;
                 } elseif ($_SERVER['REQUEST_URI'] == '/api/todos/'. $id) {
                     getTodoById($id, $dbObj);
+                    return true;
                 } elseif ($_SERVER['REQUEST_URI'] == '/api/todos/'. $status) {
                     getAllTodosByStatus($status, $dbObj);
+                    return true;
                 }
-                // function for "get all todos status 1-4", so that the deleted ones are excluded, still missing
 
                 break;
             case 'POST':
                 if ($_SERVER['REQUEST_URI'] == '/api/todos'){
                     createTodo($todoDataArray, $dbObj);
+                    return true;
                 } elseif ($_SERVER['REQUEST_URI'] == '/api/todos/'. $id) {
                     updateTodo($todoDataArray, $dbObj);
+                    return true;
                 }
                 break;
             case 'DELETE':
                 if ($_SERVER['REQUEST_URI'] == '/api/todos/'. $id) {
                     deleteTodo($todoDataArray, $dbObj);
+                    return true;
                 }
             //PUT
 
@@ -315,6 +366,7 @@ $arrString = "[1,2,3,4,5,6,7,8,9,0]";
                 $todoDataArray: ' . var_dump($todoDataArray) . '
                 $dbObj: ' . var_dump($dbObj));
         }
+        return false;
     }
 
     /**
@@ -399,56 +451,11 @@ $arrString = "[1,2,3,4,5,6,7,8,9,0]";
     }
 
     /**
-     * Validate todo data
-     * @param $todoData - data for new todo item
-     * @return array|bool - returns true if valid or an array of errors
-     */
-    function validateTodoData($todoData): bool|array
-    {
-        $errors = [];
-
-        if (empty($todoData['title'])) {
-            $errors['title'] = 'Titel ist erforderlich.';
-        }
-
-        if (!isset($todoData['due_date']) || strtotime($todoData['due_date']) === false) {
-            $errors['due_date'] = 'Fälligkeitsdatum ist ungültig oder nicht gesetzt.';
-        }
-
-        // Weitere Validierungen können hier hinzugefügt werden
-
-        return empty($errors) ? true : $errors;
-    }
-
-    /**
-     * Error handling function
-     * @param $exception - caught exception
-     * @param $response - outgoing response
-     * @return mixed
-     */
-    function errorHandler($exception, $response): mixed
-    {
-        // Protokollieren des Fehlers für die Server-Logs
-        error_log($exception->getMessage());
-
-        // Erstellen einer Fehlerantwort für den Client
-        $errorResponse = [
-            'error' => [
-                'message' => 'Ein interner Fehler ist aufgetreten.',
-                'code' => $exception->getCode()
-            ]
-        ];
-
-        // Senden einer JSON-Antwort mit dem Fehlerstatus
-        return $response->withStatus(500)->withJson($errorResponse);
-    }
-
-    /**
      * Datenformatierung zu XML
      * @param array $todos - Array von Todos
      * @return string - XML formatierte Todos
      */
-    function formatTodosToXml(array $todos): string
+    function formatTodosToXml($todos): string
     {
         $xml = new SimpleXMLElement('<todos/>');
 
