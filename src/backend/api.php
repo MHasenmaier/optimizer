@@ -1,11 +1,11 @@
 <?php
 
-//maybe not necessary
-use Random\RandomException;
+    //maybe not necessary
+    use Random\RandomException;
 
-include 'Todo.php';
-include 'Server.php';
+    include 'dbserver.php';
 
+    //TESTDATA
     //to be replaced when API and frontend are working
     $todoDataArray = array(
         'ID' => 36,
@@ -16,6 +16,7 @@ include 'Server.php';
         'lastUpdate' => 'add some tasks'
     );
 
+    //TESTDATA
     //to be replaced when API and frontend are working
     $newTodoDataArray = array(
         'taskID' => '[6,9,31,52,106,221]',
@@ -25,22 +26,15 @@ include 'Server.php';
         'lastUpdate' => ''
     );
 
-    try {
-        $server = new Server();
-        $dbObj = $server->startServer();
-        echo 'Verbinung zum Server wurde erfolgreich aufgebaut
-         
-         ';
-    } catch (PDOException $e) {
-        echo '!!!!!!!!!!!!!
-        FEHLER beim Verbindungsaufbau:
-        ' . $e->getMessage() . '
-        !!!!!!!!!!!!!';
-    }
 
     //getAllTodosByStatus(2, $dbObj);  // change "2" to generic integer variable
-    echo json_encode(getAllActiveTodos($dbObj));
-    var_dump(getAllActiveTodos($dbObj));
+
+	//echo json_encode(getAllActiveTodos($dbObj));
+    //var_dump(getAllActiveTodos($dbObj));
+
+    //echo json_encode(getAllTodos());
+    //var_dump(getAllTodos());
+
     //echo json_encode(getTodoById($todoDataArray, $dbObj), JSON_PRETTY_PRINT);
     //deleteTodo($todoDataArray, $dbObj);
 
@@ -49,8 +43,8 @@ include 'Server.php';
  * assoc in values
  * if status != number 1-5, staus = 2 by default
  * @param array $inputTodoData
- * @param $dbObj - database object
- * @return string|false - if successful returns the created todo as json modified string
+ * @param $dbObj -database object
+ * @return string|false -if successful returns the created todo as json modified string
  */
     function createTodo(array $inputTodoData, $dbObj): string|false
     {
@@ -62,7 +56,6 @@ include 'Server.php';
             //set status = 2 as default
             $inputTodoData['status'] = 2;
         }
-
 
         try {
             $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -78,7 +71,7 @@ include 'Server.php';
                 'lastUpdate' => $inputTodoData['lastUpdate']
             ]);
 
-            return json_encode($dbObj->query("SELECT * FROM todotable LIMIT " . (countData($dbObj) - 1) . ", 1")->fetch(PDO::FETCH_ASSOC));
+            return json_encode($dbObj->query("SELECT * FROM todotable LIMIT " . (countData($dbObj) - 1) . ", 1")->fetchAll(PDO::FETCH_ASSOC));
          } catch (PDOException $e) {
             echo 'Der createTodo hat nicht geklappt:<br>' . $e->getMessage();
             return false;
@@ -91,26 +84,28 @@ include 'Server.php';
    * @param $dbObj
    * @return object|false
    */
-    function getAllTodos($dbObj): array|false
+    function getAllTodos(): array|false
     {
+		global $dbPDO;
+
       try {
-          $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		  $collectAllTodo = "SELECT * FROM todotable";
 
-          //TODO: delete the comment
-          //header('Content-Type: application/json');
-
-          $collectAllTodo = "SELECT * FROM todotable";
-
-          $stmt = $dbObj->prepare($collectAllTodo);
+          $stmt = $dbPDO->prepare($collectAllTodo);
           $stmt->execute();
 
+	      //TODO: de-comment
+	      //header('Content-Type: application/json');
 
           //debugging console out
           //echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC), JSON_PRETTY_PRINT);
           return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
       } catch (PDOException $e) {
+	      //TODO: de-comment
+	      //header('Content-Type: application/json');
           echo 'Der getAllTodo hat nicht geklappt:<br>' . $e->getMessage();
+		  echo json_encode(['error' => $e->getMessage()]);
           return false;
       }
   }
@@ -269,7 +264,7 @@ include 'Server.php';
             $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $stmt = $dbObj->prepare('SELECT COUNT(*) as dbSize FROM todotable');
             $stmt->execute();
-            $row = $stmt->fetch();
+            $row = $stmt->fetchAll();
             return $row['dbSize'];
         } catch (PDOException $e) {
             echo 'countData hat nicht geklappt:<br>' . $e->getMessage();
@@ -315,140 +310,6 @@ include 'Server.php';
      * Fehlerbehebung
      * Datenformatierung
      */
-
-    /**
- * routing function with switch-case for $_SERVER['REQUEST_METHOD']
- * PUT is still missing
- * parameter possibly wrong / not complete
- *
- * @param $todoDataArray - todo as an array
- * @param $dbObj
- * @return bool - true if routing was successful
-     */
-    function routing ($todoDataArray, $dbObj) : bool
-    {
-        $id = $todoDataArray['ID'];
-        $status = $todoDataArray['status'];
-
-        switch ($_SERVER['REQUEST_METHOD']) {
-            case 'GET':
-                if ($_SERVER['REQUEST_URI'] == '/api/todos') {
-                    getAllActiveTodos($dbObj);
-                    return true;
-                } elseif ($_SERVER['REQUEST_URI'] == '/api/todos/'. $id) {
-                    getTodoById($id, $dbObj);
-                    return true;
-                } elseif ($_SERVER['REQUEST_URI'] == '/api/todos/'. $status) {
-                    getAllTodosByStatus($status, $dbObj);
-                    return true;
-                }
-
-                break;
-            case 'POST':
-                if ($_SERVER['REQUEST_URI'] == '/api/todos'){
-                    createTodo($todoDataArray, $dbObj);
-                    return true;
-                } elseif ($_SERVER['REQUEST_URI'] == '/api/todos/'. $id) {
-                    updateTodo($todoDataArray, $dbObj);
-                    return true;
-                }
-                break;
-            case 'DELETE':
-                if ($_SERVER['REQUEST_URI'] == '/api/todos/'. $id) {
-                    deleteTodo($todoDataArray, $dbObj);
-                    return true;
-                }
-            //PUT
-
-            default:
-                echo 'routing-switch-case im default:
-                $_SERVER["REQUEST_METHOD"]: ' . var_dump($_SERVER['REQUEST_METHOD'] . '
-                $todoDataArray: ' . var_dump($todoDataArray) . '
-                $dbObj: ' . var_dump($dbObj));
-        }
-        return false;
-    }
-
-    /**
-     * Authentication middleware
-     * @param $request - incoming request
-     * @param $response - outgoing response
-     * @param $next - next middleware or controller
-     * @return mixed
-     */
-    function authMiddleware($request, $response, $next): mixed
-    {
-        // Überprüfen, ob ein Authentifizierungstoken vorhanden ist
-        $authHeader = $request->getHeader('Authorization');
-        $token = $authHeader ? $authHeader[0] : null;
-
-        if (validateToken($token)) {
-            // Wenn das Token gültig ist, fahre mit der nächsten Middleware oder dem Controller fort
-            return $next($request, $response);
-        } else {
-            // Wenn das Token ungültig ist, gib einen Fehler zurück
-            return $response->withStatus(401)->withJson(['error' => 'Unauthorized']);
-        }
-    }
-
-    /**
-     * Token validation function
-     * @param $token - authentication token
-     * @return bool
-     */
-    function validateToken($token): bool
-    {
-        // Hier würde die Logik zur Überprüfung des Tokens stehen.
-        // Zum Beispiel könnte hier eine Datenbankabfrage stattfinden
-        return $token === 'valid-token'; // Vereinfachtes Beispiel
-    }
-
-    /**
-     * Authenticate user and return token
-     * @param $username - User's username
-     * @param $password - User's password
-     * @param $dbObj - database object
-     * @return string|false
-     */
-    function authenticateUser($username, $password, $dbObj): false|string
-    {
-        try {
-            $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $query = 'SELECT * FROM users WHERE username = :username';
-
-            $stmt = $dbObj->prepare($query);
-            $stmt->execute(['username' => $username]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($user && password_verify($password, $user['password'])) {
-                // Hier würde ein Token generiert und zurückgegeben werden
-                return generateToken($user['id']);
-            } else {
-                return false;
-            }
-        } catch (PDOException $e) {
-            echo 'Authentifizierung fehlgeschlagen (PDOException):
-            ' . $e->getMessage();
-            return false;
-        } catch (RandomException $e) {
-            echo 'Authentifizierung im generateToken fehlgeschlagen (RandomException):
-            ' . $e->getMessage();
-            return false;
-        }
-    }
-
-    /**
- * Generate a token for a user
- * @param $userId - User's ID
- * @return string
- * @throws RandomException
- */
-    function generateToken($userId): string
-    {
-        // Hier würde ein sicheres Token generiert werden.
-        // Dies ist nur ein vereinfachtes Beispiel
-        return base64_encode(random_bytes(32)) . '.' . $userId;
-    }
 
     /**
      * Datenformatierung zu XML

@@ -1,3 +1,29 @@
+
+function createTodoElement() {
+    // create <section>
+    const section = document.createElement("section");
+
+    // create <input>
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    section.appendChild(checkbox);
+
+    // create <a>
+    const todoTitle = document.createElement("a");
+    todoTitle.textContent = "Todo title 1";
+    section.appendChild(todoTitle);
+
+    // create <button>
+    const button = document.createElement("button");
+    button.textContent = "01";
+    section.appendChild(button);
+
+    // add <section> to the website
+    document.body.appendChild(section);
+}
+
+
+
 //const title = document.getElementById('todoTitle').value;
 //const status = document.getElementById('statusPopup').value;
 //const description = document.getElementById('todoDescription').value;
