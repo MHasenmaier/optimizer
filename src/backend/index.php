@@ -14,3 +14,10 @@ include("routing.php");
 		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 	];
 
+	global $dbPDO;
+
+	//start routing
+	if(!routing($dbPDO))
+	{
+		errormessage(500);
+	}

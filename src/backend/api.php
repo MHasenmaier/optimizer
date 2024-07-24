@@ -78,12 +78,10 @@
         }
     }
 
-    /**
-   * get function
-   * assoc of all todos
-   * @param $dbObj
-   * @return object|false
-   */
+	/**
+	 * Returns JSON with all todos
+	 * @return array|false
+	 */
     function getAllTodos(): array|false
     {
 		global $dbPDO;
@@ -97,8 +95,6 @@
 	      //TODO: de-comment
 	      //header('Content-Type: application/json');
 
-          //debugging console out
-          //echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC), JSON_PRETTY_PRINT);
           return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
       } catch (PDOException $e) {
@@ -109,6 +105,49 @@
           return false;
       }
   }
+
+	/**
+	 * Returns JSON with all todos  with status != 5
+	 * @return array|false
+	 */
+	function getAllActiveTodos(): array|false
+	{
+		global $dbPDO;
+
+		try {
+			$sqlSelectAllActiveTodos = 'SELECT * FROM todotable WHERE status != 5';
+
+			$getAllActiveTodos = $dbPDO->prepare($sqlSelectAllActiveTodos);
+			$getAllActiveTodos->execute();
+
+			return $getAllActiveTodos->fetchAll(PDO::FETCH_ASSOC);
+		} catch (PDOException $e) {
+			echo 'getTodoByStatus hat nicht geklappt:
+			' . $e->getMessage();
+			return false;
+		}
+	}
+
+	/**
+	 * Returns JSON with all todos with status == 5
+	 * @return array|false
+	 */
+	function getAllInactiveTodos(): array|false
+	{
+		global $dbPDO;
+
+		try {
+			$selectAllInactiveTodos = 'SELECT * FROM todotable WHERE status = 5';
+
+			$stmt = $dbPDO->prepare($selectAllInactiveTodos);
+			$stmt->execute();
+
+			return $stmt->fetchAll(PDO::FETCH_ASSOC);
+		} catch (PDOException $e) {
+			echo 'getTodoByStatus hat nicht geklappt:<br>' . $e->getMessage();
+			return false;
+		}
+	}
 
     /**
      * read function (select) - is important for the archiv and the bin
@@ -136,45 +175,30 @@
     }
 
     /**
-     * function for all todos status != 5
-     * @param $dbObj
-     * @return array|false - returns all active todos as an array
-     */
-    function getAllActiveTodos($dbObj): array|false
-    {
-        try {
-            $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $selectAllActiveTodos = 'SELECT * FROM todotable WHERE status != 5';
-
-            $allActiveTodos = $dbObj->query($selectAllActiveTodos)->fetchAll(PDO::FETCH_ASSOC);
-
-            return $allActiveTodos;
-        } catch (PDOException $e) {
-            echo 'getTodoByStatus hat nicht geklappt:<br>' . $e->getMessage();
-            return false;
-        }
-    }
-
-    /**
  * read function (select)
  * assoc in rows
  * @param $todoDataArray - array of the todo
  * @param $dbObj - database object
  * @return object|false
  */
-    function getTodoById(array $inputTodoDataArray, $dbObj): array|false
+    function getTodoById(int $id): array|false
     {
+		global $dbPDO;
+
         try {
-            $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sqlSelectTodoByID = 'SELECT * FROM todotable WHERE id = :IDValue';
+            $sqlSelectTodoByID = 'SELECT * FROM todotable WHERE ID = :IDValue';
 
-            $expectedTodoById = $dbObj->prepare($sqlSelectTodoByID);
-            $expectedTodoById->execute(['IDValue' => $inputTodoDataArray['ID']]);
+            $expectedTodoById = $dbPDO->prepare($sqlSelectTodoByID);
+            $expectedTodoById->execute(['IDValue' => $id]);
 
-            //TODO de-comment this line!
-            //header('Content-Type: application/json');
+			$checkedIDTodo = ($expectedTodoById->fetchAll(PDO::FETCH_ASSOC))[0];
 
-            return ($expectedTodoById->fetchAll(PDO::FETCH_ASSOC))[0];
+	        //check if
+	        if (!empty($checkedIDTodo))
+	        {
+				return false;
+			}
+            return $checkedIDTodo;
         } catch (PDOException $e) {
             echo 'getTodoById hat nicht geklappt:
             ' . $e->getMessage();
@@ -279,8 +303,8 @@
  */
     function statusCheck ($statusInput): int
     {
-        is_null($statusInput) ? 2 : $statusInput;
         //set default status = 2 if not 1-5
+        is_null($statusInput) ? 2 : $statusInput;
         return (($statusInput !== (1 || 2 || 3 || 4 || 5)) ? 2 : $statusInput);
     }
 
@@ -289,9 +313,9 @@
      * @param $dbObj
      * @return array|false - returns the array of the questionable todo
      */
-    function checkID (int $id, $dbObj): array|false
+    function checkID (int $id): array|false
     {
-           $allTodosArray = getAllTodos($dbObj);
+           $allTodosArray = getAllTodos();
 
            foreach ($allTodosArray as $todo) {
                if ($id == $todo['ID']) {
@@ -301,15 +325,6 @@
         return false;
     }
 
-/**
-     * Potenzielle Funktionen für
-     * Routing
-     * Middleware
-     * Authentifizierung
-     * Validierungsfunktion
-     * Fehlerbehebung
-     * Datenformatierung
-     */
 
     /**
      * Datenformatierung zu XML
