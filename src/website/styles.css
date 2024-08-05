@@ -56,6 +56,7 @@ a:active {
   align-items: center;
   grid-area: date;
   font-size: 40px;
+  text-decoration: none;
 }
 
 .time {
@@ -81,24 +82,46 @@ a:active {
 .menubutton {
   display: flex;
   flex-direction: column;
+  border-color: white;
+  text-decoration: none;
 }
 
 .menubutton:active {
   background-color: #b9b9b9;
   border-radius: 75%;
   box-shadow: #b9b9b9 0 0 2px 5px;
+  border-color: #b9b9b9;
 }
 
-.menubutton:visited {
-  background-color: #b9b9b9;
-  border-radius: 75%;
-  box-shadow: #b9b9b9 0 0 2px 5px;
+.menubutton:active div {
+  background-color: white;
+  border-color: black;
 }
 
-.menubutton:focus {
-  background-color: #b9b9b9;
-  border-radius: 75%;
-  box-shadow: #b9b9b9 0 0 2px 5px;
+.menuwindow {
+  display: none;
+  /*display: flex;*/
+  position: absolute;
+  width: 170px;
+  height: 100px;
+  border: 1px solid #000000;
+  box-shadow: 0px 1px 2px #000000;
+  flex-direction: column;
+  top: 145px;
+  border-radius: 8px;
+  right: 12px;
+  background-color: lightgrey;
+}
+
+.menuwindow ul {
+  list-style-type: none;
+}
+
+.menuwindow ul li button {
+  font-size: 30px;
+  background-color: grey;
+  border: none;
+  border-radius: 8px;
 }
 
 .dot {
@@ -118,13 +141,13 @@ a:active {
   padding: 12px 0;
 }
 
-.contentOverview section {
+.contentOverview div {
   display: flex;
   align-items: center;
   margin: 15px 0 15px 40px;
 }
 
-.contentOverview section input {
+.contentOverview div input {
   display: flex;
   justify-content: center;
   border: lightgrey solid 3px;
@@ -140,7 +163,7 @@ a:active {
   background-color: #b9b9b9;
 }
 
-.contentOverview section a {
+.contentOverview div a {
   display: flex;
   border: lightgrey solid 1px;
   border-radius: 6px;
@@ -153,11 +176,11 @@ a:active {
   padding: 0 6px;
 }
 
-.contentOverview section a:active {
+.contentOverview div a:active {
   background-color: #b9b9b9;
 }
 
-.contentOverview section button {
+.contentOverview div button {
   height: 25px;
   width: 40px;
   display: flex;
@@ -172,7 +195,7 @@ a:active {
   right: 20px;
 }
 
-.contentOverview section button:active {
+.contentOverview div button:active {
   background-color: #b9b9b9;
 }
 
@@ -368,6 +391,117 @@ a:active {
 
 /**
 *
+*   create Task
+*
+*/
+
+.mainAddTask {
+  display: grid;
+  grid-template-areas:
+    "status"
+    "formArea"
+    "taskAdd";
+  grid-template-rows: 5% 85% 10%;
+  width: 360px;
+  height: 800px;
+  padding: 39px 30px 0;
+  background: #fafafa;
+  border: 1px solid #000000;
+
+  font-family: sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  color: #000000;
+}
+
+.taskAddForms {
+  display: grid;
+  grid-area: formArea;
+  grid-template-areas:
+    "taskTitle"
+    "taskDescription";
+  grid-template-rows: 10% 90%;
+}
+
+.taskItem {
+  display: flex;
+  grid-area: taskItem;
+  flex-direction: column;
+}
+
+#taskTitle {
+  grid-area: taskTitle;
+  font-size: 18px;
+  padding: 9px 5px;
+  margin: 9px 0 9px;
+  border-radius: 6px;
+  font-family: sans-serif;
+  border: #d3d3d3 solid 2px;
+}
+
+#taskTitle::placeholder {
+  color: #d3d3d3;
+}
+
+#taskDescription {
+  grid-area: taskDescription;
+  display: flex;
+  height: 100%;
+  padding: 9px 5px;
+  border-radius: 6px;
+  font-size: 18px;
+  font-family: sans-serif;
+  border: #d3d3d3 solid 2px;
+  box-sizing: border-box;
+  resize: none;
+  overflow: visible;
+}
+
+#taskDescription::placeholder {
+  color: #d3d3d3;
+}
+
+.taskAdd {
+  display: flex;
+  grid-area: taskArea;
+  align-items: center;
+}
+
+.taskAddText {
+  display: flex;
+  flex-direction: row;
+  font-size: 20px;
+  margin: 10px 16px;
+  align-items: flex-start;
+}
+
+.taskAddButton:active {
+  background-color: #b9b9b9;
+}
+
+.footerButton {
+  font-size: 35px;
+  padding: 8px 60px;
+  border-radius: 24px;
+  background-color: white;
+  border: #d3d3d3 solid 2px;
+  cursor: pointer;
+}
+
+.footerButton:active {
+  background-color: #b9b9b9;
+}
+
+.addTaskFooter {
+  grid-area: taskAdd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+/**
+*
 *   Archiv and delete
 *
 */
@@ -477,8 +611,65 @@ a:active {
   align-items: center;
 }
 
+.focusBody {
+  display: grid;
+  grid-template-areas:
+        'header'
+        'main'
+        'footer';
+  grid-template-rows: 7% 83% 10%;
+  position: relative;
+  width: 360px;
+  height: 800px;
+  background: #fafafa;
+  border: 1px solid #000000;
+  padding: 10px 20px;
+}
+
+.focusHeader {
+  display: flex;
+  grid-area: header;
+  justify-content: center;
+  box-shadow: #000000 0px 1px 0px 0px;
+  align-items: center;
+}
+
+.focusHeader Button {
+  padding: 10px;
+  margin: 8px 0;
+}
+
+.focusHeader h1 {
+  padding: 0;
+  margin: 0 15px;
+}
+
+.focusHeader p {
+  padding: 0;
+  margin: 0 15px;
+}
+
+.focusMain {
+  display: flex;
+  flex-direction: column;
+  grid-area: main;
+}
+
+.focusFooter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 /* The switch - the box around the slider */
 .archivToggle {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.focusSliderToggle {
   position: relative;
   display: inline-block;
   width: 60px;
@@ -490,6 +681,17 @@ a:active {
   opacity: 0;
   width: 0;
   height: 0;
+}
+
+.focusSliderToggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.focusSliderToggle p {
+  padding: 0px;
+  margin: auto 0;
 }
 
 /* The slider */
@@ -521,10 +723,23 @@ input:checked + .slider {
   background-color: #f32121;
 }
 
+input:checked + .focusSliderPopup:before {
+  display: block;
+}
+
 input:focus + .slider {
   box-shadow: 0 0 1px #f32121;
 }
 
 input:checked + .slider:before {
   transform: translateX(26px);
+}
+
+/*  focus slider */
+.sliderContainer {
+  padding: 30px;
+}
+
+.focusSliderPopup {
+  display: none;
 }

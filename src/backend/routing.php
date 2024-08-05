@@ -1,5 +1,5 @@
 <?php
-include("api.php");
+	include("api.php");
 
 	/**
 	 * routing function with switch-case for $_SERVER['REQUEST_METHOD']
@@ -8,7 +8,7 @@ include("api.php");
 	 *
 	 * @return bool - true if routing was successful
 	 */
-	function routing ($dbPDO) : bool
+	function routing($dbPDO): bool
 	{
 		//cuts the unnecessary part of the path
 		$requestSegments = explode('/optimizer/src/backend/index.php', $_SERVER['REQUEST_URI']);
@@ -27,11 +27,11 @@ include("api.php");
 			echo $pathPartsCounted . 'x pathPartsCounted (> 2)', PHP_EOL;
 		}
 
-		$nonNumberChar = preg_match("/D/", $path[2]);
-
-		if ($nonNumberChar === 1)
-		{
-			return false;
+		if (count($path) >= 3) {
+			$nonNumberChar = preg_match("/D/", $path[2]);
+			if ($nonNumberChar === 1) {
+				return false;
+			}
 		}
 
 		switch ($_SERVER['REQUEST_METHOD']) {
@@ -39,38 +39,41 @@ include("api.php");
 				switch ($path[1]) {
 					case 'activetodos':
 						$getAllActiveTodos = getAllActiveTodos();
-						if (!$getAllActiveTodos)
-						{
+						if (!$getAllActiveTodos) {
 							return false;
 						}
-						echo json_encode($getAllActiveTodos);
+						echo xmlFormatter($getAllActiveTodos);
 						return errormessage(200);
 
 					case 'inactivetodos':
 						$getAllInactiveTodos = getAllInactiveTodos();
-						if (!$getAllInactiveTodos)
-						{
+						if (!$getAllInactiveTodos) {
 							return false;
 						}
-						echo json_encode($getAllInactiveTodos);
+						echo xmlFormatter($getAllInactiveTodos);
 						return errormessage(200);
 
 					case 'todo':
-						if ($pathPartsCounted > 3 || !is_numeric($path[2]))
-						{
+						if ($pathPartsCounted > 3 || !is_numeric($path[2])) {
 							return errormessage(404);
 						}
 						$getTodoById = getTodoById($path[2]);
-						if ( is_null($getTodoById ))
-						{
+						if (is_null($getTodoById)) {
 							return errormessage(404);
 						}
-						if (!$getTodoById)
-						{
+						if (!$getTodoById) {
 							return false;
 						}
 
-						echo json_encode($getTodoById);
+						echo xmlFormatter($getTodoById);
+						return errormessage(200);
+
+					case 'countaktivetodos':
+						$countActiveTodos = countActiveTodos();
+						if (!$countActiveTodos) {
+							return false;
+						}
+						echo $countActiveTodos;
 						return errormessage(200);
 
 					default:
@@ -82,13 +85,13 @@ include("api.php");
 				switch ($path[1]) {
 					case 'newtodo':
 						createTodo();
-					return errormessage(200);;
+						return errormessage(200);
 
-					//case '/updatetodo/' . $id:
-//
-					//	if (str_ends_with($requestPath, "/")) {
-					//	 	($requestPath)
-					//	}
+						//case '/updatetodo/' . $id:
+						//
+						//	if (str_ends_with($requestPath, "/")) {
+						//	 	($requestPath)
+						//	}
 
 						// $segments = split(/update/, requestPath)
 						// ['/update/', '22']
@@ -112,7 +115,7 @@ include("api.php");
 
 
 						//updateTodo($id);
-					return true;
+						return true;
 				}
 				break;
 
@@ -138,9 +141,10 @@ include("api.php");
 	/**
 	 * @param $errorcode
 	 * return false if unknown error code -> non-http error code
+	 *
 	 * @return true|false
 	 */
-	function errormessage($errorcode):bool
+	function errormessage($errorcode): bool
 	{
 		switch ($errorcode) {
 			case 200:

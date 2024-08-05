@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de-DE">
+<head>
+  <meta charset="utf-8">
+  <title>Optimizer - Neuen Task anlegen</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="mainAddTask">
+
+<select class="status" name="Status" id="statusPopup">
+  <option value="" disabled selected>Status</option>
+  <option>löschen</option>
+  <option>neu</option>
+  <option>geplant</option>
+  <option>begonnen</option>
+  <option>fertig</option>
+</select>
+
+<form class="taskAddForms" action="http://localhost/optimizer/src/backend/backend.php" method="post">
+  <input
+          name="taskTitle"
+          id="taskTitle"
+          type="text"
+          placeholder="Tasktitel eingeben"
+          required
+  >
+  <textarea id="taskDescription" type="text" placeholder="Beschreibung eingeben"></textarea>
+</form>
+<footer class="addTaskFooter">
+  <a href="http://localhost/optimizer/src/website/createTodo.html">
+    <button class="footerButton">
+      Task anlegen
+    </button>
+  </a>
+</footer>
+</body>
+</html>

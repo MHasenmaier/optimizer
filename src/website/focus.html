@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de-DE">
+<head>
+    <meta charset="utf-8">
+    <title>Optimizer - Fokus Optionen</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="focusBody">
+
+<header class="focusHeader">
+    <h1>Fokus</h1>
+</header>
+
+
+<div class="focusMain">
+
+    <div class="focusToggle">
+        <div class="sliderContainer">
+            <label class="focusSliderToggle" for="focusTodoCheck">
+                <input type="checkbox" id="focusTodoCheck">
+                <span class="slider"></span>
+
+            </label>
+            <p>Todo Fokus setzen</p>
+        </div>
+
+        <div class="focusSliderPopup">
+            <p>
+                Wie viele Todos sollen höchstens gleichzeit aktiv sein?
+            </p>
+            <input type="number" id="focusMaxTodos"/>
+        </div>
+    </div>
+
+    <div class="focusToggle">
+
+        <div class="sliderContainer">
+            <label class="focusSliderToggle" for="focusTaskCheck">
+                <input type="checkbox" id="focusTaskCheck">
+                <span class="slider"></span>
+
+            </label>
+            <p>Task Fokus setzen</p>
+        </div>
+
+        <div class="focusSliderPopup">
+            <p>
+                Wie viele Tasks sollen höchstens gleichzeit aktiv sein?
+            </p>
+            <input type="number" id="focusMaxTasks"/>
+        </div>
+    </div>
+
+</div>
+
+
+<footer class="footer">
+    <a href="http://localhost/optimizer/src/website/overview.html">
+        <button class="footerButton" id="closeArchivButton">
+            Zurück
+        </button>
+    </a>
+</footer>
+</body>
+</html>

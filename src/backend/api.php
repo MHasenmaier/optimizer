@@ -46,8 +46,10 @@
  * @param $dbObj -database object
  * @return string|false -if successful returns the created todo as json modified string
  */
-    function createTodo(array $inputTodoData, $dbObj): string|false
+    function createTodo(array $inputTodoData): string|false
     {
+		global $dbPDO;
+
         // check if status exists ant is valid
         if (array_key_exists('status', $inputTodoData))
         {
@@ -58,11 +60,11 @@
         }
 
         try {
-            $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	        $dbPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $insertTodo = "INSERT INTO todotable
                            (taskID, title, status, description, lastUpdate)
                            VALUES (:taskID, :title, :status, :description, :lastUpdate)";
-            $createdTodo = $dbObj->prepare($insertTodo);
+            $createdTodo = $dbPDO->prepare($insertTodo);
             $createdTodo->execute([
                 'taskID' => $inputTodoData['taskID'],
                 'title' => $inputTodoData['title'],
@@ -71,7 +73,7 @@
                 'lastUpdate' => $inputTodoData['lastUpdate']
             ]);
 
-            return json_encode($dbObj->query("SELECT * FROM todotable LIMIT " . (countData($dbObj) - 1) . ", 1")->fetchAll(PDO::FETCH_ASSOC));
+            return json_encode($dbPDO->query("SELECT * FROM todotable LIMIT " . (countData($dbPDO) - 1) . ", 1")->fetchAll(PDO::FETCH_ASSOC));
          } catch (PDOException $e) {
             echo 'Der createTodo hat nicht geklappt:<br>' . $e->getMessage();
             return false;
@@ -282,11 +284,12 @@
  * @return int|false - number of rows/data in the db
  * @return false if not successful
  */
-    function countData($dbObj): int|false
+    function countActiveTodos(): int|false
     {
+		global $dbPDO;
         try {
-            $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $stmt = $dbObj->prepare('SELECT COUNT(*) as dbSize FROM todotable');
+	        $dbPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $stmt = $dbPDO->prepare('SELECT COUNT(*) as dbSize FROM todotable');
             $stmt->execute();
             $row = $stmt->fetchAll();
             return $row['dbSize'];
@@ -331,7 +334,7 @@
      * @param array $todos - Array von Todos
      * @return string - XML formatierte Todos
      */
-    function formatTodosToXml($todos): string
+    function xmlFormatter($todos): string
     {
         $xml = new SimpleXMLElement('<todos/>');
 
