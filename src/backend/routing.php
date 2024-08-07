@@ -10,79 +10,110 @@
 	 */
 	function routing($dbPDO): bool
 	{
+		$id = 0;
 		//cuts the unnecessary part of the path
-		$requestSegments = explode('/optimizer/src/backend/index.php', $_SERVER['REQUEST_URI']);
+		// $_SERVER['REQUEST_URI'] = /optimizer/src/backend/index.php/
+		// $_SERVER['REQUEST_URI'] = string()
 
-		//check if the part has exact 2 parts and if the second part is not empty
-		//more than 2 parts are
-		if (count($requestSegments) !== 2 || $requestSegments[1] == "") {
+		$requestSegments = explode('/', $_SERVER['REQUEST_URI']);
+
+		//check uri parts $requestSegments[1], $requestSegments[2], $requestSegments[3], $requestSegments[4]
+		//if not correct uri segments => return 404
+//		if (!($requestSegments[1] === 'optimizer' && $requestSegments[2] === 'src' && ($requestSegments[3] === 'backend' | $requestSegments[3] === 'website') && ($requestSegments[4] === 'index.php' | $requestSegments[4] === 'overview.html'))) {
+		if (!($requestSegments[1] === 'optimizer' && $requestSegments[2] === 'src' && $requestSegments[3] === 'backend' && $requestSegments[4] === 'index.php')) {
 			return errormessage(404);
 		}
 
-		$path = explode("/", $requestSegments[1]);
-		$pathPartsCounted = count($path);
 
-		if ($pathPartsCounted > 3) {
-			echo "too many segments", PHP_EOL;
-			echo $pathPartsCounted . 'x pathPartsCounted (> 2)', PHP_EOL;
-		}
+		//	if (sizeof($requestSegments) === 0) {
+		//		echo "\nyou tried to get index.php - check you path!\n";
+		//		return false;
+		//	}
+		//
+		//	//check if the part has exact 2 parts and if the second part is not empty
+		//	if (count($requestSegments) !== 2 || $requestSegments[1] == "") {
+		//		return errormessage(404);
+		//	}
+		//
+		//	$path = explode("/", $requestSegments[1]);
+		//	$pathPartsCounted = count($path);
+		//
+		//	if ($pathPartsCounted > 2) {
+		//		echo $pathPartsCounted . " parts counted";
+		//	}
+		//
+		//	if ($pathPartsCounted > 3) {
+		//		echo "too many segments", PHP_EOL;
+		//		echo $pathPartsCounted . 'x pathPartsCounted (> 2)', PHP_EOL;
+		//	}
+		//
+		//	if (count($path) >= 3) {
+		//		$nonNumberChar = preg_match("/D/", $path[2]);
+		//		if ($nonNumberChar === 1) {
+		//			return false;
+		//		}
+		//	}
 
-		if (count($path) >= 3) {
-			$nonNumberChar = preg_match("/D/", $path[2]);
-			if ($nonNumberChar === 1) {
+		if (str_contains($requestSegments[5], 'todo?id=')) {
+			parse_str($requestSegments[5], $todo);
+			// filter out id from uri segments
+			$id = $todo['todo?id'];
+			echo 'id = ' . $id . '\n';
+
+			$getTodoById = getTodoById($id);
+			if (is_null($getTodoById)) {
+				return errormessage(404);
+			}
+			if (!$getTodoById) {
 				return false;
 			}
+
+			echo xmlFormatter($getTodoById);
+			return errormessage(200);
+
 		}
+
 
 		switch ($_SERVER['REQUEST_METHOD']) {
 			case 'GET':
-				switch ($path[1]) {
-					case 'activetodos':
-						$getAllActiveTodos = getAllActiveTodos();
-						if (!$getAllActiveTodos) {
-							return false;
-						}
-						echo xmlFormatter($getAllActiveTodos);
-						return errormessage(200);
+				//checks if requested segment is the last item of the url, to dodge
+				//wrong, too long urls
+				if (($requestSegments[5] === array_reverse($requestSegments)[0])) {
+					switch ($requestSegments[5]) {
+						//http://localhost/optimizer/src/website/overview.html
+						case 'activetodos':
+							$getAllActiveTodos = getAllActiveTodos();
+							if (!$getAllActiveTodos) {
+								return false;
+							}
+							echo xmlFormatter($getAllActiveTodos);
+							return errormessage(200);
 
-					case 'inactivetodos':
-						$getAllInactiveTodos = getAllInactiveTodos();
-						if (!$getAllInactiveTodos) {
-							return false;
-						}
-						echo xmlFormatter($getAllInactiveTodos);
-						return errormessage(200);
+						case 'inactivetodos':
+							$getAllInactiveTodos = getAllInactiveTodos();
+							if (!$getAllInactiveTodos) {
+								return false;
+							}
+							echo xmlFormatter($getAllInactiveTodos);
+							return errormessage(200);
 
-					case 'todo':
-						if ($pathPartsCounted > 3 || !is_numeric($path[2])) {
-							return errormessage(404);
-						}
-						$getTodoById = getTodoById($path[2]);
-						if (is_null($getTodoById)) {
-							return errormessage(404);
-						}
-						if (!$getTodoById) {
-							return false;
-						}
+						case 'countaktivetodos':
+							$countActiveTodos = countActiveTodos();
+							if (!$countActiveTodos) {
+								return false;
+							}
+							echo $countActiveTodos;
+							return errormessage(200);
 
-						echo xmlFormatter($getTodoById);
-						return errormessage(200);
-
-					case 'countaktivetodos':
-						$countActiveTodos = countActiveTodos();
-						if (!$countActiveTodos) {
-							return false;
-						}
-						echo $countActiveTodos;
-						return errormessage(200);
-
-					default:
-						errormessage(404);
-						return true;
+						default:
+							errormessage(404);
+							return true;
+					}
 				}
 
+
 			case 'POST':
-				switch ($path[1]) {
+				switch ($requestSegments[5]) {
 					case 'newtodo':
 						createTodo();
 						return errormessage(200);
@@ -115,7 +146,7 @@
 
 
 						//updateTodo($id);
-						return true;
+						//return true;
 				}
 				break;
 

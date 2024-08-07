@@ -1,64 +1,83 @@
-const parser = new DOMParser()
+const parser = new DOMParser();
 
-function loadTodos() {
-    //console.log("load todos")
+loadTodosAsync();
 
-    const responePromise = fetch("http://localhost/optimizer/src/backend/index.php/activetodos")
-        .then((response) => {
+/*
+<div id="36">
+    <input type="checkbox"/>
+    <a href="xyz/usw/id=12">Todo title 1 </a>
+    <button>01</button>
+</div>
+*/
 
-            if (!response.ok) throw new Error("Unsatisfying response code " + response.statusText);
-
-            return response.text()
-        })
-        .then(body => {
-            //console.log("body", body);
-
-            const xmlObject = parser.parseFromString(body, "text/xml");
-
-            //extract all stuff from the todo
-            const id = xmlObject.getElementsByTagName("id");
-            const taskid = xmlObject.getElementsByTagName("taskid");
-            const title = xmlObject.getElementsByTagName("title");
-            const status = xmlObject.getElementsByTagName("status");
-            const description = xmlObject.getElementsByTagName("description");
-            const createDate = xmlObject.getElementsByTagName("createDate");
-            const updateDate = xmlObject.getElementsByTagName("updateDate");
-            const lastUpdate = xmlObject.getElementsByTagName("lastUpdate");
-
-            //console.log("Fetch successfully",
-            //    {
-            //        id: id,
-            //        taskid: taskid,
-            //        title: title,
-            //        status: status,
-            //        description: description,
-            //        createDate: createDate,
-            //        updateDate: updateDate,
-            //        lastUpdate: lastUpdate,
-            //    })
-
-            return xmlObject;
-
-        })
-        .catch((err) => {
-            console.error("Ein Fehler in loadTodos() ist aufgetreten", err);
-            return false;
-        })
-}
-
-console.log("XML Test: ", loadTodos() , "\n");
-
-
-async function loadTododsAsync() {
+async function loadTodosAsync() {
     try {
-        const response = await fetch("http://localhost/optimizer/src/backend/index.php/activetodos")
-        const body = await response.text()
-        console.log("body", body)
+        const response = await fetch("http://localhost/optimizer/src/backend/index.php/activetodos");
+        const body = await response.text();
 
-        const xmlObject = parser.parseFromString(body, "text/xml")
-        console.log("xml", xmlObject)
+        const xmlObject = parser.parseFromString(body, "text/xml");
+        console.log("XML Test: loadTododsAsync \n", xmlObject);
+        //return await xmlObject;
+
+        createTodoElements(xmlObject);
 
     } catch (err) {
-        console.error("Ein fehler ist aufgetreten", err);
+        console.error("Ein Fehler in loadTodosAsync() ist aufgetreten: \n", err);
+    }
+}
+
+function createTodoElements(inputPromObj) {
+
+    const todoid = 0;
+    const taskid = 1;
+    const title = 2;
+    const status = 3;
+    //const description = 4;
+    //const createDate = 5;
+    //const updateDate = 6;
+    //const lastUpdate = 7;
+
+    const todoArray = inputPromObj.getElementsByTagName("todo");
+
+    const contentOverview = document.getElementById("contentOverview");
+
+    for (let i = 0; i < todoArray.length; i++) {
+        //create TodoBox
+        const todoBox = document.createElement("div");
+        todoBox.setAttribute("id", todoArray[i].children[todoid].innerHTML);
+        contentOverview.appendChild(todoBox);
+
+        //create checkbox-field
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        todoBox.appendChild(checkbox);
+
+        if (parseInt(todoArray[i].children[status].innerHTML)  === 4)
+        {
+            checkbox.checked = true;
+        } else{
+            checkbox.checked = false;
+        }
+
+        //create <a>-tag
+        const todoTitleLink = document.createElement("a");
+        todoTitleLink.innerHTML = todoArray[i].children[title].innerHTML;
+        todoBox.appendChild(todoTitleLink);
+
+        //create task-button
+        let abc =  todoArray[i].children[taskid].innerHTML; // [ = 1. elem, .... ] = last elem.
+        let taskidInnerHtml =  abc.substring(1, abc.indexOf("]")).split(','); //get rid of "[" and "]"
+        console.log("erstes Element: " + taskidInnerHtml.at(0));
+        console.log("Anzahl der angehängten Tasks: " + taskidInnerHtml.length);
+
+        //create button if one or more tasks and tasks not empty
+        if (taskidInnerHtml.length > 0 && taskidInnerHtml.at(0) !== "")
+        {
+            console.log(taskidInnerHtml.at(1));
+            const button = document.createElement("button");
+            button.textContent = taskidInnerHtml.length;
+            todoBox.appendChild(button);
+        }
+
     }
 }

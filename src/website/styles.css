@@ -132,7 +132,7 @@ a:active {
   border-radius: 100%;
 }
 
-.contentOverview {
+#contentOverview {
   display: flex;
   grid-area: content;
   flex-direction: column;
@@ -141,13 +141,13 @@ a:active {
   padding: 12px 0;
 }
 
-.contentOverview div {
+#contentOverview div {
   display: flex;
   align-items: center;
   margin: 15px 0 15px 40px;
 }
 
-.contentOverview div input {
+#contentOverview div input {
   display: flex;
   justify-content: center;
   border: lightgrey solid 3px;
@@ -159,11 +159,11 @@ a:active {
   background-color: white;
 }
 
-.contentOverview section input:active {
+#contentOverview section input:active {
   background-color: #b9b9b9;
 }
 
-.contentOverview div a {
+#contentOverview div a {
   display: flex;
   border: lightgrey solid 1px;
   border-radius: 6px;
@@ -176,11 +176,11 @@ a:active {
   padding: 0 6px;
 }
 
-.contentOverview div a:active {
+#contentOverview div a:active {
   background-color: #b9b9b9;
 }
 
-.contentOverview div button {
+#contentOverview div button {
   height: 25px;
   width: 40px;
   display: flex;
@@ -195,7 +195,7 @@ a:active {
   right: 20px;
 }
 
-.contentOverview div button:active {
+#contentOverview div button:active {
   background-color: #b9b9b9;
 }
 

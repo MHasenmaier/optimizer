@@ -7,24 +7,24 @@
 
     //TESTDATA
     //to be replaced when API and frontend are working
-    $todoDataArray = array(
-        'ID' => 36,
-        'taskID' => '[1,2,3,5,10,221]',
-        'title' => 'some new title',
-        'status' => 9,
-        'description' => 'some new shit. you know. lot to do. more stuff than usually. some easy stuff. some hard stuff. but always stuff. a lot. i mean, really, a lot of stuff.',
-        'lastUpdate' => 'add some tasks'
-    );
+//    $todoDataArray = array(
+//        'ID' => 36,
+//        'taskID' => [1,2,3,5,10,221],
+//        'title' => 'some new title',
+//        'status' => 9,
+//        'description' => 'some new shit. you know. lot to do. more stuff than usually. some easy stuff. some hard stuff. but always stuff. a lot. i mean, really, a lot of stuff.',
+//        'lastUpdate' => 'add some tasks'
+//    );
 
     //TESTDATA
     //to be replaced when API and frontend are working
-    $newTodoDataArray = array(
-        'taskID' => '[6,9,31,52,106,221]',
-        'title' => 'new title for new todo',
-
-        'description' => 'new todo. new description.',
-        'lastUpdate' => ''
-    );
+//    $newTodoDataArray = array(
+//        'taskID' => '[6,9,31,52,106,221]',
+//        'title' => 'new title for new todo',
+//
+//        'description' => 'new todo. new description.',
+//        'lastUpdate' => ''
+//    );
 
 
     //getAllTodosByStatus(2, $dbObj);  // change "2" to generic integer variable
@@ -158,13 +158,15 @@
      * @param $dbObj - database object
      * @return object|false
      */
-    function getAllTodosByStatus(int $inputStatus, $dbObj): array|false
+    function getAllTodosByStatus(int $inputStatus): array|false
     {
+	    global $dbPDO;
+
         try {
-            $dbObj->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	        $dbPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $selectAllTodosByStatus = 'SELECT * FROM todotable WHERE status = :statusValue';
 
-            $expectedTodoByStatus = $dbObj->prepare($selectAllTodosByStatus);
+            $expectedTodoByStatus = $dbPDO->prepare($selectAllTodosByStatus);
             $expectedTodoByStatus->execute(['statusValue' => $inputStatus]);
 
             echo json_encode($expectedTodoByStatus->fetchAll(PDO::FETCH_ASSOC), JSON_PRETTY_PRINT);
@@ -187,6 +189,10 @@
     {
 		global $dbPDO;
 
+		if (!checkID($id)){
+			return false;
+		}
+
         try {
             $sqlSelectTodoByID = 'SELECT * FROM todotable WHERE ID = :IDValue';
 
@@ -198,6 +204,7 @@
 	        //check if
 	        if (!empty($checkedIDTodo))
 	        {
+				echo 'id wrong';
 				return false;
 			}
             return $checkedIDTodo;
@@ -321,7 +328,7 @@
            $allTodosArray = getAllTodos();
 
            foreach ($allTodosArray as $todo) {
-               if ($id == $todo['ID']) {
+               if ($id === $todo['ID']) {
                    return $todo;
                }
            }
