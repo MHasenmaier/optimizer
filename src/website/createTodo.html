@@ -1,43 +1,44 @@
 <!DOCTYPE html>
 <html lang="de-DE">
-    <head>
-        <meta charset="utf-8">
-        <title>Optimizer - Neues Todo anlegen</title>
-        <link rel="stylesheet" href="styles.css">
-    </head>
-    <body class="mainAddTodo">
+<head>
+    <meta charset="utf-8">
+    <title>Optimizer - Neues Todo anlegen</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="mainAddTodo">
 
-            <select class="status" name="Status" id="statusPopup">
-                <option value="" disabled selected>Status</option>
-                <option>löschen</option>
-                <option>neu</option>
-                <option>geplant</option>
-                <option>begonnen</option>
-                <option>fertig</option>
-            </select>
+<select class="status" name="Status" id="statusPopup">
+    <option value="" disabled selected>Status</option>
+    <option value="1">löschen</option>
+    <option value="2">neu</option>
+    <option value="3">geplant</option>
+    <option value="4">begonnen</option>
+    <option value="5">fertig</option>
+</select>
 
-        <form class="todoAddForms" action="http://localhost/optimizer/src/backend/backend.php" method="post">
-            <input
-            name="todoTitle"
+<form id="todoAddForms" action="http://localhost/optimizer/src/backend/index.php/newtodo" method="post">
+        <input
+                name="todoTitle"
                 id="todoTitle"
                 type="text"
                 placeholder="Titel eingeben"
                 required
-            >
-            <textarea id="todoDescription" type="text" placeholder="Beschreibung eingeben"></textarea>
-        </form>
-        <div class="taskAdd">
-            <a href="http://localhost/optimizer/src/website/createTask.html" class="taskAddText">
-                Task
-                <button class="taskAddButton">+</button>
-            </a>
-        </div>
-        <footer class="addTodoFooter">
-            <a href="http://localhost/optimizer/src/website/overview.html">
-                <button class="footerButton">
-                    Todo anlegen
-                </button>
-            </a>
-        </footer>
-    </body>
+        >
+        <textarea id="todoDescription" type="text" placeholder="Beschreibung eingeben"></textarea>
+</form>
+<div class="taskAdd">
+    <a href="http://localhost/optimizer/src/website/createTask.html" class="taskAddText">
+        Task
+        <button class="taskAddButton">+</button>
+    </a>
+</div>
+<footer class="addTodoFooter">
+   <!-- <a href="http://localhost/optimizer/src/website/overview.html"> -->
+        <button class="footerButton" id="buttonAddTodo">
+            Todo anlegen
+        </button>
+    </a>
+</footer>
+<script src="script.js"></script>
+</body>
 </html>

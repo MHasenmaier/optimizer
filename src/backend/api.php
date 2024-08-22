@@ -1,112 +1,109 @@
 <?php
+	include 'dbserver.php';
 
-    //maybe not necessary
-    use Random\RandomException;
+	//TESTDATA
+	//to be replaced when API and frontend are working
+	//    $todoDataArray = array(
+	//        'ID' => 36,
+	//        'taskID' => [1,2,3,5,10,221],
+	//        'title' => 'some new title',
+	//        'status' => 9,
+	//        'description' => 'some new shit. you know. lot to do. more stuff than usually. some easy stuff. some hard stuff. but always stuff. a lot. i mean, really, a lot of stuff.',
+	//        'lastUpdate' => 'add some tasks'
+	//    );
 
-    include 'dbserver.php';
-
-    //TESTDATA
-    //to be replaced when API and frontend are working
-//    $todoDataArray = array(
-//        'ID' => 36,
-//        'taskID' => [1,2,3,5,10,221],
-//        'title' => 'some new title',
-//        'status' => 9,
-//        'description' => 'some new shit. you know. lot to do. more stuff than usually. some easy stuff. some hard stuff. but always stuff. a lot. i mean, really, a lot of stuff.',
-//        'lastUpdate' => 'add some tasks'
-//    );
-
-    //TESTDATA
-    //to be replaced when API and frontend are working
-//    $newTodoDataArray = array(
-//        'taskID' => '[6,9,31,52,106,221]',
-//        'title' => 'new title for new todo',
-//
-//        'description' => 'new todo. new description.',
-//        'lastUpdate' => ''
-//    );
+	//TESTDATA
+	//to be replaced when API and frontend are working
+	//    $newTodoDataArray = array(
+	//        'taskID' => '[6,9,31,52,106,221]',
+	//        'title' => 'new title for new todo',
+	//
+	//        'description' => 'new todo. new description.',
+	//        'lastUpdate' => ''
+	//    );
 
 
-    //getAllTodosByStatus(2, $dbObj);  // change "2" to generic integer variable
+	//getAllTodosByStatus(2, $dbObj);  // change "2" to generic integer variable
 
 	//echo json_encode(getAllActiveTodos($dbObj));
-    //var_dump(getAllActiveTodos($dbObj));
+	//var_dump(getAllActiveTodos($dbObj));
 
-    //echo json_encode(getAllTodos());
-    //var_dump(getAllTodos());
+	//echo json_encode(getAllTodos());
+	//var_dump(getAllTodos());
 
-    //echo json_encode(getTodoById($todoDataArray, $dbObj), JSON_PRETTY_PRINT);
-    //deleteTodo($todoDataArray, $dbObj);
+	//echo json_encode(getTodoById($todoDataArray, $dbObj), JSON_PRETTY_PRINT);
+	//deleteTodo($todoDataArray, $dbObj);
 
-    /**
- * create function
- * assoc in values
- * if status != number 1-5, staus = 2 by default
- * @param array $inputTodoData
- * @param $dbObj -database object
- * @return string|false -if successful returns the created todo as json modified string
- */
-    function createTodo(array $inputTodoData): string|false
-    {
+	/**
+	 * create function
+	 * assoc in values
+	 * if status != number 1-5, staus = 2 by default
+	 *
+	 * @param array $inputTodoData
+	 * @param       $dbObj -database object
+	 *
+	 * @return string|false -if successful returns the created todo as json modified string
+	 */
+	function createTodo(array $inputTodoData): string|false
+	{
 		global $dbPDO;
 
-        // check if status exists ant is valid
-        if (array_key_exists('status', $inputTodoData))
-        {
-            $inputTodoData['status'] = statusCheck($inputTodoData['status']);
-        } else {
-            //set status = 2 as default
-            $inputTodoData['status'] = 2;
-        }
+		// check if status exists ant is valid
+		if (array_key_exists('status', $inputTodoData)) {
+			$inputTodoData['status'] = statusCheck($inputTodoData['status']);
+		} else {
+			//set status = 2 as default
+			$inputTodoData['status'] = 2;
+		}
 
-        try {
-	        $dbPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $insertTodo = "INSERT INTO todotable
+		try {
+			$dbPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$insertTodo = "INSERT INTO todotable
                            (taskID, title, status, description, lastUpdate)
                            VALUES (:taskID, :title, :status, :description, :lastUpdate)";
-            $createdTodo = $dbPDO->prepare($insertTodo);
-            $createdTodo->execute([
-                'taskID' => $inputTodoData['taskID'],
-                'title' => $inputTodoData['title'],
-                'status' => $inputTodoData['status'],
-                'description' => $inputTodoData['description'],
-                'lastUpdate' => $inputTodoData['lastUpdate']
-            ]);
+			$createdTodo = $dbPDO->prepare($insertTodo);
+			$createdTodo->execute([
+				'taskID' => $inputTodoData['taskID'],
+				'title' => $inputTodoData['title'],
+				'status' => $inputTodoData['status'],
+				'description' => $inputTodoData['description'],
+				'lastUpdate' => $inputTodoData['lastUpdate']
+			]);
 
-            return json_encode($dbPDO->query("SELECT * FROM todotable LIMIT " . (countData($dbPDO) - 1) . ", 1")->fetchAll(PDO::FETCH_ASSOC));
-         } catch (PDOException $e) {
-            echo 'Der createTodo hat nicht geklappt:<br>' . $e->getMessage();
-            return false;
-        }
-    }
+			return json_encode($dbPDO->query("SELECT * FROM todotable LIMIT " . (countData($dbPDO) - 1) . ", 1")->fetchAll(PDO::FETCH_ASSOC));
+		} catch (PDOException $e) {
+			echo 'Der createTodo hat nicht geklappt:<br>' . $e->getMessage();
+			return false;
+		}
+	}
 
 	/**
 	 * Returns JSON with all todos
 	 * @return array|false
 	 */
-    function getAllTodos(): array|false
-    {
+	function getAllTodos(): array|false
+	{
 		global $dbPDO;
 
-      try {
-		  $collectAllTodo = "SELECT * FROM todotable";
+		try {
+			$collectAllTodo = "SELECT * FROM todotable";
 
-          $stmt = $dbPDO->prepare($collectAllTodo);
-          $stmt->execute();
+			$stmt = $dbPDO->prepare($collectAllTodo);
+			$stmt->execute();
 
-	      //TODO: de-comment
-	      //header('Content-Type: application/json');
+			//TODO: de-comment
+			//header('Content-Type: application/json');
 
-          return $stmt->fetchAll(PDO::FETCH_ASSOC);
+			return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-      } catch (PDOException $e) {
-	      //TODO: de-comment
-	      //header('Content-Type: application/json');
-          echo 'Der getAllTodo hat nicht geklappt:<br>' . $e->getMessage();
-		  echo json_encode(['error' => $e->getMessage()]);
-          return false;
-      }
-  }
+		} catch (PDOException $e) {
+			//TODO: de-comment
+			//header('Content-Type: application/json');
+			echo 'Der getAllTodo hat nicht geklappt:<br>' . $e->getMessage();
+			echo json_encode(['error' => $e->getMessage()]);
+			return false;
+		}
+	}
 
 	/**
 	 * Returns JSON with all todos  with status != 5
@@ -151,207 +148,250 @@
 		}
 	}
 
-    /**
-     * read function (select) - is important for the archiv and the bin
-     * assoc in rows
-     * @param $status
-     * @param $dbObj - database object
-     * @return object|false
-     */
-    function getAllTodosByStatus(int $inputStatus): array|false
-    {
-	    global $dbPDO;
-
-        try {
-	        $dbPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $selectAllTodosByStatus = 'SELECT * FROM todotable WHERE status = :statusValue';
-
-            $expectedTodoByStatus = $dbPDO->prepare($selectAllTodosByStatus);
-            $expectedTodoByStatus->execute(['statusValue' => $inputStatus]);
-
-            echo json_encode($expectedTodoByStatus->fetchAll(PDO::FETCH_ASSOC), JSON_PRETTY_PRINT);
-
-            return ($expectedTodoByStatus->fetchAll(PDO::FETCH_ASSOC));
-        } catch (PDOException $e) {
-            echo 'getTodoByStatus hat nicht geklappt:<br>' . $e->getMessage();
-            return false;
-        }
-    }
-
-    /**
- * read function (select)
- * assoc in rows
- * @param $todoDataArray - array of the todo
- * @param $dbObj - database object
- * @return object|false
- */
-    function getTodoById(int $id): array|false
-    {
+	/**
+	 * read function (select) - is important for the archiv and the bin
+	 * assoc in rows
+	 *
+	 * @param $status
+	 * @param $dbObj - database object
+	 *
+	 * @return object|false
+	 */
+	function getAllTodosByStatus(int $inputStatus): array|false
+	{
 		global $dbPDO;
 
-		if (!checkID($id)){
+		try {
+			$dbPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$selectAllTodosByStatus = 'SELECT * FROM todotable WHERE status = :statusValue';
+
+			$expectedTodoByStatus = $dbPDO->prepare($selectAllTodosByStatus);
+			$expectedTodoByStatus->execute(['statusValue' => $inputStatus]);
+
+			echo json_encode($expectedTodoByStatus->fetchAll(PDO::FETCH_ASSOC), JSON_PRETTY_PRINT);
+
+			return ($expectedTodoByStatus->fetchAll(PDO::FETCH_ASSOC));
+		} catch (PDOException $e) {
+			echo 'getTodoByStatus hat nicht geklappt:<br>' . $e->getMessage();
 			return false;
 		}
+	}
 
-        try {
-            $sqlSelectTodoByID = 'SELECT * FROM todotable WHERE ID = :IDValue';
+	/***
+	 * GET a to-do by its ID
+	 * uses FETCH_ASSOC [0] to get just the first one
+	 * @param int $id
+	 *
+	 * @return array|false
+	 */
+	function getTodoById(int $id): array|false
+	{
+		global $dbPDO;
 
-            $expectedTodoById = $dbPDO->prepare($sqlSelectTodoByID);
-            $expectedTodoById->execute(['IDValue' => $id]);
+		//Maybe bullshit
+		$id = $_GET['id'];
+
+
+		try {
+			$sqlSelectTodoByID = 'SELECT * FROM todotable WHERE ID = :IDValue';
+
+			$expectedTodoById = $dbPDO->prepare($sqlSelectTodoByID);
+
+/** maybe bullshit, because ID is known */	//bind the param to
+/** maybe bullshit, because ID is known */	$expectedTodoById->bindParam(':IDValue', $id);
+
+			//check if id exist in DB
+			if (!checkID($id)) {
+				return errormessage(404);
+			}
+
+			$expectedTodoById->execute(['IDValue' => $id]);
 
 			$checkedIDTodo = ($expectedTodoById->fetchAll(PDO::FETCH_ASSOC))[0];
 
-	        //check if
-	        if (!empty($checkedIDTodo))
-	        {
-				echo 'id wrong';
+			//check if array is empty
+			if (empty($checkedIDTodo)) {
 				return false;
 			}
-            return $checkedIDTodo;
-        } catch (PDOException $e) {
-            echo 'getTodoById hat nicht geklappt:
+			return $checkedIDTodo;
+		} catch (PDOException $e) {
+			echo 'getTodoById hat nicht geklappt:
             ' . $e->getMessage();
-            return false;
-        }
-    }
+			return false;
+		}
+	}
 
-    /**
- * update function
- * does not take care about form validation
- * @param $todoDataArray - todo as an array
- * @param $dbObj - database object
- * @return object|false
- */
-    function updateTodo(array $inputTodoDataArray, $dbObj): array|false
-    {
-        //soll bei ungültiger ID den return auslösen
-        if (!($inputTodoDataArray['ID'] > 0))
-        {
-            echo "Ungültige ID: " . $inputTodoDataArray['ID'] . " in updateTodo.";
-            return false;
-        }
+	/**
+	 * update function
+	 * does not take care about form validation
+	 *
+	 * @param $inputTodoDataArray - todo as an array
+	 *
+	 * @return array|bool
+	 */
+	function updateTodo(array $inputTodoDataArray): array|bool
+	{
+		global $dbPDO;
 
-        try {
-            $updateTodo = "UPDATE todotable
+		//soll bei ungültiger ID den return auslösen
+		if (!($inputTodoDataArray['ID'] > 0)) {
+			errormessage(404);
+			return true;
+		}
+
+		try {
+			$updateTodo = 'UPDATE todotable
                             SET taskID = :taskID,
                                 title = :title,
                                 status = :status,
                                 description = :description,
                                 lastUpdate = :lastUpdate
-                            WHERE ID = :ID";
+                            WHERE ID = :ID';
 
-            // check if status is valid
-            $inputTodoDataArray['status'] = statusCheck($inputTodoDataArray['status']);
+			// check if status is valid
+			$inputTodoDataArray['status'] = statusCheck($inputTodoDataArray['status']);
 
-            $prepUpdatedTodo = $dbObj->prepare($updateTodo);
-            $prepUpdatedTodo->execute([
-                'ID' => $inputTodoDataArray['ID'],
-                'taskID' => $inputTodoDataArray['taskID'],
-                'title' => $inputTodoDataArray['title'],
-                'status' => $inputTodoDataArray['status'],
-                'description' => $inputTodoDataArray['description'],
-                'lastUpdate' => $inputTodoDataArray['lastUpdate']
-            ]);
+			$prepUpdatedTodo = $dbPDO->prepare($updateTodo);
+			$prepUpdatedTodo->execute([
+				'ID' => $inputTodoDataArray['ID'],
+				'taskID' => $inputTodoDataArray['taskID'],
+				'title' => $inputTodoDataArray['title'],
+				'status' => $inputTodoDataArray['status'],
+				'description' => $inputTodoDataArray['description'],
+				'lastUpdate' => $inputTodoDataArray['lastUpdate']
+			]);
 
-            return getTodoById($inputTodoDataArray, $dbObj);
-        } catch (PDOException $e) {
-            echo 'Das updateTodo hat nicht geklappt:
+			return getTodoById($inputTodoDataArray['ID']);
+		} catch (PDOException $e) {
+			echo 'Das updateTodo hat nicht geklappt:
             ' . $e->getMessage();
-            return false;
-        }
-    }
+			return false;
+		}
+	}
 
-    /**
- * delete function
- * @param $todoDataArray - todo as an array
- * @param $dbObj - database object
- * @return bool
- */
-    function deleteTodo($todoDataArray, $dbObj): bool
-    {
-        //temp variable for debugging echo
-        $tempID = $todoDataArray['ID'];
-        try {
-            $deleteTodo = 'DELETE FROM todotable
-            WHERE ID = :IDValue';
-            $stmt = $dbObj->prepare($deleteTodo);
-            $stmt->execute(['IDValue' => $todoDataArray['ID']]);
-            echo 'DELETE hat ' . $stmt->rowCount() . ' Zeilen gelöscht. <br>';
-            echo 'DELETE hat den Eintrag mit der ID: ' . $tempID . ' endgültig gelöscht.';
-            return true;
-        } catch (PDOException $e) {
-            echo 'DELETE hat nicht geklappt:<br>' . $e->getMessage();
-            return false;
-        }
-    }
-
-    /**
- * function to figure out, how many data is stored in the db
- * @param $dbObj
- * @return int|false - number of rows/data in the db
- * @return false if not successful
- */
-    function countActiveTodos(): int|false
-    {
+	/**
+	 * delete function
+	 *
+	 * @param $todoDataArray - todo as an array
+	 * @param $dbObj         - database object
+	 *
+	 * @return bool
+	 */
+	function deleteTodo($id): bool
+	{
 		global $dbPDO;
-        try {
-	        $dbPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $stmt = $dbPDO->prepare('SELECT COUNT(*) as dbSize FROM todotable');
-            $stmt->execute();
-            $row = $stmt->fetchAll();
-            return $row['dbSize'];
-        } catch (PDOException $e) {
-            echo 'countData hat nicht geklappt:<br>' . $e->getMessage();
-            return false;
-        }
-    }
 
-    /**
- * checks the status has a valid form and set 2 as default if not
- * @param $statusInput - status as integer
- * @return int - status value, by default 2 if status was not 1, 2, 3, 4, or 5
- */
-    function statusCheck ($statusInput): int
-    {
-        //set default status = 2 if not 1-5
-        is_null($statusInput) ? 2 : $statusInput;
-        return (($statusInput !== (1 || 2 || 3 || 4 || 5)) ? 2 : $statusInput);
-    }
+		try {
+			$deleteTodo = 'DELETE FROM todotable
+            WHERE ID = :IDValue';
+			$stmt = $dbPDO->prepare($deleteTodo);
+			$stmt->execute(['IDValue' => $id]);
+			echo 'DELETE hat ' . $stmt->rowCount() . ' Zeilen gelöscht. <br>';
+			echo 'DELETE hat den Eintrag mit der ID: ' . $id . ' endgültig gelöscht.';
+			return true;
+		} catch (PDOException $e) {
+			echo 'DELETE hat nicht geklappt:<br>' . $e->getMessage();
+			return false;
+		}
+	}
 
-    /**
-     * @param int $id - ID to look for
-     * @param $dbObj
-     * @return array|false - returns the array of the questionable todo
-     */
-    function checkID (int $id): array|false
-    {
-           $allTodosArray = getAllTodos();
+	/**
+	 * function to figure out, how many data is stored in the db
+	 *
+	 * @param $dbObj
+	 *
+	 * @return int|false - number of rows/data in the db
+	 * @return false if not successful
+	 */
+	function countActiveTodos(): int|false
+	{
+		global $dbPDO;
+		try {
+			$dbPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$stmt = $dbPDO->prepare('SELECT COUNT(*) as dbSize FROM todotable');
+			$stmt->execute();
+			$row = $stmt->fetchAll();
+			return $row['dbSize'];
+		} catch (PDOException $e) {
+			echo 'countData hat nicht geklappt:<br>' . $e->getMessage();
+			return false;
+		}
+	}
 
-           foreach ($allTodosArray as $todo) {
-               if ($id === $todo['ID']) {
-                   return $todo;
-               }
-           }
-        return false;
-    }
+	/**
+	 * checks the status has a valid form and set 2 as default if not
+	 *
+	 * @param $statusInput - status as integer
+	 *
+	 * @return int - status value, by default 2 if status was not 1, 2, 3, 4, or 5
+	 */
+	function statusCheck($statusInput): int
+	{
+		//set default status = 2 if not 1-5
+		// ?? is_null($statusInput) ? 2 : $statusInput;
+		return (($statusInput !== (1 || 2 || 3 || 4 || 5)) ? 2 : $statusInput);
+	}
 
+	/**
+	 * @param int $id - ID to look for
+	 * @param     $dbObj
+	 *
+	 * @return array|false - returns the array of the questionable todo
+	 */
+	function checkID(int $id): array|false
+	{
+		$allTodosArray = getAllTodos();
 
-    /**
-     * Datenformatierung zu XML
-     * @param array $todos - Array von Todos
-     * @return string - XML formatierte Todos
-     */
-    function xmlFormatter($todos): string
-    {
-        $xml = new SimpleXMLElement('<todos/>');
+		foreach ($allTodosArray as $todo) {
+			if ($id === $todo['ID']) {
+				return $todo;
+			}
+		}
+		return false;
+	}
 
-        foreach ($todos as $todo) {
-            $todoElement = $xml->addChild('todo');
-            foreach ($todo as $key => $value) {
-                $todoElement->addChild($key, htmlspecialchars($value));
-            }
-        }
+	/**
+	 * Datenformatierung zu XML für mehrere Elemente
+	 *
+	 * @param array $todos - Array von Todos
+	 *
+	 * @return string - XML formatierte Todos
+	 */
+	function xmlFormatter($todos): string
+	{
+		$xml = new SimpleXMLElement('<todos/>');
 
-        header('Content-Type: application/xml');
-        return $xml->asXML();
-    }
+		foreach ($todos as $todo) {
+			$todoElement = $xml->addChild('todo');
+			foreach ($todo as $key => $value) {
+				$todoElement->addChild($key, htmlspecialchars($value));
+			}
+		}
+
+		header('Content-Type: application/xml');
+		return $xml->asXML();
+	}
+
+	/**
+	 * Datenformatierung zu XML für ein einzelnes Element
+	 *
+	 * @param array $todos - Array eines Todos
+	 *
+	 * @return string - XML formatiertes Todo
+	 */
+	function xmlFormatterSingle($todo): string
+	{
+		$xml = new SimpleXMLElement('<todos/>');
+
+		$todoElement = $xml->addChild('todo');
+		foreach ($todo as $key => $value) {
+			$todoElement->addChild($key, htmlspecialchars($value));
+		}
+
+		header('Content-Type: application/xml');
+		return $xml->asXML();
+	}
+
+	function stringToXML($todos) {
+
+	}

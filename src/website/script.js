@@ -1,6 +1,40 @@
 const parser = new DOMParser();
+const buttonAddTodo = document.getElementById("buttonAddTodo");
+const todoAddForms = document.getElementById("todoAddForms");
 
 loadTodosAsync();
+
+// run the function just if the button is loaded
+if (buttonAddTodo) {
+    buttonAddTodo.addEventListener("click", () => {
+            //sendData()
+            const todoTitleInput = document.getElementById("todoTitle").value;
+            const todoDescriptionInput = document.getElementById("todoDescription").value;
+            const todoStatusPopup = document.getElementById("statusPopup").value;
+
+
+            let todoData = {};
+
+            todoData.title = todoTitleInput;
+            todoData.description = todoDescriptionInput;
+            todoData.status = todoStatusPopup;
+
+            console.log(todoData);
+
+
+            console.log('<todo>' +
+                '   <ID>5</ID>' +
+                '   <taskID>1,3,5,7</taskID>' +
+                '   <title>' + todoTitleInput + '</title>' +
+                '   <status>' + todoStatusPopup + '</status>' +
+                '   <description>' + todoDescriptionInput + '</description>' +
+                '</todo>');
+
+            return true;
+        }
+    )
+}
+
 
 /*
 <div id="36">
@@ -16,13 +50,13 @@ async function loadTodosAsync() {
         const body = await response.text();
 
         const xmlObject = parser.parseFromString(body, "text/xml");
-        console.log("XML Test: loadTododsAsync \n", xmlObject);
+        console.log('XML Test: loadTododsAsync \n', xmlObject, '\n');
         //return await xmlObject;
 
         createTodoElements(xmlObject);
 
     } catch (err) {
-        console.error("Ein Fehler in loadTodosAsync() ist aufgetreten: \n", err);
+        console.error("Frontendfehler in loadTodosAsync(): \n", err);
     }
 }
 
@@ -44,18 +78,17 @@ function createTodoElements(inputPromObj) {
     for (let i = 0; i < todoArray.length; i++) {
         //create TodoBox
         const todoBox = document.createElement("div");
-        todoBox.setAttribute("id", todoArray[i].children[todoid].innerHTML);
         contentOverview.appendChild(todoBox);
 
         //create checkbox-field
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
+        checkbox.setAttribute("id", todoArray[i].children[todoid].innerHTML);
         todoBox.appendChild(checkbox);
 
-        if (parseInt(todoArray[i].children[status].innerHTML)  === 4)
-        {
+        if (parseInt(todoArray[i].children[status].innerHTML) === 4) {
             checkbox.checked = true;
-        } else{
+        } else {
             checkbox.checked = false;
         }
 
@@ -65,14 +98,13 @@ function createTodoElements(inputPromObj) {
         todoBox.appendChild(todoTitleLink);
 
         //create task-button
-        let abc =  todoArray[i].children[taskid].innerHTML; // [ = 1. elem, .... ] = last elem.
-        let taskidInnerHtml =  abc.substring(1, abc.indexOf("]")).split(','); //get rid of "[" and "]"
+        let abc = todoArray[i].children[taskid].innerHTML; // [ = 1. elem, .... ] = last elem.
+        let taskidInnerHtml = abc.substring(1, abc.indexOf("]")).split(','); //get rid of "[" and "]"
         console.log("erstes Element: " + taskidInnerHtml.at(0));
         console.log("Anzahl der angehängten Tasks: " + taskidInnerHtml.length);
 
         //create button if one or more tasks and tasks not empty
-        if (taskidInnerHtml.length > 0 && taskidInnerHtml.at(0) !== "")
-        {
+        if (taskidInnerHtml.length > 0 && taskidInnerHtml.at(0) !== "") {
             console.log(taskidInnerHtml.at(1));
             const button = document.createElement("button");
             button.textContent = taskidInnerHtml.length;
@@ -80,4 +112,49 @@ function createTodoElements(inputPromObj) {
         }
 
     }
+}
+
+function sendData() {
+    const todoTitleInput = document.getElementById("todoTitle");
+    const todoDescriptionInput = document.getElementById("todoDescription");
+    const todoStatusPopup = document.getElementById("statusPopup");
+
+    // const todoElement = document.createElement("todo");
+
+    // ?? const taskID = document.createElement("taskID");
+    // ?? document.todoElement.appendChild(taskID);
+
+    //const title = document.createElement("title");
+    //document.todoElement.appendChild(title);
+    //title.innerHTML = todoTitleInput.value;
+//
+    //const status = document.createElement("status");
+    //document.todoElement.appendChild(status);
+    //status.innerHTML = todoStatusPopup.value;
+//
+    //const description = document.createElement("description");
+    //document.todoElement.appendChild(description);
+    //description.innerHTML = todoDescriptionInput.value;
+
+    // todoStatusPopup.children[1].innerHTML //löschen
+    // todoStatusPopup.children[2].innerHTML //neu
+    // todoStatusPopup.children[3].innerHTML //geplant
+    // todoStatusPopup.children[4].innerHTML //begonnen
+    // todoStatusPopup.children[5].innerHTML //fertig
+
+    /*
+    const status = todoStatusPopup.value;
+
+    alert(status)
+
+    console.log('Status = ' + status);
+    */
+
+    console.log('<todo>' +
+        '   <ID>5</ID>' +
+        '   <taskID>1,3,5,7</taskID>' +
+        '   <title>' + todoTitleInput.innerHTML + '</title>' +
+        '   <status>' + todoStatusPopup.value + '</status>' +
+        '   <description>' + todoDescriptionInput.innerHTML + '</description>' +
+        '</todo>');
 }
