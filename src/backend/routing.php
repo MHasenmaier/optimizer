@@ -21,8 +21,6 @@
 
 				if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
 
-					// (int)$id but ... nicer
-					$id = intval(htmlspecialchars($_GET['id']));
 				}
 			}
 		}
@@ -37,14 +35,14 @@
 		switch ($_SERVER['REQUEST_METHOD']) {
 			case 'GET':
 				//GET specific to-do
-				if (isset($requestSegments[1]) && ($requestSegments[1] === 'todo')) {
+				if ($requestSegments[1] === 'todo') {
 					if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
 
 						// (int)$id but ... nicer
 						$id = intval(htmlspecialchars($_GET['id']));
 
 						$getTodoById = getTodoById($id);
-						if (is_null($getTodoById) | empty($getTodoById) | ($getTodoById === false)) {
+						if (is_null($getTodoById) | empty($getTodoById) | ($getTodoById === false) | !(isset($getTodoById) === true)) {
 							return errormessage(404);
 						}
 					}
@@ -119,6 +117,8 @@
 							echo xmlFormatterSingle($body);
 							var_dump($body);
 
+							//TODO: (body) string -> array
+
 							$createTodo = createTodo($body);
 
 							if (is_null($createTodo) | empty($createTodo) | ($createTodo === false)) {
@@ -172,22 +172,22 @@
 		switch ($errorcode) {
 			case 200:   //all good
 				http_response_code(200);
-				echo json_encode(['message' => 'OK']);
+				//echo json_encode(['message' => 'OK']);
 				break;
 
 			case 201:   //created
 				http_response_code(201);
-				echo json_encode(['message' => 'created']);
+				//echo json_encode(['message' => 'created']);
 				break;
 
 			case 202:   //accepted
 				http_response_code(202);
-				echo json_encode(['message' => 'accepted']);
+				//echo json_encode(['message' => 'accepted']);
 				break;
 
 			case 204:   //no content -> content has been deleted
 				http_response_code(204);
-				echo json_encode(['message' => 'No Content']);
+				//echo json_encode(['message' => 'No Content']);
 				break;
 
 			case 400:   //bad request - malformed syntax

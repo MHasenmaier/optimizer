@@ -8,7 +8,7 @@
 	//        'taskID' => [1,2,3,5,10,221],
 	//        'title' => 'some new title',
 	//        'status' => 9,
-	//        'description' => 'some new shit. you know. lot to do. more stuff than usually. some easy stuff. some hard stuff. but always stuff. a lot. i mean, really, a lot of stuff.',
+	//        'description' => 'some new shit. you know. lot to do. more stuff than usually. some easy stuff. some hard stuff. but always stuff. a lot. I mean, really, a lot of stuff.',
 	//        'lastUpdate' => 'add some tasks'
 	//    );
 
@@ -40,8 +40,6 @@
 	 * if status != number 1-5, staus = 2 by default
 	 *
 	 * @param array $inputTodoData
-	 * @param       $dbObj -database object
-	 *
 	 * @return string|false -if successful returns the created todo as json modified string
 	 */
 	function createTodo(array $inputTodoData): string|false
@@ -70,6 +68,7 @@
 				'lastUpdate' => $inputTodoData['lastUpdate']
 			]);
 
+			// TODO: countData durch rowCount() ersetzen?
 			return json_encode($dbPDO->query("SELECT * FROM todotable LIMIT " . (countData($dbPDO) - 1) . ", 1")->fetchAll(PDO::FETCH_ASSOC));
 		} catch (PDOException $e) {
 			echo 'Der createTodo hat nicht geklappt:<br>' . $e->getMessage();
@@ -149,13 +148,12 @@
 	}
 
 	/**
-	 * read function (select) - is important for the archiv and the bin
-	 * assoc in rows
+	 *  read function (select) - is important for the archiv and the bin
+	 *  assoc in rows
 	 *
-	 * @param $status
-	 * @param $dbObj - database object
+	 * @param int $inputStatus
 	 *
-	 * @return object|false
+	 * @return array|false
 	 */
 	function getAllTodosByStatus(int $inputStatus): array|false
 	{
@@ -190,7 +188,6 @@
 
 		//Maybe bullshit
 		$id = $_GET['id'];
-
 
 		try {
 			$sqlSelectTodoByID = 'SELECT * FROM todotable WHERE ID = :IDValue';
@@ -325,7 +322,7 @@
 	 *
 	 * @return int - status value, by default 2 if status was not 1, 2, 3, 4, or 5
 	 */
-	function statusCheck($statusInput): int
+	function statusCheck(int $statusInput): int
 	{
 		//set default status = 2 if not 1-5
 		// ?? is_null($statusInput) ? 2 : $statusInput;
@@ -357,7 +354,7 @@
 	 *
 	 * @return string - XML formatierte Todos
 	 */
-	function xmlFormatter($todos): string
+	function xmlFormatter(array $todos): string
 	{
 		$xml = new SimpleXMLElement('<todos/>');
 
@@ -375,11 +372,11 @@
 	/**
 	 * Datenformatierung zu XML für ein einzelnes Element
 	 *
-	 * @param array $todos - Array eines Todos
+	 * @param array $todo - Array eines Todos
 	 *
 	 * @return string - XML formatiertes Todo
 	 */
-	function xmlFormatterSingle($todo): string
+	function xmlFormatterSingle(array $todo): string
 	{
 		$xml = new SimpleXMLElement('<todos/>');
 

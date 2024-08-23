@@ -235,11 +235,10 @@ a:active {
 .mainAddTodo {
   display: grid;
   grid-template-areas:
-    "status"
     "formArea"
     "taskArea"
     "todoAdd";
-  grid-template-rows: 5% 75% 10% 10%;
+  grid-template-rows: 80% 10% 10%;
   width: 360px;
   height: 800px;
   padding: 39px 30px 0;
@@ -256,14 +255,15 @@ a:active {
   display: grid;
   grid-area: formArea;
   grid-template-areas:
+    "todoStatus"
     "todoTitle"
     "todoDescription";
-  grid-template-rows: 10% 90%;
+  grid-template-rows: 10% 10% 80%;
 }
 
-.status {
+#statusPopup {
   display: flex;
-  grid-area: status;
+  grid-area: todoStatus;
   justify-self: right;
   align-self: end;
   margin: 0;
@@ -274,28 +274,28 @@ a:active {
   cursor: pointer;
 }
 
-.status:focus {
+#statusPopup:focus {
   border: none;
   box-shadow: none;
 }
 
-.status option:first-child {
+#statusPopup option:first-child {
   display: none;
 }
 
-.status option:checked {
+#statusPopup option:checked {
   color: black;
 }
 
-.status::placeholder {
+#statusPopup::placeholder {
   color: #d3d3d3;
 }
 
-.statusName {
+#statusName {
   font-size: 35px;
 }
 
-.statusButton {
+#statusButton {
   display: flex;
 }
 
@@ -398,7 +398,6 @@ a:active {
 .mainAddTask {
   display: grid;
   grid-template-areas:
-    "status"
     "formArea"
     "taskAdd";
   grid-template-rows: 5% 85% 10%;
