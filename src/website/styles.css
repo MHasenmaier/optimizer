@@ -105,7 +105,7 @@ a:active {
   width: 170px;
   height: 100px;
   border: 1px solid #000000;
-  box-shadow: 0px 1px 2px #000000;
+  box-shadow: 0 1px 2px #000000;
   flex-direction: column;
   top: 145px;
   border-radius: 8px;
@@ -202,7 +202,7 @@ a:active {
 .footer {
   display: flex;
   grid-area: footer;
-  box-shadow: inset 0px 1px #000000;
+  box-shadow: inset 0 1px #000000;
   justify-content: center;
   align-items: center;
   height: 10vh;
@@ -232,13 +232,13 @@ a:active {
 *
 */
 
-.mainAddTodo {
+#mainAddTodo {
   display: grid;
   grid-template-areas:
     "formArea"
     "taskArea"
     "todoAdd";
-  grid-template-rows: 80% 10% 10%;
+  grid-template-rows: 80% 8% 12%;
   width: 360px;
   height: 800px;
   padding: 39px 30px 0;
@@ -255,15 +255,23 @@ a:active {
   display: grid;
   grid-area: formArea;
   grid-template-areas:
-    "todoStatus"
-    "todoTitle"
-    "todoDescription";
+    "statusPopupArea"
+    "todoTitleArea"
+    "todoDescriptionArea";
   grid-template-rows: 10% 10% 80%;
+}
+
+#todoAddForms label {
+  display: none;
+}
+
+#statusPopupArea {
+  display: grid;
+  grid-area: statusPopupArea;
 }
 
 #statusPopup {
   display: flex;
-  grid-area: todoStatus;
   justify-self: right;
   align-self: end;
   margin: 0;
@@ -305,8 +313,13 @@ a:active {
   flex-direction: column;
 }
 
+#todoTitleArea {
+  display: flex;
+  grid-area: todoTitleArea;
+  flex-direction: column;
+}
+
 #todoTitle {
-  grid-area: todoTitle;
   font-size: 18px;
   padding: 9px 5px;
   margin: 9px 0 9px;
@@ -319,8 +332,13 @@ a:active {
   color: #d3d3d3;
 }
 
+#todoDescriptionArea {
+  display: flex;
+  grid-area: todoDescriptionArea;
+  flex-direction: column;
+}
+
 #todoDescription {
-  grid-area: todoDescription;
   display: flex;
   height: 100%;
   padding: 9px 5px;
@@ -442,20 +460,6 @@ a:active {
   color: #d3d3d3;
 }
 
-#taskDescription {
-  grid-area: taskDescription;
-  display: flex;
-  height: 100%;
-  padding: 9px 5px;
-  border-radius: 6px;
-  font-size: 18px;
-  font-family: sans-serif;
-  border: #d3d3d3 solid 2px;
-  box-sizing: border-box;
-  resize: none;
-  overflow: visible;
-}
-
 #taskDescription::placeholder {
   color: #d3d3d3;
 }
@@ -524,7 +528,7 @@ a:active {
   display: flex;
   grid-area: header;
   justify-content: space-between;
-  box-shadow: #000000 0px 1px 0px 0px;
+  box-shadow: #000000 0 1px 0 0;
   align-items: center;
 }
 
@@ -591,7 +595,7 @@ a:active {
 }
 
 .archivMainSection section:hover {
-  box-shadow: #000000 0px 0px 2px;
+  box-shadow: #000000 0 0 2px;
 }
 
 .archivMainSection section p:first-child {
@@ -629,7 +633,7 @@ a:active {
   display: flex;
   grid-area: header;
   justify-content: center;
-  box-shadow: #000000 0px 1px 0px 0px;
+  box-shadow: #000000 0 1px 0 0;
   align-items: center;
 }
 
@@ -689,7 +693,7 @@ a:active {
 }
 
 .focusSliderToggle p {
-  padding: 0px;
+  padding: 0;
   margin: auto 0;
 }
 

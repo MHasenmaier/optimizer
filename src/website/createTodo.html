@@ -5,29 +5,37 @@
     <title>Optimizer - Neues Todo anlegen</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="mainAddTodo">
+<body id="mainAddTodo">
 
-<form id="todoAddForms" action="http://localhost/optimizer/src/backend/index.php/todo" method="post">
-    <label for="statusPopup" class="labelStatus"></label>
-    <select name="statusPopup" id="statusPopup">
-        <option value="" disabled selected>Status</option>
-        <option value="1">löschen</option>
-        <option value="2">neu</option>
-        <option value="3">geplant</option>
-        <option value="4">begonnen</option>
-        <option value="5">fertig</option>
-    </select>
-    <label for="todoTitle" class="labelTodoTitle">Titel</label>
-    <input
-        name="todoTitle"
-        id="todoTitle"
-        type="text"
-        placeholder="Titel eingeben"
-        required
-    >
+<!--action="http://localhost/optimizer/src/backend/index.php/todo"-->
+<form id="todoAddForms" method="post">
+    <div id="statusPopupArea">
+        <label for="statusPopup" class="labelStatus">Label for status - you shouldn't see this text</label>
+        <select name="statusPopup" id="statusPopup">
+            <option value="" disabled selected>Status</option>
+            <option value="1">löschen</option>
+            <option value="2">neu</option>
+            <option value="3">geplant</option>
+            <option value="4">begonnen</option>
+            <option value="5">fertig</option>
+        </select>
+    </div>
 
-    <label for="todoDescription" class="labelTodoDescription">Beschreibung</label>
-    <textarea name="todoDescription" id="todoDescription" type="text" placeholder="Beschreibung eingeben"></textarea>
+    <div id="todoTitleArea">
+        <label for="todoTitle" class="labelTodoTitle">Label for title - you shouldn't see this text</label>
+        <input
+                name="todoTitle"
+                id="todoTitle"
+                type="text"
+                placeholder="Titel eingeben"
+                required
+        >
+    </div>
+
+    <div id="todoDescriptionArea" >
+        <label for="todoDescription" class="labelTodoDescription">Label for description - you shouldn't see this text</label>
+        <textarea name="todoDescription" id="todoDescription" type="text" placeholder="Beschreibung eingeben"></textarea>
+    </div>
 
 </form>
 <div class="taskAdd">

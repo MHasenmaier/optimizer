@@ -113,7 +113,8 @@
 		global $dbPDO;
 
 		try {
-			$sqlSelectAllActiveTodos = 'SELECT * FROM todotable WHERE status != 5';
+			//status 1 => deleted, status 5 => done } => both inaktive
+			$sqlSelectAllActiveTodos = 'SELECT * FROM todotable WHERE status != 5 & status != 1';
 
 			$getAllActiveTodos = $dbPDO->prepare($sqlSelectAllActiveTodos);
 			$getAllActiveTodos->execute();
