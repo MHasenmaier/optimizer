@@ -6,8 +6,8 @@
     2.1 [X] "Konsolenausgabe /-eingabe" von Datenbankeinträgen (Kommunikation php mit DB)
     2.2 [X] ~~REST~~ GET requests
     2.3 [X] ~~REST~~ POST, DELETE und UPDATE requests
-3. JS-php Kommunikation
-4. Durchstich
+3. [X] JS-php Kommunikation
+4. [X] Durchstich
 5. Frontend anpassen
-    5.1 form einfügen
+    5.1 [1/2] form einfügen
     5.2 überflüssige div-container durch passendere ersetzen

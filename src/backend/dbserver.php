@@ -24,6 +24,7 @@
 	        $dbPDO = new PDO($dsn, $userName, $password, $options);
         } catch (PDOException $e) {
             echo 'Unable to connect to database: ' . $e->getMessage();
-	        //throw $e; //activate if needed
+	        //activate if needed
+			//throw $e;
             return false;
         }

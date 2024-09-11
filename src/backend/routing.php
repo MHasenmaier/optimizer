@@ -87,12 +87,12 @@
 							return true;
 					}
 				}
-				errormessage(404);
-				break;
+				return errormessage(404);
 
 			case 'POST':
 				//Update specific todo
 				if (isset($requestSegments[1]) && ($requestSegments[1] === 'todo')) {
+					// update specific to-do
 					if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
 
 						// (int)$id but ... nicer
@@ -107,33 +107,40 @@
 						echo xmlFormatterSingle($updateTodo);
 						return errormessage(200);
 					}
-				}
 
-				if (($requestPHPSegments[1] & array_reverse($requestPHPSegments)[0])) {
-					switch ($requestPHPSegments[1]) {
-						case '/todo':
+					//test if '/todo' == '/todo'
+					if (($requestPHPSegments[1] & array_reverse($requestPHPSegments)[0])) {
+						//add a new to-do
 
-							$body = file_get_contents('php://input');
-							echo xmlFormatterSingle($body);
-							var_dump($body);
+						/**
+						 * <to-dos>
+						 *      <to-do>
+						 *          <ID></ID>
+						 *          <taskId></taskId>
+						 *          <title>PleaseDeleteMe</title>
+						 *          <status>5</status>
+						 *          <description>Teststuff via Postman</description>
+						 *          <createDate></createDate>
+						 *          <updateDate></updateDate>
+						 *          <lastUpdate>installed Postman</lastUpdate>
+						 *      </to-do>
+						 * </to-dos>
+						 */
+						$body = file('php://input');
 
-							//TODO: (body) string -> array
 
-							$createTodo = createTodo($body);
+								$createTodo = createTodo($body);
+								echo $createTodo;
 
-							if (is_null($createTodo) | empty($createTodo) | ($createTodo === false)) {
-								return errormessage(500);
-							}
-
-							echo xmlFormatterSingle($createTodo);
-							return errormessage(201);
-						default:
-							errormessage(404);
-							return true;
+						//		if (is_null($createTodo) | empty($createTodo) | ($createTodo === false)) {
+						//			return errormessage(500);
+						//		}
+//
+						//		echo xmlFormatterSingle($createTodo);
+								return errormessage(201);
 					}
+					return errormessage(404);
 				}
-				errormessage(404);
-				break;
 
 			case 'DELETE':
 				//Delete specific todo

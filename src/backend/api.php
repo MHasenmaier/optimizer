@@ -23,12 +23,12 @@
 	//    );
 
 
-	//getAllTodosByStatus(2, $dbObj);  // change "2" to generic integer variable
+	//getAllTodosByStatus(2);  // change "2" to generic integer variable
 
 	//echo json_encode(getAllActiveTodos($dbObj));
 	//var_dump(getAllActiveTodos($dbObj));
 
-	//echo json_encode(getAllTodos());
+	//echo json_encode(getAllActiveTodos());
 	//var_dump(getAllTodos());
 
 	//echo json_encode(getTodoById($todoDataArray, $dbObj), JSON_PRETTY_PRINT);
@@ -40,36 +40,84 @@
 	 * if status != number 1-5, staus = 2 by default
 	 *
 	 * @param array $inputTodoData
+	 *
 	 * @return string|false -if successful returns the created todo as json modified string
 	 */
 	function createTodo(array $inputTodoData): string|false
 	{
 		global $dbPDO;
 
+		//array durchsuchen
+		foreach ($inputTodoData as $todo) {
+
+			$parser = xml_parser_create();
+			xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
+			xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 0);
+
+			xml_parse_into_struct($parser, $todo, $vals);
+			xml_parser_free($parser);
+
+			$todoData = [];
+
+			if (array_key_exists(0, $vals)) {
+
+				foreach ($vals as $val) {
+					if (array_key_exists('value', $val) && !is_null($val["value"])) {
+						$todoData[$val['tag']] = $val["value"];
+					}
+				}
+			}
+			printf("todoData:\n");
+			print_r($todoData);
+
+			foreach ($todoData as $tag => $value) {
+				switch ($tag) {
+					case 'title':
+						printf("title = " . $tag . " ::: " . $value . "\n");
+						break;
+					case 'status':
+						printf("status = " . $tag . " ::: " . $value . "\n");
+						break;
+					case 'description':
+						printf("description = " . $tag . " ::: " . $value . "\n");
+						break;
+					case 'lastUpdate':
+						printf("lastUpdate = " . $tag . " ::: " . $value . "\n");
+						break;
+					default:
+						printf("tag = " . $tag . "\n");
+				}
+			}
+		}
+
+		if (!$inputTodoData) {
+			printf("No item has been created.");
+			return false;
+		}
+
 		// check if status exists ant is valid
-		if (array_key_exists('status', $inputTodoData)) {
-			$inputTodoData['status'] = statusCheck($inputTodoData['status']);
+		if (array_key_exists('status', $todoData)) {
+			$todoData['status'] = statusCheck($todoData['status']);
 		} else {
 			//set status = 2 as default
-			$inputTodoData['status'] = 2;
+			//$todoData['status'] = 2;
 		}
 
 		try {
-			$dbPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-			$insertTodo = "INSERT INTO todotable
-                           (taskID, title, status, description, lastUpdate)
-                           VALUES (:taskID, :title, :status, :description, :lastUpdate)";
-			$createdTodo = $dbPDO->prepare($insertTodo);
+			$todoToSQL = "INSERT INTO todotable
+                           (title, status, description, lastUpdate)
+                           VALUES ( :title, :status, :description, :lastUpdate)";
+			$createdTodo = $dbPDO->prepare($todoToSQL);
 			$createdTodo->execute([
-				'taskID' => $inputTodoData['taskID'],
-				'title' => $inputTodoData['title'],
-				'status' => $inputTodoData['status'],
-				'description' => $inputTodoData['description'],
-				'lastUpdate' => $inputTodoData['lastUpdate']
+				'title' => $todoData['title'],
+				'status' => $todoData['status'],
+				'description' => $todoData['description'],
+				'lastUpdate' => $todoData['lastUpdate']
 			]);
 
 			// TODO: countData durch rowCount() ersetzen?
-			return json_encode($dbPDO->query("SELECT * FROM todotable LIMIT " . (countData($dbPDO) - 1) . ", 1")->fetchAll(PDO::FETCH_ASSOC));
+			//json_encode($dbPDO->query("SELECT * FROM todotable LIMIT " . (rowCount($dbPDO) - 1) . ", 1")->fetchAll(PDO::FETCH_ASSOC));
+			return "ok";
 		} catch (PDOException $e) {
 			echo 'Der createTodo hat nicht geklappt:<br>' . $e->getMessage();
 			return false;
@@ -97,9 +145,8 @@
 
 		} catch (PDOException $e) {
 			//TODO: de-comment
-			//header('Content-Type: application/json');
 			echo 'Der getAllTodo hat nicht geklappt:<br>' . $e->getMessage();
-			echo json_encode(['error' => $e->getMessage()]);
+			//echo json_encode(['error' => $e->getMessage()]);
 			return false;
 		}
 	}
@@ -114,7 +161,7 @@
 
 		try {
 			//status 1 => deleted, status 5 => done } => both inaktive
-			$sqlSelectAllActiveTodos = 'SELECT * FROM todotable WHERE status != 5 & status != 1';
+			$sqlSelectAllActiveTodos = 'SELECT * FROM todotable WHERE status != (5 | 1)';
 
 			$getAllActiveTodos = $dbPDO->prepare($sqlSelectAllActiveTodos);
 			$getAllActiveTodos->execute();
@@ -136,7 +183,7 @@
 		global $dbPDO;
 
 		try {
-			$selectAllInactiveTodos = 'SELECT * FROM todotable WHERE status = 5';
+			$selectAllInactiveTodos = 'SELECT * FROM todotable WHERE status = (5 | 1)';
 
 			$stmt = $dbPDO->prepare($selectAllInactiveTodos);
 			$stmt->execute();
@@ -179,6 +226,7 @@
 	/***
 	 * GET a to-do by its ID
 	 * uses FETCH_ASSOC [0] to get just the first one
+	 *
 	 * @param int $id
 	 *
 	 * @return array|false
@@ -190,18 +238,20 @@
 		//Maybe bullshit
 		$id = $_GET['id'];
 
+		//check if id exist in DB
+		if (!checkID($id)) {
+			return errormessage(404);
+		}
+
 		try {
 			$sqlSelectTodoByID = 'SELECT * FROM todotable WHERE ID = :IDValue';
 
 			$expectedTodoById = $dbPDO->prepare($sqlSelectTodoByID);
 
-/** maybe bullshit, because ID is known */	//bind the param to
-/** maybe bullshit, because ID is known */	$expectedTodoById->bindParam(':IDValue', $id);
+			/** maybe bullshit, because ID is known */    //bind the param to
+			/** maybe bullshit, because ID is known */
+			$expectedTodoById->bindParam(':IDValue', $id);
 
-			//check if id exist in DB
-			if (!checkID($id)) {
-				return errormessage(404);
-			}
 
 			$expectedTodoById->execute(['IDValue' => $id]);
 
@@ -377,19 +427,18 @@
 	 *
 	 * @return string - XML formatiertes Todo
 	 */
-	function xmlFormatterSingle(array $todo): string
+	function xmlFormatterSingle($todo): string
 	{
 		$xml = new SimpleXMLElement('<todos/>');
 
 		$todoElement = $xml->addChild('todo');
 		foreach ($todo as $key => $value) {
+			echo "key = " . $key . "\n";
+			echo "value = " . $value . "\n";
+
 			$todoElement->addChild($key, htmlspecialchars($value));
 		}
 
 		header('Content-Type: application/xml');
 		return $xml->asXML();
-	}
-
-	function stringToXML($todos) {
-
 	}
