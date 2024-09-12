@@ -1,28 +1,6 @@
 <?php
 	include 'dbserver.php';
 
-	//TESTDATA
-	//to be replaced when API and frontend are working
-	//    $todoDataArray = array(
-	//        'ID' => 36,
-	//        'taskID' => [1,2,3,5,10,221],
-	//        'title' => 'some new title',
-	//        'status' => 9,
-	//        'description' => 'some new shit. you know. lot to do. more stuff than usually. some easy stuff. some hard stuff. but always stuff. a lot. I mean, really, a lot of stuff.',
-	//        'lastUpdate' => 'add some tasks'
-	//    );
-
-	//TESTDATA
-	//to be replaced when API and frontend are working
-	//    $newTodoDataArray = array(
-	//        'taskID' => '[6,9,31,52,106,221]',
-	//        'title' => 'new title for new todo',
-	//
-	//        'description' => 'new todo. new description.',
-	//        'lastUpdate' => ''
-	//    );
-
-
 	//getAllTodosByStatus(2);  // change "2" to generic integer variable
 
 	//echo json_encode(getAllActiveTodos($dbObj));
@@ -125,7 +103,7 @@
 	}
 
 	/**
-	 * Returns JSON with all todos
+	 * Returns an array with all todos
 	 * @return array|false
 	 */
 	function getAllTodos(): array|false
@@ -152,7 +130,7 @@
 	}
 
 	/**
-	 * Returns JSON with all todos  with status != 5
+	 * Returns an array with all todos  with status != 5 | 1
 	 * @return array|false
 	 */
 	function getAllActiveTodos(): array|false
@@ -175,7 +153,7 @@
 	}
 
 	/**
-	 * Returns JSON with all todos with status == 5
+	 * Returns an array of all todos => status == 5 | 1
 	 * @return array|false
 	 */
 	function getAllInactiveTodos(): array|false
@@ -201,7 +179,7 @@
 	 *
 	 * @param int $inputStatus
 	 *
-	 * @return array|false
+	 * @return array|false returns to-do as an array or false
 	 */
 	function getAllTodosByStatus(int $inputStatus): array|false
 	{
@@ -249,7 +227,6 @@
 			$expectedTodoById = $dbPDO->prepare($sqlSelectTodoByID);
 
 			/** maybe bullshit, because ID is known */    //bind the param to
-			/** maybe bullshit, because ID is known */
 			$expectedTodoById->bindParam(':IDValue', $id);
 
 
@@ -320,8 +297,7 @@
 	/**
 	 * delete function
 	 *
-	 * @param $todoDataArray - todo as an array
-	 * @param $dbObj         - database object
+	 * @param $id - of the item to delete
 	 *
 	 * @return bool
 	 */
@@ -345,8 +321,6 @@
 
 	/**
 	 * function to figure out, how many data is stored in the db
-	 *
-	 * @param $dbObj
 	 *
 	 * @return int|false - number of rows/data in the db
 	 * @return false if not successful
@@ -381,8 +355,8 @@
 	}
 
 	/**
+	 * checks if the given ID is known by the backend
 	 * @param int $id - ID to look for
-	 * @param     $dbObj
 	 *
 	 * @return array|false - returns the array of the questionable todo
 	 */
@@ -427,14 +401,12 @@
 	 *
 	 * @return string - XML formatiertes Todo
 	 */
-	function xmlFormatterSingle($todo): string
+	function xmlFormatterSingle(array $todo): string
 	{
 		$xml = new SimpleXMLElement('<todos/>');
 
 		$todoElement = $xml->addChild('todo');
 		foreach ($todo as $key => $value) {
-			echo "key = " . $key . "\n";
-			echo "value = " . $value . "\n";
 
 			$todoElement->addChild($key, htmlspecialchars($value));
 		}

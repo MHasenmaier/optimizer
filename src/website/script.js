@@ -2,6 +2,7 @@ const parser = new DOMParser();
 const contentOverview = document.getElementById("contentOverview");
 const mainAddTodo = document.getElementById("mainAddTodo");
 
+
 if (contentOverview) {
     loadTodosAsync();
 }
@@ -31,12 +32,16 @@ async function loadTodosAsync() {
     }
 }
 
+/**
+ * create the to-do boxes for each to-do inside the XML
+ * @param xmlObject - xml formatted
+ */
 function renderTodos(xmlObject) {
 
-    // Get all <todo> elements
+    //Fetch all <todo> elements from XML
     const todos = xmlObject.getElementsByTagName("todo");
 
-    // Loop through each <todo> element
+    // Loop through each <todo>
     for (let i = 0; i < todos.length; i++) {
         const todo = todos[i];
 
@@ -44,24 +49,39 @@ function renderTodos(xmlObject) {
         const id = todo.getElementsByTagName("ID")[0].textContent;
         const title = todo.getElementsByTagName("title")[0].textContent;
         const taskId = todo.getElementsByTagName("taskId")[0].textContent;
+        let status = todo.getElementsByTagName("status")[0].textContent;
 
-        // Create a new div element for the todo
+        // Create the div for the todo
         const todoDiv = document.createElement("div");
         todoDiv.setAttribute("id", id);
-        todoDiv.innerHTML = title;
+
+        //Set the title of the todo
+        const todoTitle = document.createElement("a");
+        todoTitle.innerHTML = title;
+        todoTitle.setAttribute("href", "http://localhost/optimizer/src/backend/index.php/todo/?id=" + id);
 
         // Create a new input checkbox element
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
 
+        //Task box
+        const taskBox = document.createElement("button");
+        taskBox.setAttribute("id", "taskOf" + id);
+
+
         // Display the checkbox only if taskId is not 0
         if (taskId !== "") {
-            checkbox.checked = true;
-            todoDiv.appendChild(checkbox);
+            // TODO: box einblenden mit anzahl angehöngter tasks
+            taskBox.innerText = taskId;
         }
 
         // Append the newly created div to an existing container on your page
         contentOverview.appendChild(todoDiv);
+
+        //order of the includes is important
+        todoDiv.appendChild(checkbox);
+        todoDiv.appendChild(todoTitle);
+        todoDiv.appendChild(taskBox);
     }
 }
 
