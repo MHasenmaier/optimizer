@@ -38,6 +38,7 @@
 				if ($requestSegments[1] === 'todo') {
 					if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
 
+
 						// (int)$id but ... nicer
 						$id = intval(htmlspecialchars($_GET['id']));
 
@@ -46,6 +47,11 @@
 							return errormessage(404);
 						}
 					}
+
+					//TODO path isnt working (see also api.php (65) )
+					header("Location: /http://localhost/optimizer/src/website/todo.html"); //?id=$id
+
+					//printf($id);
 					echo xmlFormatterSingle($getTodoById);
 					return errormessage(200);
 				}
