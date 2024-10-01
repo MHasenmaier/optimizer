@@ -1,237 +1,235 @@
 <?php
-	include("api.php");
+include("api.php");
 
-	/**
-	 * routing function with switch-case for $_SERVER['REQUEST_METHOD']
-	 * parameter possibly wrong / not complete
-	 * @return bool - true if routing was successful
-	 */
-	function routing(): bool
-	{
-		$requestPHPSegments = explode('.php', $_SERVER['REQUEST_URI']);
+/**
+ * routing function with switch-case for $_SERVER['REQUEST_METHOD']
+ * parameter possibly wrong / not complete
+ * @return bool - true if routing was successful
+ */
+function routing(): bool
+{
+    $requestPHPSegments = explode('.php', $_SERVER['REQUEST_URI']);
 
-		if (!($requestPHPSegments[0] === '/optimizer/src/backend/index')) {
-			return errormessage(404);
-		}
+    if (!($requestPHPSegments[0] === '/optimizer/src/backend/index')) {
+        return errormessage(404);
+    }
 
-		if (isset($requestPHPSegments[1])) {
-			$requestSegments = explode('/', $requestPHPSegments[1]);
+    if (isset($requestPHPSegments[1])) {
+        $requestSegments = explode('/', $requestPHPSegments[1]);
 
-			if (isset($requestSegments[1]) & $requestSegments[1] === 'todo') {
+        //TODO: pathing funktioniert nur zufällig richtig.
+        //----: notwendige und hinreicheinde bedingungen identifizieren und anpassen
+        //----: bspw.: schließen manche bedingungen den allgemeinen zugriff auf, z. B. "alle aktiven" to dos aus
+        if (isset($requestSegments[1])) {
 
-				if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
-                    //echo "routing works normally . . .
-                    //
-                    //";
-				}
-			}
-		}
-
-		//example path
-		//http://localhost/optimizer/src/backend/index.php/     /todo/?id=36
-		//               [0]                                       [1]
-		//      todo/?id=36
-		//       [0]   [1]
-		//      /activetodos
-		//          [0]
-		switch ($_SERVER['REQUEST_METHOD']) {
-			case 'GET':
-				//GET specific to-do
-				if ($requestSegments[1] === 'todo') {
-					if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
+            if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
 
 
-						// (int)$id but ... nicer
-						$id = intval(htmlspecialchars($_GET['id']));
-
-						$getTodoById = getTodoById($id);
-						if (is_null($getTodoById) | empty($getTodoById) | ($getTodoById === false) | !(isset($getTodoById) === true)) {
-							return errormessage(404);
-						}
-					}
-
-					//TODO path isnt working (see also api.php (65) )
-					header("Location: /http://localhost/optimizer/src/website/todo.html"); //?id=$id
-
-					//printf($id);
-					echo xmlFormatterSingle($getTodoById);
-					return errormessage(200);
-				}
-
-				//checks if requested segment is the last item of the url, to dodge
-				//wrong, too long urls
-				if (($requestPHPSegments[1] === array_reverse($requestPHPSegments)[0])) {
-					switch ($requestPHPSegments[1]) {
-
-						//get all active todos (status != 5)
-						case '/activetodos':
-							$getAllActiveTodos = getAllActiveTodos();
-							if (!$getAllActiveTodos) {
-								return false;
-							}
-							echo xmlFormatter($getAllActiveTodos);
-							return errormessage(200);
-
-						//get all not-active todos (status == 5)
-						case '/inactivetodos':
-							$getAllInactiveTodos = getAllInactiveTodos();
-							if (!$getAllInactiveTodos) {
-								return false;
-							}
-							echo xmlFormatter($getAllInactiveTodos);
-							return errormessage(200);
-
-						//returns number of all active todos (status != 5)
-						case '/countaktivetodos':
-							$countActiveTodos = countActiveTodos();
-							if (!$countActiveTodos) {
-								return false;
-							}
-							echo $countActiveTodos;
-							return errormessage(200);
-
-						default:
-							errormessage(404);
-							return true;
-					}
-				}
-				return errormessage(404);
-
-			case 'POST':
-				//Update specific todo
-				if (isset($requestSegments[1]) && ($requestSegments[1] === 'todo')) {
-					// update specific to-do
-					if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
-
-						// (int)$id but ... nicer
-
-						$id = intval(htmlspecialchars($_GET['id']));
-
-						//grab the body
-						$entityBody = file_get_contents('php://input');
-
-						$updateTodo = updateTodo($entityBody, $id);
-						if (is_null($updateTodo) | empty($updateTodo) | ($updateTodo === false)) {
-							return errormessage(500);
-						}
-
-						echo xmlFormatterSingle($updateTodo);
-						return errormessage(200);
-					}
-
-					//test if '/todo' == '/todo'
-					if (($requestPHPSegments[1] & array_reverse($requestPHPSegments)[0])) {
-						//add a new to-do
-
-						/**
-						 * <todos>
-						 *      <todo>
-						 *          <ID></ID>
-						 *          <taskId></taskId>
-						 *          <title>PleaseDeleteMe</title>
-						 *          <status>5</status>
-						 *          <description>Teststuff via Postman</description>
-						 *          <createDate></createDate>
-						 *          <updateDate></updateDate>
-						 *          <lastUpdate>installed Postman</lastUpdate>
-						 *      </todo>
-						 * </todos>
-						 */
-						$body = file('php://input');
+                //example path
+                //http://localhost/optimizer/src/backend/index.php/     /to_do/?id=36
+                //               [0]                                       [1]
+                //      to_do/?id=36
+                //       [0]   [1]
+                //      /activetodos
+                //          [0]
+                switch ($_SERVER['REQUEST_METHOD']) {
+                    case 'GET':
+                        //GET specific to-do
+                        if ($requestSegments[1] === 'todo') {
+                            if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
 
 
-								$createTodo = createTodo($body);
-								echo $createTodo;
+                                // (int)$id but ... nicer
+                                $id = intval(htmlspecialchars($_GET['id']));
 
-						//		if (is_null($createTodo) | empty($createTodo) | ($createTodo === false)) {
-						//			return errormessage(500);
-						//		}
-						//
-						//		echo xmlFormatterSingle($createTodo);
-								return errormessage(201);
-					}
-					return errormessage(404);
-				}
+                                $getTodoById = getTodoById($id);
+                                if (!isset($getTodoById)) {
+                                    return errormessage(404);
+                                }
+                                if (is_null($getTodoById) | empty($getTodoById) | ($getTodoById === false) | !(isset($getTodoById) === true)) {
+                                    return errormessage(404);
+                                }
 
-			case 'DELETE':
-				//Delete specific todo
-				if (isset($requestSegments[1]) && ($requestSegments[1] === 'todo')) {
-					if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
+                                header("Location: /http://localhost/optimizer/src/website/todo.html"); //?id=$id
 
-						// (int)$id but ... nicer
-						$id = intval(htmlspecialchars($_GET['id']));
-						$getTodoById = getTodoById($id);
+                                //printf($id);
+                                echo xmlFormatterSingle($getTodoById);
+                                return errormessage(200);
+                            }
 
-						if (deleteTodo($id)) {
-							echo xmlFormatterSingle($getTodoById);
-							return errormessage(200);
-						}
-						return false;
-					}
-				}
-				break;
+                            //TODO path isnt working (see also api.php (65) )
 
-			//PUT
+                        }
 
-			default:
-				errormessage(405);
-		}
-		return false;
-	}
+                        //checks if requested segment is the last item of the url, to dodge
+                        //wrong, too long urls
+                        if (($requestPHPSegments[1] === array_reverse($requestPHPSegments)[0])) {
+                            switch ($requestPHPSegments[1]) {
 
-	/**
-	 * @param $errorcode
-	 * return false if unknown error code -> non-http error code
-	 *
-	 * @return true|false
-	 */
-	function errormessage(int $errorcode): bool
-	{
-		switch ($errorcode) {
-			case 200:   //all good
-				http_response_code(200);
-				//echo json_encode(['message' => 'OK']);
-				break;
+                                //get all active todos (status != 5)
+                                case '/activetodos':
+                                    $getAllActiveTodos = getAllActiveTodos();
+                                    if (!$getAllActiveTodos) {
+                                        return false;
+                                    }
+                                    echo xmlFormatter($getAllActiveTodos);
+                                    return errormessage(200);
 
-			case 201:   //created
-				http_response_code(201);
-				//echo json_encode(['message' => 'created']);
-				break;
+                                //get all not-active todos (status == 5)
+                                case '/inactivetodos':
+                                    $getAllInactiveTodos = getAllInactiveTodos();
+                                    if (!$getAllInactiveTodos) {
+                                        return false;
+                                    }
+                                    echo xmlFormatter($getAllInactiveTodos);
+                                    return errormessage(200);
 
-			case 202:   //accepted
-				http_response_code(202);
-				//echo json_encode(['message' => 'accepted']);
-				break;
+                                //returns number of all active todos (status != 5)
+                                case '/countaktivetodos':
+                                    $countActiveTodos = countActiveTodos();
+                                    if (!$countActiveTodos) {
+                                        return false;
+                                    }
+                                    echo $countActiveTodos;
+                                    return errormessage(200);
 
-			case 204:   //no content -> content has been deleted
-				http_response_code(204);
-				//echo json_encode(['message' => 'No Content']);
-				break;
+                                default:
+                                    errormessage(404);
+                                    return true;
+                            }
+                        }
+                        return errormessage(404);
 
-			case 400:   //bad request - malformed syntax
-				http_response_code(400);
-				echo json_encode(['message' => 'Bad Request']);
-				break;
+                    case 'POST':
+                        //Update specific to do
+                        if (isset($requestSegments[1]) && ($requestSegments[1] === 'todo')) {
+                            // update specific to-do
+                            if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
 
-			case 404:   //not found - server has not found anything matching the request-uri
-				http_response_code(404);
-				echo json_encode(['message' => 'Not Found']);
-				break;
+                                // (int)$id but ... nicer
 
-			case 405:
-				http_response_code(405);
-				echo json_encode(['message' => 'Method Not Allowed']);
-				break;
+                                $id = intval(htmlspecialchars($_GET['id']));
 
-			case 500:
-				http_response_code(500);
-				echo json_encode(['message' => 'Internal Server Error']);
-				break;
+                                //grab the body
+                                $entityBody = file_get_contents('php://input');
 
-			default:
-				http_response_code($errorcode);
-				echo json_encode(['message' => $errorcode]);
-				return false;
-		}
-		return true;
-	}
+                                $updateTodo = updateTodo($entityBody, $id);
+                                if (is_null($updateTodo) | empty($updateTodo) | ($updateTodo === false)) {
+                                    return errormessage(500);
+                                }
+
+                                echo xmlFormatterSingle($updateTodo);
+                                return errormessage(200);
+                            }
+
+                            //test if '/to do' == '/to do'
+                            if (($requestPHPSegments[1] & array_reverse($requestPHPSegments)[0])) {
+                                //add a new to-do
+
+                                $body = file('php://input');
+
+
+                                $createTodo = createTodo($body);
+                                echo $createTodo;
+
+                                //		if (is_null($createTodo) | empty($createTodo) | ($createTodo === false)) {
+                                //			return errormessage(500);
+                                //		}
+                                //
+                                //		echo xmlFormatterSingle($createTodo);
+                                return errormessage(201);
+                            }
+                            return errormessage(404);
+                        }
+
+                    case 'DELETE':
+                        //Delete specific to do
+                        if (isset($requestSegments[1]) && ($requestSegments[1] === 'todo')) {
+                            if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
+
+                                // (int)$id but ... nicer
+                                $id = intval(htmlspecialchars($_GET['id']));
+                                $getTodoById = getTodoById($id);
+
+                                if (deleteTodo($id)) {
+                                    echo xmlFormatterSingle($getTodoById);
+                                    return errormessage(200);
+                                }
+                                return false;
+                            }
+                        }
+                        break;
+
+                    //PUT
+
+                    default:
+                        errormessage(405);
+                }
+                return false;
+
+            }
+        }
+    }
+    echo "
+    X_X_X_X_X
+    what did just happen here????
+    X_X_X_X_X";
+    return false;
+}
+
+/**
+ * @param $errorcode
+ * return false if unknown error code -> non-http error code
+ *
+ * @return true|false
+ */
+function errormessage(int $errorcode): bool
+{
+    switch ($errorcode) {
+        case 200:   //all good
+            http_response_code(200);
+            //echo json_encode(['message' => 'OK']);
+            break;
+
+        case 201:   //created
+            http_response_code(201);
+            //echo json_encode(['message' => 'created']);
+            break;
+
+        case 202:   //accepted
+            http_response_code(202);
+            //echo json_encode(['message' => 'accepted']);
+            break;
+
+        case 204:   //no content -> content has been deleted
+            http_response_code(204);
+            //echo json_encode(['message' => 'No Content']);
+            break;
+
+        case 400:   //bad request - malformed syntax
+            http_response_code(400);
+            echo json_encode(['message' => 'Bad Request']);
+            break;
+
+        case 404:   //not found - server has not found anything matching the request-uri
+            http_response_code(404);
+            echo json_encode(['message' => 'Not Found']);
+            break;
+
+        case 405:
+            http_response_code(405);
+            echo json_encode(['message' => 'Method Not Allowed']);
+            break;
+
+        case 500:
+            http_response_code(500);
+            echo json_encode(['message' => 'Internal Server Error']);
+            break;
+
+        default:
+            http_response_code($errorcode);
+            echo json_encode(['message' => $errorcode]);
+            return false;
+    }
+    return true;
+}

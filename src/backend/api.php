@@ -1,5 +1,5 @@
-<?php
-	include 'dbserver.php';
+<?php /** @noinspection ALL */
+include 'dbserver.php';
 
 	//getAllTodosByStatus(2);  // change "2" to generic integer variable
 
@@ -45,7 +45,8 @@
 					}
 				}
 			}
-			printf("todoData:\n");
+
+            printf("todoData:\n");
 			print_r($todoData);
 
 			foreach ($todoData as $tag => $value) {
@@ -68,6 +69,10 @@
 			}
 		}
 
+        if (empty($todoData)) {
+            return errormessage(500);
+        }
+
 		if (!$inputTodoData) {
 			printf("No item has been created.");
 			return false;
@@ -78,7 +83,7 @@
 			$todoData['status'] = statusCheck($todoData['status']);
 		} else {
 			//set status = 2 as default
-			//$todoData['status'] = 2;
+			$todoData['status'] = 2;
 		}
 
 		try {
@@ -246,16 +251,15 @@
 		}
 	}
 
-	/**
-	 * update function
-	 * does not take care about form validation
-	 *
-	 * @param array $inputTodoDataArray - todo as an array
-	 * @param int   $id
-	 *
-	 * @return array|bool
-	 * @throws Exception
-	 */
+    /**
+     * update function
+     * does not take care about form validation
+     *
+     * @param string $inputTodoDataArray - todo as an array
+     * @param int $id
+     *
+     * @return array|bool
+     */
 	function updateTodo(string $inputTodoDataArray, int $id): array|bool
 	{
 		global $dbPDO;
@@ -266,44 +270,12 @@
         $todoElementSimpleXMLObj = $todoArray['todo'];
 
         foreach ($todoElementSimpleXMLObj->children() as $key => $value) {
-            varDEBUG("key",  $key);
-            echo "
-            echo key : $key
-            ";
 
             if (strcmp($key, 'status') == 0 | strcmp($key, 'taskId') == 0 ) {
-
-                echo "
-                before parsing status | taskId ==>
-                ";
-                varDEBUG("value",  $value);
-
                 $value = (int)$value;
 
-                echo "
-                ==> after parsing
-                ";
-                varDEBUG("value",  $value);
-                echo "
-                echo value : $value
-                ";
-
             } elseif (strcmp($key, 'description') == 0 | strcmp($key, 'lastUpdate') == 0 | strcmp($key, 'title') == 0) {
-
-                echo "
-                before parsing description || lastUpdate || title ==>
-                ";
-                varDEBUG("value",  $value);
-
                 $value = (string)$value;
-
-                echo "
-                after parsing ==>
-                ";
-                varDEBUG("value",  $value);
-                echo "
-                echo value : $value
-                ";
             }
             $updateArray[$key] = $value;
         }
@@ -313,6 +285,10 @@
 			errormessage(404);
 			return true;
 		}
+
+        if (empty($updateArray)) {
+            return errormessage(500);
+        }
 
 		try {
 			$updateTodo = 'UPDATE todotable
@@ -335,6 +311,8 @@
 				'description' => $updateArray['description'],
 				'lastUpdate' => $updateArray['lastUpdate']
 			]);
+
+            //TODO: das TODO vom body wird nicht an die DB weitergegeben!!
 
 			return getTodoById($id);
 		} catch (PDOException $e) {
@@ -454,8 +432,8 @@
 	function xmlFormatterSingle(array $todo): string
 	{
         //TODO: neu formatieren. todos->todo->elemente => todo->elemente
-        //todo: 'todos'-ebene ist nicht notwendig, nur ein element
-        //todo: überlegung: zeile (1) löschen, zeile (2) todoElement durch xml ersetzen
+        //----: 'todos'-ebene ist nicht notwendig, nur ein element
+        //----: überlegung: zeile (1) löschen, zeile (2) todoElement durch xml ersetzen
 		$xml = new SimpleXMLElement('<todos/>');
 
 		$todoElement = $xml->addChild('todo');  //todo: (1)

@@ -52,7 +52,7 @@ function createTodoElements(xmlObject) {
         const id = todo.getElementsByTagName("ID")[0].textContent;
         const title = todo.getElementsByTagName("title")[0].textContent;
         const taskId = todo.getElementsByTagName("taskId")[0].textContent;
-        let status = todo.getElementsByTagName("status")[0].textContent;
+        //let status = to-do.getElementsByTagName("status")[0].textContent;
 
         // Create the div for the todo
         const todoDiv = document.createElement("div");
@@ -189,7 +189,7 @@ function switchToTodoPage() {
 /**
  *
  * @param inputString (String)
- * @returns {XMLDocument}
+ * @returns xmlDoc {XMLDocument}
  */
 function parseXMLString(inputString) {
     const parser = new DOMParser();
@@ -232,7 +232,7 @@ function sendData() {
         const url = "http://localhost/optimizer/src/backend/index.php/todo";
         //const urlA = "http://localhost:63342/optimizer/src/website/createTodo.html?_ijt=n56q2cvh6ssai843ca0hrav1au&_ij_reload=RELOAD_ON_SAVE";
 
-        const response = await fetch(url, {
+        await fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/xml",
