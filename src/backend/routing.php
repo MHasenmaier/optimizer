@@ -20,7 +20,9 @@
 			if (isset($requestSegments[1]) & $requestSegments[1] === 'todo') {
 
 				if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
-
+                    //echo "routing works normally . . .
+                    //
+                    //";
 				}
 			}
 		}
@@ -102,10 +104,13 @@
 					if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
 
 						// (int)$id but ... nicer
-						$id = intval(htmlspecialchars($_GET['id']));
-						$post = $_POST;
 
-						$updateTodo = updateTodo($post);
+						$id = intval(htmlspecialchars($_GET['id']));
+
+						//grab the body
+						$entityBody = file_get_contents('php://input');
+
+						$updateTodo = updateTodo($entityBody, $id);
 						if (is_null($updateTodo) | empty($updateTodo) | ($updateTodo === false)) {
 							return errormessage(500);
 						}
@@ -119,8 +124,8 @@
 						//add a new to-do
 
 						/**
-						 * <to-dos>
-						 *      <to-do>
+						 * <todos>
+						 *      <todo>
 						 *          <ID></ID>
 						 *          <taskId></taskId>
 						 *          <title>PleaseDeleteMe</title>
@@ -129,8 +134,8 @@
 						 *          <createDate></createDate>
 						 *          <updateDate></updateDate>
 						 *          <lastUpdate>installed Postman</lastUpdate>
-						 *      </to-do>
-						 * </to-dos>
+						 *      </todo>
+						 * </todos>
 						 */
 						$body = file('php://input');
 
@@ -141,7 +146,7 @@
 						//		if (is_null($createTodo) | empty($createTodo) | ($createTodo === false)) {
 						//			return errormessage(500);
 						//		}
-//
+						//
 						//		echo xmlFormatterSingle($createTodo);
 								return errormessage(201);
 					}

@@ -2,14 +2,12 @@ const parser = new DOMParser();
 const contentOverview = document.getElementById("contentOverview");
 const mainAddTodo = document.getElementById("mainAddTodo");
 
-
 if (contentOverview) {
-    loadTodosAsyncForOverview();
+    loadTodosAsyncForOverview().then(clickEvents);
 }
 
 if (mainAddTodo) {
-    const currentUrl = document.URL;
-    console.log(currentUrl);
+    console.log(">Todo Main> startet . . .")
     //sendData();
 }
 
@@ -27,14 +25,13 @@ async function loadTodosAsyncForOverview() {
         // console.log("body", body); // debugging
 
         const xmlObject = parser.parseFromString(body, "text/xml");
-        console.log('Todos loaded - async and XML formatted: \n', xmlObject, '\n');
+        console.log('Todos async loaded\nXML formatted: \n', xmlObject, '\n');
 
-        renderTodos(xmlObject);
-
+        createTodoElements(xmlObject);
         return true;
 
     } catch (err) {
-        console.error("Frontendfehler in loadTodosAsync(): \n", err);
+        console.error("Frontend error in loadTodosAsync(): \n", err);
     }
 }
 
@@ -42,7 +39,7 @@ async function loadTodosAsyncForOverview() {
  * create the to-do boxes for each to-do inside the XML
  * @param xmlObject - xml formatted
  */
-function renderTodos(xmlObject) {
+function createTodoElements(xmlObject) {
 
     //Fetch all <todo> elements from XML
     const todos = xmlObject.getElementsByTagName("todo");
@@ -60,13 +57,15 @@ function renderTodos(xmlObject) {
         // Create the div for the todo
         const todoDiv = document.createElement("div");
         todoDiv.setAttribute("id", id);
+        todoDiv.setAttribute("class", "todoCountClass");
 
         //Set the title of the todo
-        const todoTitle = document.createElement("a");
+        const todoTitle = document.createElement("button");
+        todoTitle.setAttribute("class", "todoButton");
         todoTitle.innerHTML = title;
 
         //TODO path isnt working!! see also routing.php (51)
-        todoTitle.setAttribute("href", "http://localhost/optimizer/src/backend/index.php/?id=" + id);
+        todoTitle.setAttribute("href", "http://localhost/optimizer/src/backend/index.php/todo/?id=" + id);
 
         // Create a new input checkbox element
         const checkbox = document.createElement("input");
@@ -74,12 +73,13 @@ function renderTodos(xmlObject) {
 
         //Task box
         const taskBox = document.createElement("button");
+        taskBox.setAttribute("class", "taskButton");
         taskBox.setAttribute("id", "taskOf" + id);
 
 
         // Display the checkbox only if taskId is not 0
         if (taskId !== "") {
-            // TODO: box einblenden mit anzahl angehöngter tasks
+            // TODO: box einblenden mit ANZAHL angehöngter tasks, nicht TASKID
             taskBox.innerText = taskId;
         }
 
@@ -93,50 +93,107 @@ function renderTodos(xmlObject) {
     }
 }
 
-//useless function?
-function loadTodos() {
-    //console.log("load todos");
-    const responePromise = fetch("http://localhost/optimizer/src/backend/index.php/activetodos")
-        .then((response) => {
 
-            if (!response.ok) throw new Error("Unsatisfying response code " + response.statusText);
+function clickEvents() {
+    console.log("clickEvents available: . . .");
+    const allTodoButtons = document.querySelectorAll('.todoButton');
 
-            return response.text()
+    let specificID = -1; //default value
+
+
+    for (let i = 0; i < allTodoButtons.length; i++) {       // browse through all buttons
+        allTodoButtons[i].addEventListener('click', async function () {  // click event for all buttns
+            specificID = this.parentElement.id;        // catch id of the clicked to-do  //alternate to "this" -> "allTodoButtons[i]"
+            if (specificID !== -1) {                                // check if there really was click and the ID has been catched
+
+                try {
+                    const fetchedXML = await getSpecificTodo(specificID);     // get the specific to-do
+                    console.log(`fetched xml = ${fetchedXML}`);             // log specific to-do
+                    switchToTodoPage();
+                    renderTodoInAddTodo(fetchedXML);
+                } catch (error) {
+                    console.error(`frontend error in clickevents: ${error}`);
+                }
+                console.log(`specID: ${specificID}`);
+            }
         })
-        .then(body => {
-            //console.log("body", body);
+    }
+    console.log("--- clickEvent finished ---");
+}
 
-            const xmlObject = parser.parseFromString(body, "text/xml");
+function renderTodoInAddTodo(input) {
+    console.log(`renderTodo inputXML = ${input}`);
 
-            //extract all stuff from the todo
-            const id = xmlObject.getElementsByTagName("id");
-            const taskid = xmlObject.getElementsByTagName("taskid");
-            const title = xmlObject.getElementsByTagName("title");
-            const status = xmlObject.getElementsByTagName("status");
-            const description = xmlObject.getElementsByTagName("description");
-            const createDate = xmlObject.getElementsByTagName("createDate");
-            const updateDate = xmlObject.getElementsByTagName("updateDate");
-            const lastUpdate = xmlObject.getElementsByTagName("lastUpdate");
+    const inputXML = parseXMLString(input);
+    console.log(`parsedXML = ${inputXML}`);
 
-            //console.log("Fetch successfully",
-            //    {
-            //        id: id,
-            //        taskid: taskid,
-            //        title: title,
-            //        status: status,
-            //        description: description,
-            //        createDate: createDate,
-            //        updateDate: updateDate,
-            //        lastUpdate: lastUpdate,
-            //    })
+    if (inputXML instanceof XMLDocument) {
+        console.log("inputXML is valid");
+    } else {
+        console.error("inputXML is not valid.");
+        return;
+    }
 
-            return xmlObject;
+    const rootNode = inputXML.documentElement;
+    console.log(`renderTodo rootNode = ${rootNode.nodeName}`);
 
-        })
-        .catch((err) => {
-            console.error("Ein Fehler in loadTodos() ist aufgetreten", err);
-            return false;
-        })
+    const children = rootNode.childNodes;
+    for (let i = 0; i < children.length; i++) {
+        //const grandChildNodes = children.childNodes;
+
+        const todoElements = children[i];
+        console.log(`todoElement = ${i}`, todoElements.nodeName);
+
+    }
+
+    console.log(new XMLSerializer().serializeToString(rootNode));
+
+    const todos = rootNode.querySelectorAll("todos");
+    todos.forEach((todo, index) => {
+        const title = todo.querySelector("title").textContent;
+        const status = todo.querySelector("status").textContent;
+        const description = todo.querySelector("description").textContent;
+
+        console.log(`todo index: = ${index + 1}`);
+        console.log(`todo title: = ${title}`);
+        console.log(`todo status: = ${status}`);
+        console.log(`todo description: = ${description}`);
+    })
+}
+
+/**
+ *
+ * @param id
+ * @returns {Promise<Document>}
+ */
+async function getSpecificTodo(id) {
+    try {
+        const response = await fetch(`http://localhost/optimizer/src/backend/index.php/todo/?id=${id}`, {
+            mode: "cors",
+        });
+        const body = await response.text();
+        return await parser.parseFromString(body, "text/xml");  //returns the specific to-do from DB
+    } catch (err) {
+        console.log("frontend error in getSpecificTodo: \n", err);
+    }
+}
+
+/**
+ * switch to the (Add-New-)To-do-Page
+ * @returns {string}
+ */
+function switchToTodoPage() {
+    return window.location.href = "http://localhost/optimizer/src/website/todo.html";
+}
+
+/**
+ *
+ * @param inputString (String)
+ * @returns {XMLDocument}
+ */
+function parseXMLString(inputString) {
+    const parser = new DOMParser();
+    return parser.parseFromString(inputString.trim, "application/xml");
 }
 
 // for page: createTodo
@@ -173,7 +230,7 @@ function sendData() {
         //console.log(todoElement);
 
         const url = "http://localhost/optimizer/src/backend/index.php/todo";
-        const urlA = "http://localhost:63342/optimizer/src/website/createTodo.html?_ijt=n56q2cvh6ssai843ca0hrav1au&_ij_reload=RELOAD_ON_SAVE";
+        //const urlA = "http://localhost:63342/optimizer/src/website/createTodo.html?_ijt=n56q2cvh6ssai843ca0hrav1au&_ij_reload=RELOAD_ON_SAVE";
 
         const response = await fetch(url, {
             method: "POST",
@@ -194,36 +251,3 @@ function sendData() {
             .then(() => console.log(todoElement))
     });
 }
-
-// for page: createTodo
-//to read the data from the todoAddForms
-//async function collectTodo() {
-//    const formData = new FormData(todoAddForms);
-//    console.log("formData erstellt")
-//
-//    const data = {
-//        title: formData.get("todoTitle"),
-//        description: formData.get("todoDescription"),
-//        status: formData.get("todoStatus")
-//    };
-//    console.log("data enthält: " + data);
-//
-//    try {
-//        const response = await fetch("http://localhost:63342/optimizer/src/website/createTodo.html?_ijt=kmuqi4h9vna9b0rbplkjndobnk&_ij_reload=RELOAD_ON_SAVE", {
-//            method: "POST",
-//            headers: {
-//                "Content-Type": "application/json",
-//            },
-//            body: JSON.stringify(data),
-//        });
-//        console.log("response enthält: " + response);
-//
-//        if (!response.ok) {
-//            throw new Error("Something went wrong");
-//        }
-//        const result = await response.json();
-//        console.log(result);
-//    } catch (e) {
-//        console.error(e);
-//    }
-//}

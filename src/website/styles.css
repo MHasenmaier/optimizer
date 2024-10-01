@@ -163,7 +163,7 @@ a:active {
   background-color: #b9b9b9;
 }
 
-#contentOverview div a {
+.todoButton {
   display: flex;
   border: lightgrey solid 1px;
   border-radius: 6px;
@@ -177,11 +177,11 @@ a:active {
   color: black;
 }
 
-#contentOverview div a:active {
+.todoButton:active {
   background-color: #b9b9b9;
 }
 
-#contentOverview div button {
+.taskButton {
   height: 25px;
   width: 40px;
   display: flex;
@@ -196,7 +196,7 @@ a:active {
   right: 20px;
 }
 
-#contentOverview div button:active {
+.taskButton :active {
   background-color: #b9b9b9;
 }
 

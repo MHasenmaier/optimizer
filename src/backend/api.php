@@ -250,16 +250,66 @@
 	 * update function
 	 * does not take care about form validation
 	 *
-	 * @param $inputTodoDataArray - todo as an array
+	 * @param array $inputTodoDataArray - todo as an array
+	 * @param int   $id
 	 *
 	 * @return array|bool
+	 * @throws Exception
 	 */
-	function updateTodo(array $inputTodoDataArray): array|bool
+	function updateTodo(string $inputTodoDataArray, int $id): array|bool
 	{
 		global $dbPDO;
 
-		//soll bei ungültiger ID den return auslösen
-		if (!($inputTodoDataArray['ID'] > 0)) {
+        $xmlObject = simplexml_load_string($inputTodoDataArray);    //string -> XML object
+        $todoArray = xmlToArray($xmlObject);
+
+        $todoElementSimpleXMLObj = $todoArray['todo'];
+
+        foreach ($todoElementSimpleXMLObj->children() as $key => $value) {
+            varDEBUG("key",  $key);
+            echo "
+            echo key : $key
+            ";
+
+            if (strcmp($key, 'status') == 0 | strcmp($key, 'taskId') == 0 ) {
+
+                echo "
+                before parsing status | taskId ==>
+                ";
+                varDEBUG("value",  $value);
+
+                $value = (int)$value;
+
+                echo "
+                ==> after parsing
+                ";
+                varDEBUG("value",  $value);
+                echo "
+                echo value : $value
+                ";
+
+            } elseif (strcmp($key, 'description') == 0 | strcmp($key, 'lastUpdate') == 0 | strcmp($key, 'title') == 0) {
+
+                echo "
+                before parsing description || lastUpdate || title ==>
+                ";
+                varDEBUG("value",  $value);
+
+                $value = (string)$value;
+
+                echo "
+                after parsing ==>
+                ";
+                varDEBUG("value",  $value);
+                echo "
+                echo value : $value
+                ";
+            }
+            $updateArray[$key] = $value;
+        }
+
+		//exit for invalid IDs
+		if (!($id > 0)) {
 			errormessage(404);
 			return true;
 		}
@@ -274,19 +324,19 @@
                             WHERE ID = :ID';
 
 			// check if status is valid
-			$inputTodoDataArray['status'] = statusCheck($inputTodoDataArray['status']);
+			$updateArray['status'] = statusCheck($updateArray['status']);
 
 			$prepUpdatedTodo = $dbPDO->prepare($updateTodo);
 			$prepUpdatedTodo->execute([
-				'ID' => $inputTodoDataArray['ID'],
-				'taskID' => $inputTodoDataArray['taskID'],
-				'title' => $inputTodoDataArray['title'],
-				'status' => $inputTodoDataArray['status'],
-				'description' => $inputTodoDataArray['description'],
-				'lastUpdate' => $inputTodoDataArray['lastUpdate']
+				'ID' => $id,
+				'taskID' => $updateArray['taskId'],
+				'title' => $updateArray['title'],
+				'status' => $updateArray['status'],
+				'description' => $updateArray['description'],
+				'lastUpdate' => $updateArray['lastUpdate']
 			]);
 
-			return getTodoById($inputTodoDataArray['ID']);
+			return getTodoById($id);
 		} catch (PDOException $e) {
 			echo 'Das updateTodo hat nicht geklappt:
             ' . $e->getMessage();
@@ -403,14 +453,50 @@
 	 */
 	function xmlFormatterSingle(array $todo): string
 	{
+        //TODO: neu formatieren. todos->todo->elemente => todo->elemente
+        //todo: 'todos'-ebene ist nicht notwendig, nur ein element
+        //todo: überlegung: zeile (1) löschen, zeile (2) todoElement durch xml ersetzen
 		$xml = new SimpleXMLElement('<todos/>');
 
-		$todoElement = $xml->addChild('todo');
+		$todoElement = $xml->addChild('todo');  //todo: (1)
 		foreach ($todo as $key => $value) {
 
-			$todoElement->addChild($key, htmlspecialchars($value));
+			$todoElement->addChild($key, htmlspecialchars($value)); //todo: (2)
 		}
 
 		header('Content-Type: application/xml');
 		return $xml->asXML();
 	}
+
+    /** Formatter XML -> asso. Array
+    * @param $xml
+    * @return array
+    */
+    function xmlToArray ($xml): array {
+        $outputArray = [];
+        foreach ($xml as $key => $value) {
+            $outputArray[$key] = $value;
+        }
+        return $outputArray;
+    }
+
+    /** checks variable and datatype
+     * @param string $input
+     * @param $data
+     * @return void
+     */
+    function varDEBUG (string $input, $data): void
+    {
+        echo "
+        XXXXXXXXXXXX
+        varDEBUG
+        XXXXXXXXXXXX
+        var_dump $input =
+        ";
+        var_dump($data);
+        echo "
+        XXXXXXXXXXXX
+        varDEBUG end
+        XXXXXXXXXXXX
+        ";
+    }
