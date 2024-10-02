@@ -86,21 +86,25 @@ include 'dbserver.php';
 			$todoData['status'] = 2;
 		}
 
+        //set createDate to the actuall date
+        $createDate = date('Y-m-d', time());
+
 		try {
 			$todoToSQL = "INSERT INTO todotable
-                           (title, status, description, lastUpdate)
-                           VALUES ( :title, :status, :description, :lastUpdate)";
+                           (title, status, description, createDate, lastUpdate)
+                           VALUES ( :title, :status, :description, createDate, :lastUpdate)";
 			$createdTodo = $dbPDO->prepare($todoToSQL);
 			$createdTodo->execute([
 				'title' => $todoData['title'],
 				'status' => $todoData['status'],
 				'description' => $todoData['description'],
+                'createDate' =>$createDate,
 				'lastUpdate' => $todoData['lastUpdate']
 			]);
 
 			// TODO: countData durch rowCount() ersetzen?
 			//json_encode($dbPDO->query("SELECT * FROM todotable LIMIT " . (rowCount($dbPDO) - 1) . ", 1")->fetchAll(PDO::FETCH_ASSOC));
-			return "ok";
+			return errormessage(200);
 		} catch (PDOException $e) {
 			echo 'Der createTodo hat nicht geklappt:<br>' . $e->getMessage();
 			return false;
@@ -296,11 +300,16 @@ include 'dbserver.php';
                                 title = :title,
                                 status = :status,
                                 description = :description,
+                                updateDate = :updateDate,
                                 lastUpdate = :lastUpdate
                             WHERE ID = :ID';
 
 			// check if status is valid
 			$updateArray['status'] = statusCheck($updateArray['status']);
+
+            //         <updateDate>2024-10-01</updateDate> yyyy-mm-dd
+            //set updateDate to the actuall date
+            $updateDate = date('Y-m-d', time());
 
 			$prepUpdatedTodo = $dbPDO->prepare($updateTodo);
 			$prepUpdatedTodo->execute([
@@ -309,10 +318,11 @@ include 'dbserver.php';
 				'title' => $updateArray['title'],
 				'status' => $updateArray['status'],
 				'description' => $updateArray['description'],
+                'updateDate' => $updateDate,
 				'lastUpdate' => $updateArray['lastUpdate']
 			]);
 
-            //TODO: das TODO vom body wird nicht an die DB weitergegeben!!
+
 
 			return getTodoById($id);
 		} catch (PDOException $e) {
