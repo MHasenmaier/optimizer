@@ -31,7 +31,7 @@ async function loadTodosAsyncForOverview() {
         return true;
 
     } catch (err) {
-        console.error("Frontend error in loadTodosAsync(): \n", err);
+        console.error("Frontend error in loadTodosAsyncForOverviews(): \n", err);
     }
 }
 
@@ -76,9 +76,9 @@ function createTodoElements(xmlObject) {
 
 
         // Display the checkbox only if taskId is not 0
-        if (taskId !== "") {
+        //if (taskId !== "") {
             // TODO: box einblenden mit ANZAHL angehängter tasks
-        }
+        //}
 
         // Append the newly created div to an existing container on your page
         contentOverview.appendChild(todoDiv);
@@ -90,7 +90,9 @@ function createTodoElements(xmlObject) {
     }
 }
 
-
+/**
+ * handles the clickevents triggered by buttons at overview-page
+ */
 function clickEvents() {
     console.log("clickEvents available: . . .");
     const allTodoButtons = document.querySelectorAll('.todoButton');
@@ -118,6 +120,10 @@ function clickEvents() {
     console.log("--- clickEvent finished ---");
 }
 
+/**
+ * create the imaginary elements for a todo in AddTodo
+ * @param input
+ */
 function renderTodoInAddTodo(input) {
     console.log(`renderTodo inputXML = ${input}`);
 
@@ -186,7 +192,7 @@ function switchToTodoPage() {
 /**
  *
  * @param inputString (String)
- * @returns xmlDoc {XMLDocument}
+ * @returns Document {XMLDocument}
  */
 function parseXMLString(inputString) {
     const parser = new DOMParser();

@@ -8,16 +8,45 @@ include("api.php");
  */
 function routing(): bool
 {
-    $requestPHPSegments = explode('.php', $_SERVER['REQUEST_URI']);
-
-    if (!($requestPHPSegments[0] === '/optimizer/src/backend/index')) {
+    //http://localhost/optimizer/src/backend/index.php/ --- REST
+    //                      [0]                         --- [1]
+    $requestedCompleteURL = explode('.php', $_SERVER['REQUEST_URI']);
+    //check if the URL starts correctly
+    if (!($requestedCompleteURL[0] === '/optimizer/src/backend/index')) {
         return errormessage(404);
     }
 
-    if (isset($requestPHPSegments[1])) {
-        $requestSegments = explode('/', $requestPHPSegments[1]);
+    //check if there is something more than just the index.php called
+    if (isset($requestedCompleteURL[1])) {
 
-        //TODO: pathing funktioniert nur zufällig richtig.
+        if ( (strcmp($requestedCompleteURL[1], "/activetodos") === 0) && strcmp($_SERVER['REQUEST_METHOD'], 'GET') === 0) {
+            $getAllActiveTodos = getAllActiveTodos();
+            if (!$getAllActiveTodos) {
+                return false;
+            }
+            echo xmlFormatter($getAllActiveTodos);
+            return errormessage(200);
+        } elseif (strcmp($requestedCompleteURL[1], "/inactivetodos") === 0 && strcmp($_SERVER['REQUEST_METHOD'], 'GET') === 0) {
+            $getAllInactiveTodos = getAllInactiveTodos();
+            if (!$getAllInactiveTodos) {
+                return false;
+            }
+            echo xmlFormatter($getAllInactiveTodos);
+            return errormessage(200);
+        } elseif (strcmp($requestedCompleteURL[1], "/todo") == 0 && strcmp($_SERVER['REQUEST_METHOD'], 'POST') == 0) {
+            echo "neues todo erstellen
+            ";
+
+            //grab the body
+            $entityBody = file_get_contents('php://input');
+
+            /*$createTodo = */ return createTodo($entityBody);
+        }
+
+        //the rest of the URL after index.php separated in an array
+        $requestSegments = explode('/', $requestedCompleteURL[1]);
+
+        //FixMe: pathing funktioniert nur zufällig richtig.
         //----: notwendige und hinreicheinde bedingungen identifizieren und anpassen
         //----: bspw.: schließen manche bedingungen den allgemeinen zugriff auf, z. B. "alle aktiven" to dos aus
 
@@ -29,6 +58,7 @@ function routing(): bool
 
         //create    http://localhost/optimizer/src/backend/index.php/   todo           //geht nicht!!
 
+        //make sure, there is something more
         if (isset($requestSegments[1])) {
 
             if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
@@ -72,27 +102,8 @@ function routing(): bool
 
                         //checks if requested segment is the last item of the url, to dodge
                         //wrong, too long urls
-                        if (($requestPHPSegments[1] === array_reverse($requestPHPSegments)[0])) {
-                            switch ($requestPHPSegments[1]) {
-
-                                //get all active todos (status != 5)
-                                case '/activetodos':
-                                    $getAllActiveTodos = getAllActiveTodos();
-                                    if (!$getAllActiveTodos) {
-                                        return false;
-                                    }
-                                    echo xmlFormatter($getAllActiveTodos);
-                                    return errormessage(200);
-
-                                //get all not-active todos (status == 5)
-                                case '/inactivetodos':
-                                    $getAllInactiveTodos = getAllInactiveTodos();
-                                    if (!$getAllInactiveTodos) {
-                                        return false;
-                                    }
-                                    echo xmlFormatter($getAllInactiveTodos);
-                                    return errormessage(200);
-
+                        if (($requestedCompleteURL[1] === array_reverse($requestedCompleteURL)[0])) {
+                            switch ($requestedCompleteURL[1]) {
                                 //returns number of all active todos (status != 5)
                                 case '/countaktivetodos':
                                     $countActiveTodos = countActiveTodos();
@@ -132,7 +143,7 @@ function routing(): bool
                             }
 
                             //test if '/to do' == '/to do'
-                            if (($requestPHPSegments[1] & array_reverse($requestPHPSegments)[0])) {
+                            if (($requestedCompleteURL[1] & array_reverse($requestedCompleteURL)[0])) {
                                 //add a new to-do
 
                                 $body = file('php://input');
@@ -192,8 +203,7 @@ function routing(): bool
  *
  * @return true|false
  */
-function errormessage(int $errorcode): bool
-{
+function errormessage(int $errorcode): bool {
     switch ($errorcode) {
         case 200:   //all good
             http_response_code(200);

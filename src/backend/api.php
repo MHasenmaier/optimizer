@@ -21,12 +21,43 @@ include 'dbserver.php';
 	 *
 	 * @return string|false -if successful returns the created todo as json modified string
 	 */
-	function createTodo(array $inputTodoData): string|false
+	function createTodo(string $inputNewTodoDataString): string|false
 	{
 		global $dbPDO;
 
+        $inputNewTodoDataXmlObject = simplexml_load_string($inputNewTodoDataString);    //string -> XML object
+        $todoArray = xmlToArray($inputNewTodoDataXmlObject);        //XML Object -> array[XML Objects]
+
+        $todoElementSimpleXMLObj = $todoArray['todo'];      //inner array[XML Objects]
+
+        //convert values into correct datatypes
+        foreach ($todoElementSimpleXMLObj->children() as $key => $value) {
+            echo "
+            key = $key
+            value = $value
+        ";
+            //TODO: gleiches probem wie bei updateTodo gestern.
+            //<todo> ist ein SimpleXMLObject
+            //childs sind string
+
+            if (strcmp($key, 'status') == 0) {
+                $value = (int)$value;
+
+            } elseif (strcmp($key, 'description') == 0 | strcmp($key, 'lastUpdate') == 0 | strcmp($key, 'title') == 0) {
+                $value = (string)$value;
+            }
+            $newTodoArray[$key] = $value;
+        }
+
+        varDEBUG("todoArray['todo']->children()", $todoArray['todo']->children());
+
+        if (isset($newTodoArray)) {
+            printf("No item has been created.");
+            return errormessage(500);
+        }
+
 		//array durchsuchen
-		foreach ($inputTodoData as $todo) {
+		foreach ($newTodoArray as $todo) {
 
 			$parser = xml_parser_create();
 			xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
@@ -46,37 +77,32 @@ include 'dbserver.php';
 				}
 			}
 
-            printf("todoData:\n");
-			print_r($todoData);
-
-			foreach ($todoData as $tag => $value) {
-				switch ($tag) {
-					case 'title':
-						printf("title = " . $tag . " ::: " . $value . "\n");
-						break;
-					case 'status':
-						printf("status = " . $tag . " ::: " . $value . "\n");
-						break;
-					case 'description':
-						printf("description = " . $tag . " ::: " . $value . "\n");
-						break;
-					case 'lastUpdate':
-						printf("lastUpdate = " . $tag . " ::: " . $value . "\n");
-						break;
-					default:
-						printf("tag = " . $tag . "\n");
-				}
-			}
+            //printf("todoData:\n");
+			//print_r($todoData);
+//
+			//foreach ($todoData as $tag => $value) {
+			//	switch ($tag) {
+			//		case 'title':
+			//			printf("title = " . $tag . " ::: " . $value . "\n");
+			//			break;
+			//		case 'status':
+			//			printf("status = " . $tag . " ::: " . $value . "\n");
+			//			break;
+			//		case 'description':
+			//			printf("description = " . $tag . " ::: " . $value . "\n");
+			//			break;
+			//		case 'lastUpdate':
+			//			printf("lastUpdate = " . $tag . " ::: " . $value . "\n");
+			//			break;
+			//		default:
+			//			printf("tag = " . $tag . "\n");
+			//	}
+			//}
 		}
 
         if (empty($todoData)) {
             return errormessage(500);
         }
-
-		if (!$inputTodoData) {
-			printf("No item has been created.");
-			return false;
-		}
 
 		// check if status exists ant is valid
 		if (array_key_exists('status', $todoData)) {
@@ -306,7 +332,6 @@ include 'dbserver.php';
 			// check if status is valid
 			$updateArray['status'] = statusCheck($updateArray['status']);
 
-            //         <updateDate>2024-10-01</updateDate> yyyy-mm-dd
             //set updateDate to the actuall date
             $updateDate = date('Y-m-d', time());
 
@@ -319,8 +344,6 @@ include 'dbserver.php';
                 'updateDate' => $updateDate,
 				'lastUpdate' => $updateArray['lastUpdate']
 			]);
-
-
 
 			return getTodoById($id);
 		} catch (PDOException $e) {
@@ -354,6 +377,18 @@ include 'dbserver.php';
 			return false;
 		}
 	}
+
+    //function createTask           //TODO Nr. 3: Task stuff
+
+    //function getTaskById          //TODO Nr. 3: Task stuff
+
+    //function getAllTasksByTodoID  //TODO Nr. 3: Task stuff
+
+    //function countTaskByTodoID    //TODO Nr. 3: Task stuff -> Maybe bullshit
+
+    //function updateTask           //TODO Nr. 3: Task stuff
+
+    //function deleteTask           //TODO Nr. 3: Task stuff
 
 	/**
 	 * function to figure out, how many data is stored in the db
