@@ -20,6 +20,15 @@ function routing(): bool
         //TODO: pathing funktioniert nur zufällig richtig.
         //----: notwendige und hinreicheinde bedingungen identifizieren und anpassen
         //----: bspw.: schließen manche bedingungen den allgemeinen zugriff auf, z. B. "alle aktiven" to dos aus
+
+        //update    http://localhost/optimizer/src/backend/index.php/   todo/?id=36    //funktioniert
+
+        //get       http://localhost/optimizer/src/backend/index.php/   todo/?id=36    //funktioniert
+        //get       http://localhost/optimizer/src/backend/index.php/   inactivetodos  //geht nicht!!
+        //get       http://localhost/optimizer/src/backend/index.php/   activetodos    //geht nicht!!
+
+        //create    http://localhost/optimizer/src/backend/index.php/   todo           //geht nicht!!
+
         if (isset($requestSegments[1])) {
 
             if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {

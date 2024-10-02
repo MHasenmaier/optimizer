@@ -51,7 +51,6 @@ function createTodoElements(xmlObject) {
         // Extract the relevant data
         const id = todo.getElementsByTagName("ID")[0].textContent;
         const title = todo.getElementsByTagName("title")[0].textContent;
-        const taskId = todo.getElementsByTagName("taskId")[0].textContent;
         //let status = to-do.getElementsByTagName("status")[0].textContent;
 
         // Create the div for the todo
@@ -74,13 +73,11 @@ function createTodoElements(xmlObject) {
         //Task box
         const taskBox = document.createElement("button");
         taskBox.setAttribute("class", "taskButton");
-        taskBox.setAttribute("id", "taskOf" + id);
 
 
         // Display the checkbox only if taskId is not 0
         if (taskId !== "") {
-            // TODO: box einblenden mit ANZAHL angehöngter tasks, nicht TASKID
-            taskBox.innerText = taskId;
+            // TODO: box einblenden mit ANZAHL angehängter tasks
         }
 
         // Append the newly created div to an existing container on your page
@@ -206,13 +203,11 @@ function sendData() {
 
     const todoElement = document.createElement("todo");
     const todoID = document.createElement("ID");
-    const taskID = document.createElement("taskID");
     const title = document.createElement("title");
     const status = document.createElement("status");
     const description = document.createElement("description");
 
     todoElement.appendChild(todoID);
-    todoElement.appendChild(taskID);
     todoElement.appendChild(title);
     todoElement.appendChild(status);
     todoElement.appendChild(description);
@@ -222,7 +217,6 @@ function sendData() {
         let todoStatus = statusPopup.options[statusPopup.selectedIndex].value;
 
         todoID.innerText = "9";
-        taskID.innerText = "[1, 2, 3, 4, 5, 6, 7]";
         title.innerText = todoTitle.value;
         status.innerText = todoStatus;
         description.innerText = todoDescription.value;
@@ -241,7 +235,6 @@ function sendData() {
             //    body: JSON.stringify({
             //        id: todoID.innerText,
             //        title: todoTitle.value,
-            //        taskID: todoID.innerText,
             //        description: todoDescription.value,
             //        status: todoStatus.value
             //        }

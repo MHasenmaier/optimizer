@@ -1,4 +1,4 @@
-<?php /** @noinspection ALL */
+<?php
 include 'dbserver.php';
 
 	//getAllTodosByStatus(2);  // change "2" to generic integer variable
@@ -222,7 +222,7 @@ include 'dbserver.php';
 	{
 		global $dbPDO;
 
-		//Maybe bullshit
+		//TODO: maybe bullshit - maybe important but param is bullshit
 		$id = $_GET['id'];
 
 		//check if id exist in DB
@@ -231,21 +231,21 @@ include 'dbserver.php';
 		}
 
 		try {
-			$sqlSelectTodoByID = 'SELECT * FROM todotable WHERE ID = :IDValue';
+			$sqlSelectTodoByID = 'SELECT * FROM todotable WHERE ID = :id';
 
 			$expectedTodoById = $dbPDO->prepare($sqlSelectTodoByID);
 
 			/** maybe bullshit, because ID is known */    //bind the param to
-			$expectedTodoById->bindParam(':IDValue', $id);
+			$expectedTodoById->bindParam(':id', $id);
 
 
-			$expectedTodoById->execute(['IDValue' => $id]);
+			$expectedTodoById->execute(['id' => $id]);
 
 			$checkedIDTodo = ($expectedTodoById->fetchAll(PDO::FETCH_ASSOC))[0];
 
 			//check if array is empty
 			if (empty($checkedIDTodo)) {
-				return false;
+				return errormessage(404);
 			}
 			return $checkedIDTodo;
 		} catch (PDOException $e) {
@@ -275,7 +275,7 @@ include 'dbserver.php';
 
         foreach ($todoElementSimpleXMLObj->children() as $key => $value) {
 
-            if (strcmp($key, 'status') == 0 | strcmp($key, 'taskId') == 0 ) {
+            if (strcmp($key, 'status') == 0) {
                 $value = (int)$value;
 
             } elseif (strcmp($key, 'description') == 0 | strcmp($key, 'lastUpdate') == 0 | strcmp($key, 'title') == 0) {
@@ -296,8 +296,7 @@ include 'dbserver.php';
 
 		try {
 			$updateTodo = 'UPDATE todotable
-                            SET taskID = :taskID,
-                                title = :title,
+                            SET title = :title,
                                 status = :status,
                                 description = :description,
                                 updateDate = :updateDate,
@@ -314,7 +313,6 @@ include 'dbserver.php';
 			$prepUpdatedTodo = $dbPDO->prepare($updateTodo);
 			$prepUpdatedTodo->execute([
 				'ID' => $id,
-				'taskID' => $updateArray['taskId'],
 				'title' => $updateArray['title'],
 				'status' => $updateArray['status'],
 				'description' => $updateArray['description'],
