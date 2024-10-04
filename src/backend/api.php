@@ -9,7 +9,7 @@ include 'dbserver.php';
      * if status != number 1-5, staus = 2 by default
      *
      * @param string $inputNewTodoDataString
-     * @return false -if successful returns the created todo as json modified string
+     * @return array|false -if successful returns the created todo as json modified string
      */
 	function createTodo(string $inputNewTodoDataString): array|false {
 		global $dbPDO;
