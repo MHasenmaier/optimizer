@@ -33,36 +33,78 @@ function routing(): bool
             }
             echo xmlFormatter($getAllInactiveTodos);
             return errormessage(200);
-        } elseif (strcmp($requestedCompleteURL[1], "/todo") == 0 && strcmp($_SERVER['REQUEST_METHOD'], 'POST') == 0) {
-            echo "neues todo erstellen
-            ";
+        } elseif (
+            str_contains($requestedCompleteURL[1], '/todo/?id=') && strcmp($_SERVER['REQUEST_METHOD'], 'GET') === 0 &&
+            is_numeric($_GET['id']) &&
+            (intval(htmlspecialchars($_GET['id'])) !== 0)
+        ) {
+            // (int)$id but ... nicer
+            $id = intval(htmlspecialchars($_GET['id']));
+
+            $getTodoById = getTodoById($id);
+            if (!isset($getTodoById)) {
+                return errormessage(404);
+            }
+            if (is_null($getTodoById) | empty($getTodoById) | ($getTodoById === false) | !(isset($getTodoById) === true)) {
+                return errormessage(404);
+            }
+
+            header("Location: /http://localhost/optimizer/src/website/todo.html"); //?id=$id
+
+            echo xmlFormatterSingle($getTodoById);
+            return errormessage(200);
+        } elseif ((strcmp($requestedCompleteURL[1], "/countaktivetodos") === 0 && strcmp($_SERVER['REQUEST_METHOD'], 'GET') === 0)) {
+            //returns number of all active todos (status != 5)
+            $countActiveTodos = countActiveTodos();
+            if (!$countActiveTodos) {
+                return false;
+            }
+            echo $countActiveTodos;
+            return errormessage(200);
+        }
+        elseif (strcmp($requestedCompleteURL[1], "/todo") == 0 && strcmp($_SERVER['REQUEST_METHOD'], 'POST') == 0) {
 
             //grab the body
             $entityBody = file_get_contents('php://input');
 
-            /*$createTodo = */ return createTodo($entityBody);
-        }
+            $createTodo =  createTodo($entityBody);
+            if (!$createTodo) {
+                return false;
+            }
+            echo xmlFormatterSingle($createTodo);
+            return errormessage(201);
+        } elseif (str_contains($requestedCompleteURL[1], '/todo/?id=') && strcmp($_SERVER['REQUEST_METHOD'], 'POST') === 0 &&
+            is_numeric($_GET['id']) &&
+            (intval(htmlspecialchars($_GET['id'])) !== 0)) {
 
-        //the rest of the URL after index.php separated in an array
-        $requestSegments = explode('/', $requestedCompleteURL[1]);
+                // (int)$id but ... nicer
 
-        //FixMe: pathing funktioniert nur zufällig richtig.
-        //----: notwendige und hinreicheinde bedingungen identifizieren und anpassen
-        //----: bspw.: schließen manche bedingungen den allgemeinen zugriff auf, z. B. "alle aktiven" to dos aus
+                $id = intval(htmlspecialchars($_GET['id']));
 
-        //update    http://localhost/optimizer/src/backend/index.php/   todo/?id=36    //funktioniert
+                //grab the body
+                $entityBody = file_get_contents('php://input');
 
-        //get       http://localhost/optimizer/src/backend/index.php/   todo/?id=36    //funktioniert
-        //get       http://localhost/optimizer/src/backend/index.php/   inactivetodos  //geht nicht!!
-        //get       http://localhost/optimizer/src/backend/index.php/   activetodos    //geht nicht!!
+                $updateTodo = updateTodo($entityBody, $id);
+                if (is_null($updateTodo) | empty($updateTodo) | ($updateTodo === false)) {
+                    return errormessage(500);
+                }
 
-        //create    http://localhost/optimizer/src/backend/index.php/   todo           //geht nicht!!
+                echo xmlFormatterSingle($updateTodo);
+                return errormessage(200);
+        } elseif (str_contains($requestedCompleteURL[1], '/todo/?id=') && strcmp($_SERVER['REQUEST_METHOD'], 'DELETE') === 0 &&
+            is_numeric($_GET['id']) &&
+            (intval(htmlspecialchars($_GET['id'])) !== 0)
+        ) {
+                // (int)$id but ... nicer
+                $id = intval(htmlspecialchars($_GET['id']));
+                $getTodoById = getTodoById($id);
 
-        //make sure, there is something more
-        if (isset($requestSegments[1])) {
-
-            if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
-
+                if (deleteTodo($id)) {
+                    echo xmlFormatterSingle($getTodoById);
+                    return errormessage(200);
+                }
+                return false;
+            }
 
                 //example path
                 //http://localhost/optimizer/src/backend/index.php/     /to_do/?id=36
@@ -73,111 +115,16 @@ function routing(): bool
                 //          [0]
                 switch ($_SERVER['REQUEST_METHOD']) {
                     case 'GET':
-                        //GET specific to-do
-                        if ($requestSegments[1] === 'todo') {
-                            if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
 
 
-                                // (int)$id but ... nicer
-                                $id = intval(htmlspecialchars($_GET['id']));
-
-                                $getTodoById = getTodoById($id);
-                                if (!isset($getTodoById)) {
-                                    return errormessage(404);
-                                }
-                                if (is_null($getTodoById) | empty($getTodoById) | ($getTodoById === false) | !(isset($getTodoById) === true)) {
-                                    return errormessage(404);
-                                }
-
-                                header("Location: /http://localhost/optimizer/src/website/todo.html"); //?id=$id
-
-                                //printf($id);
-                                echo xmlFormatterSingle($getTodoById);
-                                return errormessage(200);
-                            }
-
-                            //TODO path isnt working (see also api.php (65) )
-
-                        }
-
-                        //checks if requested segment is the last item of the url, to dodge
-                        //wrong, too long urls
-                        if (($requestedCompleteURL[1] === array_reverse($requestedCompleteURL)[0])) {
-                            switch ($requestedCompleteURL[1]) {
-                                //returns number of all active todos (status != 5)
-                                case '/countaktivetodos':
-                                    $countActiveTodos = countActiveTodos();
-                                    if (!$countActiveTodos) {
-                                        return false;
-                                    }
-                                    echo $countActiveTodos;
-                                    return errormessage(200);
-
-                                default:
-                                    errormessage(404);
-                                    return true;
-                            }
-                        }
                         return errormessage(404);
 
                     case 'POST':
-                        //Update specific to do
-                        if (isset($requestSegments[1]) && ($requestSegments[1] === 'todo')) {
-                            // update specific to-do
-                            if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
 
-                                // (int)$id but ... nicer
-
-                                $id = intval(htmlspecialchars($_GET['id']));
-
-                                //grab the body
-                                $entityBody = file_get_contents('php://input');
-
-                                $updateTodo = updateTodo($entityBody, $id);
-                                if (is_null($updateTodo) | empty($updateTodo) | ($updateTodo === false)) {
-                                    return errormessage(500);
-                                }
-
-                                echo xmlFormatterSingle($updateTodo);
-                                return errormessage(200);
-                            }
-
-                            //test if '/to do' == '/to do'
-                            if (($requestedCompleteURL[1] & array_reverse($requestedCompleteURL)[0])) {
-                                //add a new to-do
-
-                                $body = file('php://input');
-
-
-                                $createTodo = createTodo($body);
-                                echo $createTodo;
-
-                                //		if (is_null($createTodo) | empty($createTodo) | ($createTodo === false)) {
-                                //			return errormessage(500);
-                                //		}
-                                //
-                                //		echo xmlFormatterSingle($createTodo);
-                                return errormessage(201);
-                            }
-                            return errormessage(404);
-                        }
 
                     case 'DELETE':
                         //Delete specific to do
-                        if (isset($requestSegments[1]) && ($requestSegments[1] === 'todo')) {
-                            if (isset($requestSegments[2]) && str_contains($requestSegments[2], '?id=') & is_numeric($_GET['id']) & !(intval(htmlspecialchars($_GET['id']) == 0))) {
 
-                                // (int)$id but ... nicer
-                                $id = intval(htmlspecialchars($_GET['id']));
-                                $getTodoById = getTodoById($id);
-
-                                if (deleteTodo($id)) {
-                                    echo xmlFormatterSingle($getTodoById);
-                                    return errormessage(200);
-                                }
-                                return false;
-                            }
-                        }
                         break;
 
                     //PUT
@@ -186,10 +133,7 @@ function routing(): bool
                         errormessage(405);
                 }
                 return false;
-
             }
-        }
-    }
     echo "
     X_X_X_X_X
     what did just happen here????

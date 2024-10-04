@@ -1,28 +1,17 @@
 <?php
 include 'dbserver.php';
 
-	//getAllTodosByStatus(2);  // change "2" to generic integer variable
+// todo functions
 
-	//echo json_encode(getAllActiveTodos($dbObj));
-	//var_dump(getAllActiveTodos($dbObj));
-
-	//echo json_encode(getAllActiveTodos());
-	//var_dump(getAllTodos());
-
-	//echo json_encode(getTodoById($todoDataArray, $dbObj), JSON_PRETTY_PRINT);
-	//deleteTodo($todoDataArray, $dbObj);
-
-	/**
-	 * create function
-	 * assoc in values
-	 * if status != number 1-5, staus = 2 by default
-	 *
-	 * @param array $inputTodoData
-	 *
-	 * @return string|false -if successful returns the created todo as json modified string
-	 */
-	function createTodo(string $inputNewTodoDataString): string|false
-	{
+    /**
+     * create function
+     * assoc in values
+     * if status != number 1-5, staus = 2 by default
+     *
+     * @param string $inputNewTodoDataString
+     * @return false -if successful returns the created todo as json modified string
+     */
+	function createTodo(string $inputNewTodoDataString): array|false {
 		global $dbPDO;
 
         $inputNewTodoDataXmlObject = simplexml_load_string($inputNewTodoDataString);    //string -> XML object
@@ -32,84 +21,21 @@ include 'dbserver.php';
 
         //convert values into correct datatypes
         foreach ($todoElementSimpleXMLObj->children() as $key => $value) {
-            echo "
-            key = $key
-            value = $value
-        ";
-            //TODO: gleiches probem wie bei updateTodo gestern.
-            //<todo> ist ein SimpleXMLObject
-            //childs sind string
-
-            if (strcmp($key, 'status') == 0) {
-                $value = (int)$value;
-
-            } elseif (strcmp($key, 'description') == 0 | strcmp($key, 'lastUpdate') == 0 | strcmp($key, 'title') == 0) {
-                $value = (string)$value;
-            }
-            $newTodoArray[$key] = $value;
+            //convert $value into int (if status) or string (if description, title or lastUpdate)
+            $newTodoArray[$key] = dataTypeConvert($key, $value);
         }
 
-        varDEBUG("todoArray['todo']->children()", $todoArray['todo']->children());
-
-        if (isset($newTodoArray)) {
+        if (!isset($newTodoArray) | empty($newTodoArray)) {
             printf("No item has been created.");
-            return errormessage(500);
-        }
-
-		//array durchsuchen
-		foreach ($newTodoArray as $todo) {
-
-			$parser = xml_parser_create();
-			xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
-			xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 0);
-
-			xml_parse_into_struct($parser, $todo, $vals);
-			xml_parser_free($parser);
-
-			$todoData = [];
-
-			if (array_key_exists(0, $vals)) {
-
-				foreach ($vals as $val) {
-					if (array_key_exists('value', $val) && !is_null($val["value"])) {
-						$todoData[$val['tag']] = $val["value"];
-					}
-				}
-			}
-
-            //printf("todoData:\n");
-			//print_r($todoData);
-//
-			//foreach ($todoData as $tag => $value) {
-			//	switch ($tag) {
-			//		case 'title':
-			//			printf("title = " . $tag . " ::: " . $value . "\n");
-			//			break;
-			//		case 'status':
-			//			printf("status = " . $tag . " ::: " . $value . "\n");
-			//			break;
-			//		case 'description':
-			//			printf("description = " . $tag . " ::: " . $value . "\n");
-			//			break;
-			//		case 'lastUpdate':
-			//			printf("lastUpdate = " . $tag . " ::: " . $value . "\n");
-			//			break;
-			//		default:
-			//			printf("tag = " . $tag . "\n");
-			//	}
-			//}
-		}
-
-        if (empty($todoData)) {
-            return errormessage(500);
+            return false;
         }
 
 		// check if status exists ant is valid
-		if (array_key_exists('status', $todoData)) {
-			$todoData['status'] = statusCheck($todoData['status']);
+		if (array_key_exists('status', $newTodoArray)) {
+            $newTodoArray['status'] = statusCheck($newTodoArray['status']);
 		} else {
 			//set status = 2 as default
-			$todoData['status'] = 2;
+            $newTodoArray['status'] = 2;
 		}
 
         //set createDate to the actuall date
@@ -118,21 +44,21 @@ include 'dbserver.php';
 		try {
 			$todoToSQL = "INSERT INTO todotable
                            (title, status, description, createDate, lastUpdate)
-                           VALUES ( :title, :status, :description, createDate, :lastUpdate)";
+                           VALUES ( :title, :status, :description, :createDate, :lastUpdate)";
 			$createdTodo = $dbPDO->prepare($todoToSQL);
 			$createdTodo->execute([
-				'title' => $todoData['title'],
-				'status' => $todoData['status'],
-				'description' => $todoData['description'],
+				'title' => $newTodoArray['title'],
+				'status' => $newTodoArray['status'],
+				'description' => $newTodoArray['description'],
                 'createDate' =>$createDate,
-				'lastUpdate' => $todoData['lastUpdate']
+				'lastUpdate' => $newTodoArray['lastUpdate']
 			]);
 
-			// TODO: countData durch rowCount() ersetzen?
-			//json_encode($dbPDO->query("SELECT * FROM todotable LIMIT " . (rowCount($dbPDO) - 1) . ", 1")->fetchAll(PDO::FETCH_ASSOC));
-			return errormessage(200);
+            // returns the last created todo based on the todo IDs -> returns array
+			return $dbPDO->query("SELECT * FROM todotable ORDER BY id DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 		} catch (PDOException $e) {
-			echo 'Der createTodo hat nicht geklappt:<br>' . $e->getMessage();
+			echo 'Der createTodo hat nicht geklappt:
+			' . $e->getMessage();
 			return false;
 		}
 	}
@@ -248,9 +174,6 @@ include 'dbserver.php';
 	{
 		global $dbPDO;
 
-		//TODO: maybe bullshit - maybe important but param is bullshit
-		$id = $_GET['id'];
-
 		//check if id exist in DB
 		if (!checkID($id)) {
 			return errormessage(404);
@@ -260,19 +183,16 @@ include 'dbserver.php';
 			$sqlSelectTodoByID = 'SELECT * FROM todotable WHERE ID = :id';
 
 			$expectedTodoById = $dbPDO->prepare($sqlSelectTodoByID);
-
-			/** maybe bullshit, because ID is known */    //bind the param to
-			$expectedTodoById->bindParam(':id', $id);
-
-
 			$expectedTodoById->execute(['id' => $id]);
 
+            // PDOstmt -> array
 			$checkedIDTodo = ($expectedTodoById->fetchAll(PDO::FETCH_ASSOC))[0];
 
 			//check if array is empty
 			if (empty($checkedIDTodo)) {
 				return errormessage(404);
 			}
+
 			return $checkedIDTodo;
 		} catch (PDOException $e) {
 			echo 'getTodoById hat nicht geklappt:
@@ -300,14 +220,7 @@ include 'dbserver.php';
         $todoElementSimpleXMLObj = $todoArray['todo'];
 
         foreach ($todoElementSimpleXMLObj->children() as $key => $value) {
-
-            if (strcmp($key, 'status') == 0) {
-                $value = (int)$value;
-
-            } elseif (strcmp($key, 'description') == 0 | strcmp($key, 'lastUpdate') == 0 | strcmp($key, 'title') == 0) {
-                $value = (string)$value;
-            }
-            $updateArray[$key] = $value;
+            $updateArray[$key] = dataTypeConvert($key, $value);
         }
 
 		//exit for invalid IDs
@@ -378,6 +291,8 @@ include 'dbserver.php';
 		}
 	}
 
+// task functions
+
     //function createTask           //TODO Nr. 3: Task stuff
 
     //function getTaskById          //TODO Nr. 3: Task stuff
@@ -389,6 +304,9 @@ include 'dbserver.php';
     //function updateTask           //TODO Nr. 3: Task stuff
 
     //function deleteTask           //TODO Nr. 3: Task stuff
+
+
+// support functions
 
 	/**
 	 * function to figure out, how many data is stored in the db
@@ -404,7 +322,7 @@ include 'dbserver.php';
 			$stmt = $dbPDO->prepare('SELECT COUNT(*) as dbSize FROM todotable');
 			$stmt->execute();
 			$row = $stmt->fetchAll();
-			return $row['dbSize'];
+			return $row[0]['dbSize'];
 		} catch (PDOException $e) {
 			echo 'countData hat nicht geklappt:<br>' . $e->getMessage();
 			return false;
@@ -422,7 +340,7 @@ include 'dbserver.php';
 	{
 		//set default status = 2 if not 1-5
 		// ?? is_null($statusInput) ? 2 : $statusInput;
-		return (($statusInput !== (1 || 2 || 3 || 4 || 5)) ? 2 : $statusInput);
+		return (($statusInput < 1 || $statusInput > 5) ? 2 : $statusInput);
 	}
 
 	/**
@@ -474,17 +392,11 @@ include 'dbserver.php';
 	 */
 	function xmlFormatterSingle(array $todo): string
 	{
-        //TODO: neu formatieren. todos->todo->elemente => todo->elemente
-        //----: 'todos'-ebene ist nicht notwendig, nur ein element
-        //----: überlegung: zeile (1) löschen, zeile (2) todoElement durch xml ersetzen
-		$xml = new SimpleXMLElement('<todos/>');
+		$xml = new SimpleXMLElement('<todo/>');
 
-		$todoElement = $xml->addChild('todo');  //todo: (1)
 		foreach ($todo as $key => $value) {
-
-			$todoElement->addChild($key, htmlspecialchars($value)); //todo: (2)
+            $xml->addChild($key, htmlspecialchars($value));
 		}
-
 		header('Content-Type: application/xml');
 		return $xml->asXML();
 	}
@@ -520,4 +432,18 @@ include 'dbserver.php';
         varDEBUG end
         XXXXXXXXXXXX
         ";
+    }
+
+    /** converter for createTodo and updateTodo
+     * @param $inputKey
+     * @param $inputValue
+     * @return bool|int|string
+     */
+    function dataTypeConvert ($inputKey, $inputValue): bool|int|string {
+        if (strcmp($inputKey, 'status') == 0) {
+            return (int)$inputValue;
+        } elseif (strcmp($inputKey, 'description') == 0 | strcmp($inputKey, 'lastUpdate') == 0 | strcmp($inputKey, 'title') == 0) {
+            return (string)$inputValue;
+        }
+        return errormessage(500);
     }
