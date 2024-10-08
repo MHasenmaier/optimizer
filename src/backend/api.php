@@ -170,13 +170,13 @@ include 'dbserver.php';
 	 *
 	 * @return array|false
 	 */
-	function getTodoById(int $id): array|false
+	function getTodoById(int $id): array|bool
 	{
 		global $dbPDO;
 
 		//check if id exist in DB
 		if (!checkID($id)) {
-			return errormessage(404);
+			return false;
 		}
 
 		try {

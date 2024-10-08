@@ -19,124 +19,129 @@ function routing(): bool
     //check if there is something more than just the index.php called
     if (isset($requestedCompleteURL[1])) {
 
-        if ( (strcmp($requestedCompleteURL[1], "/activetodos") === 0) && strcmp($_SERVER['REQUEST_METHOD'], 'GET') === 0) {
-            $getAllActiveTodos = getAllActiveTodos();
-            if (!$getAllActiveTodos) {
-                return false;
-            }
-            echo xmlFormatter($getAllActiveTodos);
-            return errormessage(200);
-        } elseif (strcmp($requestedCompleteURL[1], "/inactivetodos") === 0 && strcmp($_SERVER['REQUEST_METHOD'], 'GET') === 0) {
-            $getAllInactiveTodos = getAllInactiveTodos();
-            if (!$getAllInactiveTodos) {
-                return false;
-            }
-            echo xmlFormatter($getAllInactiveTodos);
-            return errormessage(200);
-        } elseif (
-            str_contains($requestedCompleteURL[1], '/todo/?id=') && strcmp($_SERVER['REQUEST_METHOD'], 'GET') === 0 &&
-            is_numeric($_GET['id']) &&
-            (intval(htmlspecialchars($_GET['id'])) !== 0)
-        ) {
-            // (int)$id but ... nicer
-            $id = intval(htmlspecialchars($_GET['id']));
+        //switch for request method
+        switch ($_SERVER['REQUEST_METHOD']) {
+            case 'GET':
 
-            $getTodoById = getTodoById($id);
-            if (!isset($getTodoById)) {
-                return errormessage(404);
-            }
-            if (is_null($getTodoById) | empty($getTodoById) | ($getTodoById === false) | !(isset($getTodoById) === true)) {
-                return errormessage(404);
-            }
+                //switch for requested URL
+                switch ($requestedCompleteURL[1]) {
+                    //for overview page
+                    case '/activetodos':
+                        $getAllActiveTodos = getAllActiveTodos();
+                        if (!$getAllActiveTodos) {
+                            return false;
+                        }
+                        echo xmlFormatter($getAllActiveTodos);
+                        return errormessage(200);
 
-            header("Location: /http://localhost/optimizer/src/website/todo.html"); //?id=$id
+                    //for archive and "marked as deleted"
+                    case '/inactivetodos':
+                        $getAllInactiveTodos = getAllInactiveTodos();
+                        if (!$getAllInactiveTodos) {
+                            return false;
+                        }
+                        echo xmlFormatter($getAllInactiveTodos);
+                        return errormessage(200);
 
-            echo xmlFormatterSingle($getTodoById);
-            return errormessage(200);
-        } elseif ((strcmp($requestedCompleteURL[1], "/countaktivetodos") === 0 && strcmp($_SERVER['REQUEST_METHOD'], 'GET') === 0)) {
-            //returns number of all active todos (status != 5)
-            $countActiveTodos = countActiveTodos();
-            if (!$countActiveTodos) {
-                return false;
-            }
-            echo $countActiveTodos;
-            return errormessage(200);
-        }
-        elseif (strcmp($requestedCompleteURL[1], "/todo") == 0 && strcmp($_SERVER['REQUEST_METHOD'], 'POST') == 0) {
+                    //for getting a specific todo
+                    case '/todo/?id=':
+                        $IdToTest = $_GET['id'];
+                        $formattedId = intval(htmlspecialchars($IdToTest));
+                        if (is_numeric($IdToTest) &&
+                            (($formattedId !== 0) | ($formattedId !== 1))) {
 
-            //grab the body
-            $entityBody = file_get_contents('php://input');
+                            $getTodoById = getTodoById($formattedId);
+                            if (!isset($getTodoById)) {
+                                return errormessage(404);
+                            }
+                            if (is_null($getTodoById) | empty($getTodoById) | ($getTodoById === false) | !(isset($getTodoById) === true)) {
+                                return errormessage(404);
+                            }
 
-            $createTodo =  createTodo($entityBody);
-            if (!$createTodo) {
-                return false;
-            }
-            echo xmlFormatterSingle($createTodo);
-            return errormessage(201);
-        } elseif (str_contains($requestedCompleteURL[1], '/todo/?id=') && strcmp($_SERVER['REQUEST_METHOD'], 'POST') === 0 &&
-            is_numeric($_GET['id']) &&
-            (intval(htmlspecialchars($_GET['id'])) !== 0)) {
+                            header("Location: /http://localhost/optimizer/src/website/todo.html");
 
-                // (int)$id but ... nicer
+                            echo xmlFormatterSingle($getTodoById);
+                            return errormessage(200);
+                        } else {
+                            return errormessage(404);
+                        }
 
-                $id = intval(htmlspecialchars($_GET['id']));
+                    case '/countaktivetodos' :
+                        //returns number of all active todos (status != 5)
+                        $countActiveTodos = countActiveTodos();
+                        if (!$countActiveTodos) {
+                            return false;
+                        }
+                        echo $countActiveTodos;
+                        return errormessage(200);
 
-                //grab the body
-                $entityBody = file_get_contents('php://input');
-
-                $updateTodo = updateTodo($entityBody, $id);
-                if (is_null($updateTodo) | empty($updateTodo) | ($updateTodo === false)) {
-                    return errormessage(500);
+                    default: return errormessage(404);
                 }
 
-                echo xmlFormatterSingle($updateTodo);
-                return errormessage(200);
-        } elseif (str_contains($requestedCompleteURL[1], '/todo/?id=') && strcmp($_SERVER['REQUEST_METHOD'], 'DELETE') === 0 &&
-            is_numeric($_GET['id']) &&
-            (intval(htmlspecialchars($_GET['id'])) !== 0)
-        ) {
-                // (int)$id but ... nicer
-                $id = intval(htmlspecialchars($_GET['id']));
-                $getTodoById = getTodoById($id);
+            case 'POST':
+                if (strcmp($requestedCompleteURL[1], "/todo") == 0 && strcmp($_SERVER['REQUEST_METHOD'], 'POST') == 0) {
 
-                if (deleteTodo($id)) {
-                    echo xmlFormatterSingle($getTodoById);
+                    //grab the body, TODO: check if there is any body
+                    $entityBody = file_get_contents('php://input');
+
+                    $createTodo =  createTodo($entityBody);
+                    if (!$createTodo) {
+                        return false;
+                    }
+                    echo xmlFormatterSingle($createTodo);
+                    return errormessage(201);
+                } elseif (str_contains($requestedCompleteURL[1], '/todo/?id=') && strcmp($_SERVER['REQUEST_METHOD'], 'POST') === 0 &&
+                    is_numeric($_GET['id']) &&
+                    (intval(htmlspecialchars($_GET['id'])) !== 0)) {
+
+                    // (int)$id but ... nicer
+                    $id = intval(htmlspecialchars($_GET['id']));
+
+                    //grab the body
+                    $entityBody = file_get_contents('php://input');
+
+                    $updateTodo = updateTodo($entityBody, $id);
+                    if (is_null($updateTodo) | empty($updateTodo) | ($updateTodo === false)) {
+                        return errormessage(500);
+                    }
+
+                    echo xmlFormatterSingle($updateTodo);
                     return errormessage(200);
                 }
-                return false;
-            }
 
-                //example path
-                //http://localhost/optimizer/src/backend/index.php/     /to_do/?id=36
-                //               [0]                                       [1]
-                //      to_do/?id=36
-                //       [0]   [1]
-                //      /activetodos
-                //          [0]
-                switch ($_SERVER['REQUEST_METHOD']) {
-                    case 'GET':
+                return errormessage(404);
 
+            case 'DELETE':
+                //Delete specific to do
+                $IdToTest = $_GET['id'];
+                $formattedId = intval(htmlspecialchars($IdToTest));
+                if (str_contains($requestedCompleteURL[1], '/todo/?id=') &&
+                    is_numeric($IdToTest) &&
+                    (($formattedId !== 0)  | ($formattedId !== 1))
+                ) {
 
-                        return errormessage(404);
+                    $getTodoById = getTodoById($formattedId);
+                    if (!$getTodoById) {
+                        return errormessage(500);
+                    }
 
-                    case 'POST':
-
-
-                    case 'DELETE':
-                        //Delete specific to do
-
-                        break;
-
-                    //PUT
-
-                    default:
-                        errormessage(405);
+                    if (deleteTodo($formattedId)) {
+                        echo xmlFormatterSingle($getTodoById);
+                         return errormessage(200);
+                    }
+                    return errormessage(500);
                 }
-                return false;
-            }
+                break;
+
+            default:
+                errormessage(405);
+        }
+        return false;
+    }
     echo "
     X_X_X_X_X
-    what did just happen here????
+    what are you doing here????
+    check your request method and URL!!
     X_X_X_X_X";
     return false;
 }
@@ -151,22 +156,22 @@ function errormessage(int $errorcode): bool {
     switch ($errorcode) {
         case 200:   //all good
             http_response_code(200);
-            //echo json_encode(['message' => 'OK']);
+            echo json_encode(['message' => 'OK']);
             break;
 
         case 201:   //created
             http_response_code(201);
-            //echo json_encode(['message' => 'created']);
+            echo json_encode(['message' => 'created']);
             break;
 
         case 202:   //accepted
             http_response_code(202);
-            //echo json_encode(['message' => 'accepted']);
+            echo json_encode(['message' => 'accepted']);
             break;
 
         case 204:   //no content -> content has been deleted
             http_response_code(204);
-            //echo json_encode(['message' => 'No Content']);
+            echo json_encode(['message' => 'No Content -> content has been deleted']);
             break;
 
         case 400:   //bad request - malformed syntax
@@ -191,7 +196,7 @@ function errormessage(int $errorcode): bool {
 
         default:
             http_response_code($errorcode);
-            echo json_encode(['message' => $errorcode]);
+            echo json_encode(['message' => "Unknown Error: $errorcode"]);
             return false;
     }
     return true;
