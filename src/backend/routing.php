@@ -10,63 +10,41 @@ function routing(): bool
 {
     //http://localhost/optimizer/src/backend/index.php/ --- REST
     //                      [0]                         --- [1]
-    $requestedCompleteURL = explode('.php', $_SERVER['REQUEST_URI']);
+    $requestedPHPURL = explode('.php', $_SERVER['REQUEST_URI']);
     //check if the URL starts correctly
-    if (!($requestedCompleteURL[0] === '/optimizer/src/backend/index')) {
+    //ignore the "http://localhost" part of the URL, otherwise the function will break
+    if (!($requestedPHPURL[0] === '/optimizer/src/backend/index')) {
         return errormessage(404);
     }
 
     //check if there is something more than just the index.php called
-    if (isset($requestedCompleteURL[1])) {
+    if (isset($requestedPHPURL[1])) {
+        //split by / to work with /todo/?id=
+        $requestedFinalURL = explode('/', $requestedPHPURL[1]);
 
         //switch for request method
         switch ($_SERVER['REQUEST_METHOD']) {
             case 'GET':
 
                 //switch for requested URL
-                switch ($requestedCompleteURL[1]) {
+                switch ($requestedFinalURL[1]) {
                     //for overview page
-                    case '/activetodos':
+                    case 'activetodos':
                         $getAllActiveTodos = getAllActiveTodos();
-                        if (!$getAllActiveTodos) {
+                        if (empty($getAllActiveTodos)) {
                             return false;
                         }
                         echo xmlFormatter($getAllActiveTodos);
                         return errormessage(200);
-
                     //for archive and "marked as deleted"
-                    case '/inactivetodos':
+                    case 'inactivetodos':
                         $getAllInactiveTodos = getAllInactiveTodos();
                         if (!$getAllInactiveTodos) {
                             return false;
                         }
                         echo xmlFormatter($getAllInactiveTodos);
                         return errormessage(200);
-
-                    //for getting a specific todo
-                    case '/todo/?id=':
-                        $IdToTest = $_GET['id'];
-                        $formattedId = intval(htmlspecialchars($IdToTest));
-                        if (is_numeric($IdToTest) &&
-                            (($formattedId !== 0) | ($formattedId !== 1))) {
-
-                            $getTodoById = getTodoById($formattedId);
-                            if (!isset($getTodoById)) {
-                                return errormessage(404);
-                            }
-                            if (is_null($getTodoById) | empty($getTodoById) | ($getTodoById === false) | !(isset($getTodoById) === true)) {
-                                return errormessage(404);
-                            }
-
-                            header("Location: /http://localhost/optimizer/src/website/todo.html");
-
-                            echo xmlFormatterSingle($getTodoById);
-                            return errormessage(200);
-                        } else {
-                            return errormessage(404);
-                        }
-
-                    case '/countaktivetodos' :
+                    case 'countaktivetodos' :
                         //returns number of all active todos (status != 5)
                         $countActiveTodos = countActiveTodos();
                         if (!$countActiveTodos) {
@@ -75,11 +53,43 @@ function routing(): bool
                         echo $countActiveTodos;
                         return errormessage(200);
 
-                    default: return errormessage(404);
+                    //for getting a specific todo
+                    case 'todo' :
+                        //check if a second part (f.e. ?id=) is missing
+                            if (!isset($requestedFinalURL[2])) {
+                                return errormessage(404);
+                            }
+                            $IdToTest = $_GET['id'];
+                            $formattedId = intval(htmlspecialchars($IdToTest));
+                            if (is_numeric($IdToTest) &&
+                                (($formattedId !== 0) | ($formattedId !== 1))) {
+
+                                //get the todo from backend
+                                $getTodoById = getTodoById($formattedId);
+
+                                if (!isset($getTodoById)) {
+
+                                    return errormessage(404);
+                                }
+                                //check if ID is known by the backend
+                                if (is_null($getTodoById) | empty($getTodoById) | ($getTodoById === false) | !(isset($getTodoById) === true)) {
+                                    return errormessage(404);
+                                }
+
+                                header("Location: /http://localhost/optimizer/src/website/todo.html");
+
+                                echo xmlFormatterSingle($getTodoById);
+                                return errormessage(200);
+                            } else {
+                                return errormessage(404);
+                            }
+
+                        default:
+                        return errormessage(404);
                 }
 
             case 'POST':
-                if (strcmp($requestedCompleteURL[1], "/todo") == 0 && strcmp($_SERVER['REQUEST_METHOD'], 'POST') == 0) {
+                if (strcmp($requestedFinalURL[1], "/todo") == 0 && strcmp($_SERVER['REQUEST_METHOD'], 'POST') == 0) {
 
                     //grab the body, TODO: check if there is any body
                     $entityBody = file_get_contents('php://input');
@@ -90,7 +100,7 @@ function routing(): bool
                     }
                     echo xmlFormatterSingle($createTodo);
                     return errormessage(201);
-                } elseif (str_contains($requestedCompleteURL[1], '/todo/?id=') && strcmp($_SERVER['REQUEST_METHOD'], 'POST') === 0 &&
+                } elseif (str_contains($requestedFinalURL[1], '/todo/?id=') && strcmp($_SERVER['REQUEST_METHOD'], 'POST') === 0 &&
                     is_numeric($_GET['id']) &&
                     (intval(htmlspecialchars($_GET['id'])) !== 0)) {
 
@@ -115,7 +125,7 @@ function routing(): bool
                 //Delete specific to do
                 $IdToTest = $_GET['id'];
                 $formattedId = intval(htmlspecialchars($IdToTest));
-                if (str_contains($requestedCompleteURL[1], '/todo/?id=') &&
+                if (str_contains($requestedFinalURL[1], '/todo/?id=') &&
                     is_numeric($IdToTest) &&
                     (($formattedId !== 0)  | ($formattedId !== 1))
                 ) {

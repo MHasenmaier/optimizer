@@ -94,6 +94,17 @@ function createTodoElements(xmlObject) {
  * handles the clickevents triggered by buttons at overview-page
  */
 function clickEvents() {
+
+    // ID des Buttons in variable speichern
+
+    //Daten der ID aus DB abrufen
+
+    //ASYNC Aufrufen der todo.html
+
+    //Solange Promise unerfüllt ist - Ladescreen
+
+    //Wenn Promise erfüllt ist, Daten des Promise in Seite anzeigen
+
     console.log("clickEvents available: . . .");
     const allTodoButtons = document.querySelectorAll('.todoButton');
 
@@ -101,7 +112,7 @@ function clickEvents() {
 
 
     for (let i = 0; i < allTodoButtons.length; i++) {       // browse through all buttons
-        allTodoButtons[i].addEventListener('click', async function () {  // click event for all buttns
+        allTodoButtons[i].addEventListener('click', async function () {  // click event for all buttons
             specificID = this.parentElement.id;        // catch id of the clicked to-do  //alternate to "this" -> "allTodoButtons[i]"
             if (specificID !== -1) {                                // check if there really was click and the ID has been catched
 
@@ -125,10 +136,11 @@ function clickEvents() {
  * @param input
  */
 function renderTodoInAddTodo(input) {
-    console.log(`renderTodo inputXML = ${input}`);
+    console.log(`renderTodo input (XML) = ${input}`);
 
+    //TODO: XML bleibt XML - kein to-string parsen
     const inputXML = parseXMLString(input);
-    console.log(`parsedXML = ${inputXML}`);
+    console.log(`parsed inputXML = ${inputXML}`);
 
     if (inputXML instanceof XMLDocument) {
         console.log("inputXML is valid");
@@ -138,7 +150,7 @@ function renderTodoInAddTodo(input) {
     }
 
     const rootNode = inputXML.documentElement;
-    console.log(`renderTodo rootNode = ${rootNode.nodeName}`);
+    console.log(`renderTodo rootNode.nodeName = ${rootNode.nodeName}`);
 
     const children = rootNode.childNodes;
     for (let i = 0; i < children.length; i++) {
@@ -199,7 +211,7 @@ function parseXMLString(inputString) {
     return parser.parseFromString(inputString.trim, "application/xml");
 }
 
-// for page: createTodo
+// for page: todo
 function sendData() {
     const buttonAddTodo = document.getElementById("buttonAddTodo");
 
@@ -250,3 +262,6 @@ function sendData() {
             .then(() => console.log(todoElement))
     });
 }
+
+
+

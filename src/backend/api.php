@@ -100,7 +100,7 @@ include 'dbserver.php';
 
 		try {
 			//status 1 => deleted, status 5 => done } => both inaktive
-			$sqlSelectAllActiveTodos = 'SELECT * FROM todotable WHERE status != (5 | 1)';
+			$sqlSelectAllActiveTodos = 'SELECT * FROM todotable WHERE status NOT IN (1, 5)';
 
 			$getAllActiveTodos = $dbPDO->prepare($sqlSelectAllActiveTodos);
 			$getAllActiveTodos->execute();
@@ -122,7 +122,7 @@ include 'dbserver.php';
 		global $dbPDO;
 
 		try {
-			$selectAllInactiveTodos = 'SELECT * FROM todotable WHERE status = (5 | 1)';
+			$selectAllInactiveTodos = 'SELECT * FROM todotable WHERE status IN (1 , 5)';
 
 			$stmt = $dbPDO->prepare($selectAllInactiveTodos);
 			$stmt->execute();
@@ -186,10 +186,10 @@ include 'dbserver.php';
 			$expectedTodoById->execute(['id' => $id]);
 
             // PDOstmt -> array
-			$checkedIDTodo = ($expectedTodoById->fetchAll(PDO::FETCH_ASSOC))[0];
+			$checkedIDTodo = ($expectedTodoById->fetch(PDO::FETCH_ASSOC));
 
 			//check if array is empty
-			if (empty($checkedIDTodo)) {
+			if ($checkedIDTodo === false) {
 				return errormessage(404);
 			}
 
@@ -293,17 +293,17 @@ include 'dbserver.php';
 
 // task functions
 
-    //function createTask           //TODO Nr. 3: Task stuff
+    //function createTask           //TODO Nr. 2: Task stuff
 
-    //function getTaskById          //TODO Nr. 3: Task stuff
+    //function getTaskById          //TODO Nr. 2: Task stuff
 
-    //function getAllTasksByTodoID  //TODO Nr. 3: Task stuff
+    //function getAllTasksByTodoID  //TODO Nr. 2: Task stuff
 
-    //function countTaskByTodoID    //TODO Nr. 3: Task stuff -> Maybe bullshit
+    //function countTaskByTodoID    //TODO Nr. 2: Task stuff -> Maybe bullshit
 
-    //function updateTask           //TODO Nr. 3: Task stuff
+    //function updateTask           //TODO Nr. 2: Task stuff
 
-    //function deleteTask           //TODO Nr. 3: Task stuff
+    //function deleteTask           //TODO Nr. 2: Task stuff
 
 
 // support functions
