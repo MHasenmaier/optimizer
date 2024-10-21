@@ -21,8 +21,8 @@ include 'dbserver.php';
 
         //convert values into correct datatypes
         foreach ($todoElementSimpleXMLObj->children() as $key => $value) {
-            //convert $value into int (if status) or string (if description, title or lastUpdate)
-            $newTodoArray[$key] = dataTypeConvert($key, $value);
+            //convert $value into int (if status) or string (if title, description or lastUpdate)
+            $newTodoArray[$key] = tagTypeConvert($key, $value);
         }
 
         if (!isset($newTodoArray) | empty($newTodoArray)) {
@@ -228,7 +228,7 @@ include 'dbserver.php';
         $todoElementSimpleXMLObj = $todoArray['todo'];
 
         foreach ($todoElementSimpleXMLObj->children() as $key => $value) {
-            $updateArray[$key] = dataTypeConvert($key, $value);
+            $updateArray[$key] = tagTypeConvert($key, $value);
         }
 
 		//exit for invalid IDs
@@ -444,12 +444,13 @@ include 'dbserver.php';
         ";
     }
 
+    //actual not used - can be deleted if backend is working properly
     /** converter for createTodo and updateTodo
      * @param $inputKey
      * @param $inputValue
      * @return bool|int|string
      */
-    function dataTypeConvert ($inputKey, $inputValue): bool|int|string {
+    function tagTypeConvert ($inputKey, $inputValue): bool|int|string {
         if (strcmp($inputKey, 'status') == 0) {
             return (int)$inputValue;
         } elseif (strcmp($inputKey, 'description') == 0 | strcmp($inputKey, 'lastUpdate') == 0 | strcmp($inputKey, 'title') == 0) {

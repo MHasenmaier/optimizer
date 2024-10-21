@@ -92,15 +92,22 @@ function routing(): bool
                 //createTodo
                 if ((strcmp($requestedFinalURL[1], "todo") == 0) && strcmp(end($requestedFinalURL), $requestedFinalURL[1]) == 0) {
 
-                    //grab the body, TODO: if( is there any body? ){ do stuff }
+                    //grab the body -> string
                     $entityBody = file_get_contents('php://input');
 
-                    $createTodo = printStuff($entityBody);
-
-                    //$createTodo =  createTodo($entityBody);
-                    if (!$createTodo) {
-                        return false;
+                    //check if body is empty
+                    if (!$entityBody) {
+                        return errormessage(404);
                     }
+
+                    $createTodo = createTodo($entityBody);
+
+                    //check if createTodo works properly
+                    if (!$createTodo) {
+                        echo "test";
+                        return errormessage(500);
+                    }
+
                     echo xmlFormatterSingle($createTodo);
                     return errormessage(201);
 
