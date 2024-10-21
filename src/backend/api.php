@@ -201,6 +201,12 @@ include 'dbserver.php';
 		}
 	}
 
+    function printStuff($input)
+    {
+        echo "printStuff(input = $input)";
+        return $input;
+    }
+
     /**
      * update function
      * does not take care about form validation
@@ -214,8 +220,10 @@ include 'dbserver.php';
 	{
 		global $dbPDO;
 
+        echo "inputTodoDataArray = $inputTodoDataArray";
+
         $xmlObject = simplexml_load_string($inputTodoDataArray);    //string -> XML object
-        $todoArray = xmlToArray($xmlObject);
+        $todoArray = xmlToArray($xmlObject);                        //xml obj -> array
 
         $todoElementSimpleXMLObj = $todoArray['todo'];
 
@@ -244,8 +252,9 @@ include 'dbserver.php';
 
 			// check if status is valid
 			$updateArray['status'] = statusCheck($updateArray['status']);
+            echo "updateArray = $updateArray[status]";
 
-            //set updateDate to the actuall date
+            //set updateDate to the actual date
             $updateDate = date('Y-m-d', time());
 
 			$prepUpdatedTodo = $dbPDO->prepare($updateTodo);
@@ -282,8 +291,8 @@ include 'dbserver.php';
             WHERE ID = :IDValue';
 			$stmt = $dbPDO->prepare($deleteTodo);
 			$stmt->execute(['IDValue' => $id]);
-			echo 'DELETE hat ' . $stmt->rowCount() . ' Zeilen gelöscht. <br>';
-			echo 'DELETE hat den Eintrag mit der ID: ' . $id . ' endgültig gelöscht.';
+			printf('DELETE hat ' . $stmt->rowCount() . ' Zeile gelöscht. <br>');
+			printf('DELETE hat den Eintrag mit der ID: ' . $id . ' endgültig gelöscht.');
 			return true;
 		} catch (PDOException $e) {
 			echo 'DELETE hat nicht geklappt:<br>' . $e->getMessage();
@@ -421,16 +430,17 @@ include 'dbserver.php';
     function varDEBUG (string $input, $data): void
     {
         echo "
-        XXXXXXXXXXXX
-        varDEBUG
-        XXXXXXXXXXXX
+        
+        ++++++++++++
+        varDEBUG start
+        
         var_dump $input =
         ";
         var_dump($data);
         echo "
-        XXXXXXXXXXXX
         varDEBUG end
-        XXXXXXXXXXXX
+        ------------
+        
         ";
     }
 

@@ -89,22 +89,24 @@ function routing(): bool
                 }
 
             case 'POST':
-                if (strcmp($requestedFinalURL[1], "/todo") == 0 && strcmp($_SERVER['REQUEST_METHOD'], 'POST') == 0) {
+                //createTodo
+                if ((strcmp($requestedFinalURL[1], "todo") == 0) && strcmp(end($requestedFinalURL), $requestedFinalURL[1]) == 0) {
 
-                    //grab the body, TODO: check if there is any body
+                    //grab the body, TODO: if( is there any body? ){ do stuff }
                     $entityBody = file_get_contents('php://input');
 
-                    $createTodo =  createTodo($entityBody);
+                    $createTodo = printStuff($entityBody);
+
+                    //$createTodo =  createTodo($entityBody);
                     if (!$createTodo) {
                         return false;
                     }
                     echo xmlFormatterSingle($createTodo);
                     return errormessage(201);
-                } elseif (str_contains($requestedFinalURL[1], '/todo/?id=') && strcmp($_SERVER['REQUEST_METHOD'], 'POST') === 0 &&
-                    is_numeric($_GET['id']) &&
-                    (intval(htmlspecialchars($_GET['id'])) !== 0)) {
 
-                    // (int)$id but ... nicer
+                } elseif (str_contains($requestedFinalURL[2], '?id=') && strcmp(end($requestedFinalURL), $requestedFinalURL[2]) == 0) {
+                    //updateTodo
+                    //parse to int: $id
                     $id = intval(htmlspecialchars($_GET['id']));
 
                     //grab the body
@@ -123,10 +125,14 @@ function routing(): bool
 
             case 'DELETE':
                 //Delete specific to do
+
+                //grab ID
                 $IdToTest = $_GET['id'];
+
+                //cast string to int
                 $formattedId = intval(htmlspecialchars($IdToTest));
-                if (str_contains($requestedFinalURL[1], '/todo/?id=') &&
-                    is_numeric($IdToTest) &&
+
+                if (str_contains($requestedFinalURL[1], 'todo') && strcmp($requestedFinalURL[2], '?id=') &&
                     (($formattedId !== 0)  | ($formattedId !== 1))
                 ) {
 
