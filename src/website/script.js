@@ -113,7 +113,7 @@ async function clickTodoEvent() {
     //let todoPage = false;
 
     arrAllTodoButtons.forEach(button => {
-        button.addEventListener('click', async () => {
+        button.addEventListener('click', async (event) => {
             //get ID of the todo (parent div of the button)
             intSpecificID = event.target.parentElement.id;
 
