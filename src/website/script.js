@@ -3,7 +3,7 @@ const contentOverview = document.getElementById("contentOverview");
 const mainAddTodo = document.getElementById("mainAddTodo");
 
 if (contentOverview) {
-    loadTodosAsyncForOverview().then(clickEvents);
+    loadTodosAsyncForOverview().then(clickTodoEvent);
 }
 
 if (mainAddTodo) {
@@ -14,7 +14,7 @@ if (mainAddTodo) {
 // for page: overview
 /**
  * loads all todos at overview.html
- * @returns {Promise<boolean>}
+ * @returns Promise
  */
 async function loadTodosAsyncForOverview() {
     try {
@@ -93,42 +93,55 @@ function createTodoElements(xmlObject) {
 /**
  * handles the clickevents triggered by buttons at overview-page
  */
-function clickEvents() {
+function clickTodoEvent() {
 
-    // ID des Buttons in variable speichern
+    //clickEvents funktionsnamen ändern - OK (clickTodoEvent)
 
-    //Daten der ID aus DB abrufen
+    //TODO: ID des Buttons in variable speichern
 
-    //ASYNC Aufrufen der todo.html
+    //TODO: Daten der ID aus DB abrufen
 
-    //Solange Promise unerfüllt ist - Ladescreen
+    //TODO: ASYNC Aufrufen der todo.html
 
-    //Wenn Promise erfüllt ist, Daten des Promise in Seite anzeigen
+    //TODO: Solange Promise unerfüllt ist - Ladescreen
 
-    console.log("clickEvents available: . . .");
-    const allTodoButtons = document.querySelectorAll('.todoButton');
+    //TODO: Wenn Promise erfüllt ist, Daten des Promise in Seite anzeigen
 
-    let specificID = -1; //default value
+    console.log("start: clickTodoEvent");
+    const arrAllTodoButtons = document.querySelectorAll('.todoButton');
 
+    //let intSpecificID = -1; //default value
 
-    for (let i = 0; i < allTodoButtons.length; i++) {       // browse through all buttons
-        allTodoButtons[i].addEventListener('click', async function () {  // click event for all buttons
-            specificID = this.parentElement.id;        // catch id of the clicked to-do  //alternate to "this" -> "allTodoButtons[i]"
-            if (specificID !== -1) {                                // check if there really was click and the ID has been catched
+    arrAllTodoButtons.forEach(button => {
+        button.addEventListener('click', catchIdOfTodo );
+       // => {              // click event for all buttons
+       //         intSpecificID = this.parentId.id;                                     // catch id of the clicked todo  //alternate to "this" -> "arrAllTodoButtons[i]"
+       //         console.log(`intSpecificID: ${intSpecificID}`);                     //TODO: ID = undefined - warum?
+       //         console.log(`this: ${this.element}`);                               //TODO: is undefined - why?
+       //         console.log(`this.parent: ${this.parent.id}`);                      //TODO: is undefined - why?
+       //         if (!(intSpecificID < 0)) {                                                    // check if there really was click and the ID has been caught
+       //             try {
+       //                 const fetchedXML = await getSpecificTodo(intSpecificID);     // get the specific to-do
+       //                 await switchToTodoPage;
+       //                 await renderTodoInAddTodo(intSpecificID);
+       //             } catch (error) {
+       //                 console.error(`frontend error in clickTodoEvent: ${error}`);
+       //             }
+       //             console.log(`specID: ${intSpecificID}`);
+       //         }
+       //  }
+            //.then(switchToTodoPage)
+            //.then(renderTodoInAddTodo)
+    //    )
+    });
 
-                try {
-                    const fetchedXML = await getSpecificTodo(specificID);     // get the specific to-do
-                    console.log(`fetched xml = ${fetchedXML}`);             // log specific to-do
-                    switchToTodoPage();
-                    renderTodoInAddTodo(fetchedXML);
-                } catch (error) {
-                    console.error(`frontend error in clickevents: ${error}`);
-                }
-                console.log(`specID: ${specificID}`);
-            }
-        })
-    }
-    console.log("--- clickEvent finished ---");
+    console.log("--- end: clickTodoEvent ---");
+}
+
+async function catchIdOfTodo (event) {
+    console.log(`Button ID = ${event.target.parent.id}`);
+    console.log(`Button innerHtml = ${event.target.innerHTML}`);
+
 }
 
 /**
@@ -179,7 +192,7 @@ function renderTodoInAddTodo(input) {
 /**
  *
  * @param id
- * @returns {Promise<Document>}
+ * @returns Promise<Document>
  */
 async function getSpecificTodo(id) {
     try {
@@ -262,6 +275,3 @@ function sendData() {
             .then(() => console.log(todoElement))
     });
 }
-
-
-
