@@ -320,7 +320,7 @@ a:active {
   flex-direction: column;
 }
 
-#todoTitle {
+#todoPageTodoTitle {
   font-size: 18px;
   padding: 9px 5px;
   margin: 9px 0 9px;
@@ -329,7 +329,7 @@ a:active {
   border: #d3d3d3 solid 2px;
 }
 
-#todoTitle::placeholder {
+#todoPageTodoTitle::placeholder {
   color: #d3d3d3;
 }
 

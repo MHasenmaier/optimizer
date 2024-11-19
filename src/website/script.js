@@ -1,6 +1,8 @@
 const parser = new DOMParser();
 const contentOverview = document.getElementById("contentOverview");
 const mainAddTodo = document.getElementById("mainAddTodo");
+const givenTodoTitle = document.getElementById("todoPageTodoTitle");
+const arrAllTodoButtons = document.querySelectorAll('.todoButton');
 
 if (contentOverview) {
     loadTodosAsyncForOverview().then(clickTodoEvent);
@@ -93,65 +95,102 @@ function createTodoElements(xmlObject) {
  * handles the clickevents triggered by buttons at overview-page
  */
 async function clickTodoEvent() {
-
-    //clickEvents funktionsnamen ändern - OK (clickTodoEvent)
-
-    //ID des Buttons in variable speichern - OK (intSpecificID)
-
-    //Daten der ID aus DB abrufen - OK
-
-    //TODO: ASYNC Aufrufen der todo.html
-
-    //TODO: Solange Promise unerfüllt ist - Ladescreen
-
-    //TODO: Wenn Promise erfüllt ist, Daten des Promise in Seite anzeigen
-
     console.log("start: clickTodoEvent");
-    const arrAllTodoButtons = document.querySelectorAll('.todoButton');
 
-    let intSpecificID = -1; //default value
-    //let todoPage = false;
-
-    arrAllTodoButtons.forEach(button => {
-        button.addEventListener('click', async (event) => {
-            //get ID of the todo (parent div of the button)
-            intSpecificID = event.target.parentElement.id;
-
-            //check if catch-ID worked
-            if (intSpecificID > 0) {
-                //get the todo from DB
-                try {
-                    const response = await fetch(`http://localhost/optimizer/src/backend/index.php/todo/?id=${intSpecificID}`, {
-                        mode: "cors",
-                    });
-                    const body = await response.text();
-                    const xmlTodo = await parser.parseFromString(body, "text/xml");
-                    await console.log('Todo async loaded\nXML formatted: \n', xmlTodo, '\n');
-
-                    //TODO: await for promise, DB info
-                    //async switch to todo.html
-                    switchToTodoHTML();
-
-                    //TODO: wait for promise, DB info  - TODO: wait for page has loaded successfully
-                    //write todo info in the input and text-area at the todo page - if page is loaded and DB has responded
-                    renderTodoInAddTodo(xmlTodo);
-
-
-
-                    return xmlTodo;
-                } catch (err) {
-                    console.log("frontend error in getSpecificTodo:\n" , err , "\n");
-                }
-            }
-
-
-        })
-
-
-        //renderTodoInAddTodo()
-
+    new Promise((resolve) => {
+        arrAllTodoButtons.forEach(button => {
+            button.addEventListener('click', async (event) => {
+                //get ID of the todo (parent div of the button)
+                //const specificID =
+                resolve(event.target.parentElement.id);
+            });
+        });
     });
 
+    //+++++++++++++
+    // .then alternative
+    //+++++++++++++
+
+   // isTodoHTMLLoaded()
+   //     .then(bIsTodoPageLoaded => {
+   //         if (bIsTodoPageLoaded) {
+   //             return eventHandlerOverview();
+   //         }
+   //     })
+//
+   //     .then(stringId => {
+   //         if (stringId) {
+   //             return fetchDBTodo(stringId);
+   //         }
+   //     })
+   //     .then(xmlTodoElement => {
+   //         if (xmlTodoElement) {
+   //             renderTodoInAddTodo(xmlTodoElement);
+   //         }
+   //     })
+   //     .catch(err => {
+   //         console.error(`Error in clickTodoEvent: ${err}`);
+   //     })
+
+    //+++++++++++++
+    // await alternative
+    //+++++++++++++
+
+    //TODO: wird automatisch nach laden der seite overview ausgeführt - warum?
+
+    try {
+        const stringId  = await specificID;
+            //const bIsTodoPageLoaded  =
+            await isTodoHTMLLoaded();
+            const xmlTodoElement = await fetchDBTodo(stringId);
+            if (xmlTodoElement) {
+                renderTodoInAddTodo(xmlTodoElement);
+            }
+    } catch (err) {
+        console.error(`Error in clickTodoEvent: ${err}`);
+    }
+}
+
+/**
+ * async function - click event listener for all todo buttons to get the ID of the clicked todo
+ * returns string - ID number if promise is fulfilled
+ * @returns {Promise<void>}
+ */
+//async function eventHandlerOverview () {
+//    return new Promise((resolve) => {
+//    arrAllTodoButtons.forEach(button => {
+//        button.addEventListener('click', async (event) => {
+//            //get ID of the todo (parent div of the button)
+//            resolve(event.target.parentElement.id);
+//            });
+//        });
+//    });
+//}
+
+/**
+ * take the provided ID and fetch the todo data of it from the DB
+ * returns the XML formatted todo data if promise is fulfilled
+ * @param inputSpecificID
+ * @returns {Promise<Document>}
+ */
+async function fetchDBTodo (inputSpecificID) {
+    //to prevent invalid IDs
+    if (inputSpecificID > 0) {
+        try {
+            const response = await fetch(`http://localhost/optimizer/src/backend/index.php/todo/?id=${intSpecificID}`, {
+                mode: "cors",
+            });
+            const body = await response.text();
+            await console.log(`body: ${body}`)
+
+            const xmlTodo = await parser.parseFromString(body, "text/xml");
+            await console.log('Todo async loaded\nXML formatted (xmlTodo loaded): \n', xmlTodo, '\n');
+
+            return xmlTodo;
+        } catch (err) {
+            console.log("frontend error in getSpecificTodo:\n" , err , "\n");
+        }
+    }
 }
 
 /**
@@ -159,6 +198,7 @@ async function clickTodoEvent() {
  * @param xmlInput
  */
 function renderTodoInAddTodo(xmlInput) {
+    const givenTodoTitle = document.getElementById("todoPageTodoTitle");
     const id = xmlInput.getElementsByTagName("ID")[0].textContent;
     let title = xmlInput.getElementsByTagName("title")[0].textContent;
     let status = xmlInput.getElementsByTagName("status")[0].textContent;
@@ -166,27 +206,29 @@ function renderTodoInAddTodo(xmlInput) {
 
     console.log(`id = ${id}\ntitle = ${title}\nstatus = ${status}\ndescription:\n${description}\n`);
 
+    //TODO: type-error (getelementbyID austauschen)
 
+    givenTodoTitle.value = title;
 
-    //TODO: type-error (.innerHTML)
-    let titelAtPage = document.getElementById("todoTitle").innerHTML;
 
     //let descriptionAtPage = document.getElementById("todoDescription").innerHTML;
 
-    console.log(`TodoTitel = ${titelAtPage}`);
+    //console.log(`todoPageTodoTitle = ${titelAtPage}`);
 
     //document.getElementById("todoTitle").innerText = xmlInput.getElementsByTagName("title")[0].textContent;
     //document.getElementById("todoDescription").innerText = xmlInput.getElementsByTagName("description")[0].textContent;
-
-
 }
 
 /**
- * switch to the (Add-New-)To-do-Page
- * @returns {string}
+ * async function to switch to the (Add-New-)To-do-Page
+ * returns 'true' if page is loaded
+ * @returns {true}
  */
-function switchToTodoHTML() {
-    return window.location.href = "http://localhost/optimizer/src/website/todo.html";
+async function isTodoHTMLLoaded() {
+    //TODO: Solange Promise unerfüllt ist - Ladescreen
+    window.location.href = "http://localhost/optimizer/src/website/todo.html";
+    await new Promise(resolve => window.addEventListener('load', resolve));
+    return true;
 }
 
 /**
