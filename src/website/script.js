@@ -4,12 +4,20 @@ const mainAddTodo = document.getElementById("mainAddTodo");
 const givenTodoTitle = document.getElementById("todoPageTodoTitle");
 const arrAllTodoButtons = document.querySelectorAll('.todoButton');
 
-if (contentOverview) {
-    loadTodosAsyncForOverview().then(clickTodoEvent);
+document.addEventListener('DOMContentLoaded', init);
+
+function init() {
+
+    if (contentOverview) {
+        console.log("Overview< loading. . .")
+        loadTodosAsyncForOverview().then(eventOverview);
+    }
 }
 
+
+
 if (mainAddTodo) {
-    console.log(">Todo Main> startet . . .")
+    console.log("Todo Main< loading . . .")
     //sendData();
 }
 
@@ -53,7 +61,7 @@ function createTodoElements(xmlObject) {
         // Extract the relevant data
         const id = todo.getElementsByTagName("ID")[0].textContent;
         const title = todo.getElementsByTagName("title")[0].textContent;
-        //let status = to-do.getElementsByTagName("status")[0].textContent;
+        //let status = todo.getElementsByTagName("status")[0].textContent;
 
         // Create the div for the todo
         const todoDiv = document.createElement("div");
@@ -75,11 +83,7 @@ function createTodoElements(xmlObject) {
         const taskBox = document.createElement("button");
         taskBox.setAttribute("class", "taskButton");
 
-
-        // Display the checkbox only if taskId is not 0
-        //if (taskId !== "") {
-            // TODO: box einblenden mit ANZAHL angehängter tasks
-        //}
+        // TODO: box einblenden mit ANZAHL angehängter tasks
 
         // Append the newly created div to an existing container on your page
         contentOverview.appendChild(todoDiv);
@@ -94,61 +98,40 @@ function createTodoElements(xmlObject) {
 /**
  * handles the clickevents triggered by buttons at overview-page
  */
-async function clickTodoEvent() {
-    console.log("start: clickTodoEvent");
+async function eventOverview() {
+    console.log("Step 0: Overview finished loading.\neventOverview startet. . .");
 
-    new Promise((resolve) => {
-        arrAllTodoButtons.forEach(button => {
-            button.addEventListener('click', async (event) => {
-                //get ID of the todo (parent div of the button)
-                //const specificID =
-                resolve(event.target.parentElement.id);
-            });
-        });
-    });
+    eventHandlerOverview()
+        .then(specificId => {
+            console.log(`Step 1: specificId = ${specificId}`);
+            fetchDBTodo(specificId)
+                .then (todoXml => {
+                    console.log(`Step 2: fetched todoXml = ${JSON.stringify(todoXml)}`);
+                    isTodoHTMLLoaded();
+                    renderTodoInAddTodo(todoXml);
+                })
+                .catch(err => console.error(`Something went wrong ${err}`));
+        })
 
-    //+++++++++++++
-    // .then alternative
-    //+++++++++++++
 
-   // isTodoHTMLLoaded()
-   //     .then(bIsTodoPageLoaded => {
-   //         if (bIsTodoPageLoaded) {
-   //             return eventHandlerOverview();
-   //         }
-   //     })
+
+
+
+//    //Step 1: load the click-event-handler and catch the button ID if clicked
+//    eventHandlerOverview().then(resp => {specificId = resp});
+//    //const specificId = await eventHandlerOverview();
+//    console.log(`Step 1: specificId = ${specificId}`);
 //
-   //     .then(stringId => {
-   //         if (stringId) {
-   //             return fetchDBTodo(stringId);
-   //         }
-   //     })
-   //     .then(xmlTodoElement => {
-   //         if (xmlTodoElement) {
-   //             renderTodoInAddTodo(xmlTodoElement);
-   //         }
-   //     })
-   //     .catch(err => {
-   //         console.error(`Error in clickTodoEvent: ${err}`);
-   //     })
-
-    //+++++++++++++
-    // await alternative
-    //+++++++++++++
-
-    //TODO: wird automatisch nach laden der seite overview ausgeführt - warum?
-
-    try {
-        const stringId  = await specificID;
-            //const bIsTodoPageLoaded  =
-            await isTodoHTMLLoaded();
-            const xmlTodoElement = await fetchDBTodo(stringId);
-            if (xmlTodoElement) {
-                renderTodoInAddTodo(xmlTodoElement);
-            }
-    } catch (err) {
-        console.error(`Error in clickTodoEvent: ${err}`);
-    }
+//    //Step 2: send the ID to the backend and fetch the todo data
+//    const todoXml = await fetchDBTodo(specificId);
+//    console.log(`Step 2: fetched todoXml = ${JSON.stringify(todoXml)}`);
+//
+//    //Step 3: load the todo page
+//    const isTodoPageLoaded = await isTodoHTMLLoaded();
+//    console.log(`Step 3: isTodoPageLoaded? = ${isTodoPageLoaded}`);
+//
+//    //Step 4: fill the todo page with todo data
+//    await renderTodoInAddTodo(todoXml);
 }
 
 /**
@@ -156,16 +139,21 @@ async function clickTodoEvent() {
  * returns string - ID number if promise is fulfilled
  * @returns {Promise<void>}
  */
-//async function eventHandlerOverview () {
-//    return new Promise((resolve) => {
-//    arrAllTodoButtons.forEach(button => {
-//        button.addEventListener('click', async (event) => {
-//            //get ID of the todo (parent div of the button)
-//            resolve(event.target.parentElement.id);
-//            });
-//        });
-//    });
-//}
+async function eventHandlerOverview () {
+    return new Promise((resolve) => {
+
+        console.log("function eventHandlerOverview: resolve = " , resolve);
+        arrAllTodoButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+            //get ID of the todo (parent div of the button)
+                console.log("function eventHandlerOverview: button clicked . . .");
+                const id = (event.target.parentElement.id);
+                console.log(`clicked button ID = ${id}`);
+                resolve(id);
+            });
+        });
+    });
+}
 
 /**
  * take the provided ID and fetch the todo data of it from the DB
@@ -174,6 +162,7 @@ async function clickTodoEvent() {
  * @returns {Promise<Document>}
  */
 async function fetchDBTodo (inputSpecificID) {
+    console.log(`function fetchDBTodo startet with ${inputSpecificID} . . .`);
     //to prevent invalid IDs
     if (inputSpecificID > 0) {
         try {
@@ -181,11 +170,14 @@ async function fetchDBTodo (inputSpecificID) {
                 mode: "cors",
             });
             const body = await response.text();
-            await console.log(`body: ${body}`)
+            await console.log(`body: ${body}`);
+
+            const parser = new DOMParser();// ?? notwendig?
 
             const xmlTodo = await parser.parseFromString(body, "text/xml");
             await console.log('Todo async loaded\nXML formatted (xmlTodo loaded): \n', xmlTodo, '\n');
 
+            console.log(`function fetchDBTodo: xmlTodo = ${xmlTodo}`);
             return xmlTodo;
         } catch (err) {
             console.log("frontend error in getSpecificTodo:\n" , err , "\n");
@@ -225,10 +217,15 @@ function renderTodoInAddTodo(xmlInput) {
  * @returns {true}
  */
 async function isTodoHTMLLoaded() {
+    console.log("function isTodoHTMLLoaded startet . . .")
     //TODO: Solange Promise unerfüllt ist - Ladescreen
     window.location.href = "http://localhost/optimizer/src/website/todo.html";
-    await new Promise(resolve => window.addEventListener('load', resolve));
-    return true;
+    return new Promise(resolve => {
+        window.addEventListener('load', () => {
+            console.log("isTodoHTMLLoaded: Todo Page loaded . . .");
+            resolve(true);
+        });
+    });
 }
 
 /**
