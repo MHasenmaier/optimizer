@@ -1,15 +1,22 @@
 const parser = new DOMParser();
 const contentOverview = document.getElementById("contentOverview");
 const mainAddTodo = document.getElementById("mainAddTodo");
-const givenTodoTitle = document.getElementById("todoPageTodoTitle");
+const landingPage = document.getElementById("bodyLanding");
 const arrAllTodoButtons = document.querySelectorAll('.todoButton');
 
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
+    //TODO: add a function to check if the DB exists
+    if (landingPage) {
+        console.log("App startet. . .");
+        document.getElementById("landingButton").addEventListener("click", () => {
+        window.location.href = "overview.html";
+        });
+    }
 
     if (contentOverview) {
-        console.log("Overview< loading. . .")
+        console.log("Overview loading. . .")
         loadTodosAsyncForOverview().then(eventOverview);
     }
 }
@@ -17,7 +24,7 @@ function init() {
 
 
 if (mainAddTodo) {
-    console.log("Todo Main< loading . . .")
+    console.log("Todo Main loading . . .")
     //sendData();
 }
 
@@ -269,7 +276,6 @@ function sendData() {
         //console.log(todoElement);
 
         const url = "http://localhost/optimizer/src/backend/index.php/todo";
-        //const urlA = "http://localhost:63342/optimizer/src/website/createTodo.html?_ijt=n56q2cvh6ssai843ca0hrav1au&_ij_reload=RELOAD_ON_SAVE";
 
         await fetch(url, {
             method: "POST",

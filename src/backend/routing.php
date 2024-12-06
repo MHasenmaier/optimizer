@@ -76,7 +76,7 @@ function routing(): bool
                                     return errormessage(404);
                                 }
 
-                                header("Location: /http://localhost/optimizer/src/website/todo.html");
+                                header("Location: /http://localhost:8080/optimizer/src/website/todo.html");
 
                                 echo xmlFormatterSingle($getTodoById);
                                 return errormessage(200);

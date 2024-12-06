@@ -1,5 +1,31 @@
 /**
 *
+*   landing page
+*
+ */
+
+.landingPic {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.startButton {
+  display: flex;
+  padding: 12px 32px;
+  margin: auto;
+  font-size: 30px;
+  color: #fafafa;
+  border-radius: 8px;
+  border: #d3d3d3 solid 2px;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  background-color: #436CFE;
+}
+
+/**
+*
 *   overview
 *
 */
