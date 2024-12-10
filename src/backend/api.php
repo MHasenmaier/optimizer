@@ -2,6 +2,9 @@
 include 'dbserver.php';
 
 // todo functions
+	//FIXME: repair DB functions
+	//TODO: add check function if DB exists
+	//TODO: add task functions
 
     /**
      * create function

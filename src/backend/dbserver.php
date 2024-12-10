@@ -1,9 +1,5 @@
 <?php
 
-/**
- *
- */
-
      $hostName = 'localhost';
      $dbName = 'optimizer';
      $userName = 'root';
@@ -28,3 +24,5 @@
 			//throw $e;
             return false;
         }
+
+		//TODO: check if DB exists

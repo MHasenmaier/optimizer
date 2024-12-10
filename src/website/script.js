@@ -10,15 +10,18 @@ function init() {
     //TODO: add a function to check if the DB exists
     if (landingPage) {
         console.log("App startet. . .");
-        document.getElementById("landingButton").addEventListener("click", () => {
-        window.location.href = "overview.html";
-        });
+        document.getElementById("landingButton").addEventListener("click", changeToOverview);
+        document.getElementById("landingButtonImage").addEventListener("click", changeToOverview);
     }
 
     if (contentOverview) {
         console.log("Overview loading. . .")
         loadTodosAsyncForOverview().then(eventOverview);
     }
+}
+
+function changeToOverview() {
+    window.location.href = "overview.html";
 }
 
 

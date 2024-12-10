@@ -24,6 +24,15 @@
   background-color: #436CFE;
 }
 
+#landingButtonImage {
+  display: flex;
+  appearance: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  cursor: pointer;
+}
+
 /**
 *
 *   overview
