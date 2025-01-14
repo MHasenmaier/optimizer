@@ -1,10 +1,128 @@
 <?php
-include 'dbserver.php';
+include 'server.php';
 
 // todo functions
-	//FIXME: repair DB functions
 	//TODO: add check function if DB exists
 	//TODO: add task functions
+
+	//TODO: initDb um sinnvollen rückgabewert erweitern
+	function initDb (): void
+	{
+		$tableArray = ["todotable", "tasktable", "linktable"];
+		try {
+			if (!checkDb()){
+				//setUpDb();
+				echo "DB set up.";
+			}
+
+			foreach ($tableArray as $table) {
+				if (!tableExists($table)) {
+					echo $table . " does not exist.";
+				} else {
+					echo "about to create " . $table;
+					createTables($table);
+				}
+			}
+
+			echo "Tables created.";
+
+		} catch(PDOException $e) {
+			echo "Fehler: " . $e->getMessage();
+		}
+	}
+
+	/** check if db named "optimizer" exists via pdo->query
+	 * @return bool
+	 */
+	function checkDb (): bool
+	{
+		global $dbPDO;
+		if (!$dbPDO) {
+			echo "DB fehlt.";
+			//$dbPDO = createNewDB();
+			usleep(500000);
+			if (!$dbPDO) {
+				echo "DB fehlt immer noch.";
+				return false;
+			}
+			return true;
+		} else {
+			return true;
+		}
+//		try {
+//			global $dbPDO;
+//			$result = $dbPDO->query("SHOW DATABASES LIKE optimizerdb");
+//			return $result->rowCount() > 0;
+//		} catch(PDOException $e) {
+//			echo "Fehler in api/checkDb: " . $e->getMessage();
+//			return false;
+//		}
+	}
+
+	/** create a table named "$table"
+	 *
+	 * @param $table
+	 *
+	 * @return void
+	 */
+	function createTables ($table): void
+	{
+		global $dbPDO;
+		$dbPDO->exec("USE optimizerdb");
+
+		//Todo table
+
+		switch ($table) {
+			case "todotable":
+				$sqlSetUpTodoTable = "CREATE TABLE IF NOT EXISTS todotable (
+    						id INT AUTO_INCREMENT PRIMARY KEY,
+    						title VARCHAR(255) NOT NULL,
+    						description TEXT,
+    						status INT NOT NULL,
+    						lastupdate TEXT
+		)";
+				$dbPDO->exec($sqlSetUpTodoTable);
+				echo $table . " installed";
+				break;
+
+			case "tasktable":
+				$sqlSetUpTaskTable = "CREATE TABLE IF NOT EXISTS tasktable (
+                            id INT AUTO_INCREMENT PRIMARY_KEY,
+    						title VARCHAR(255) NOT NULL,
+							description TEXT,
+                         	status INT NOT NULL,
+                            FOREIGN KEY (todo_id) REFERENCES todotable (id)
+        )";
+				$dbPDO->exec($sqlSetUpTaskTable);
+				echo $table . " installed";
+				break;
+
+				case "linktable":
+					$sqlSetUpLinkTable = "CREATE TABLE IF NOT EXISTS linktable (
+    todo_id INT,
+    task_id INT,
+    PRIMARY KEY (todo_id, task_id),
+    FOREIGN KEY (todo_id) REFERENCES todotable(id),
+    FOREIGN KEY (task_id) REFERENCES tasktable(id)
+)";
+					$dbPDO->exec($sqlSetUpLinkTable);
+					echo $table . " installed";
+					break;
+		}
+	}
+
+	function tableExists (string $tableName): bool
+	{
+		try {
+			global $dbPDO;
+			$result = $dbPDO->query("SHOW TABLES LIKE " . $tableName);
+			return $result->rowCount() > 0;
+		} catch(PDOException $e) {
+			echo "Fehler in api/tableExists:\n" . $e->getMessage();
+			return false;
+		}
+
+	}
 
     /**
      * create function

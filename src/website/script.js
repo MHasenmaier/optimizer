@@ -1,34 +1,51 @@
 const parser = new DOMParser();
 const contentOverview = document.getElementById("contentOverview");
-const mainAddTodo = document.getElementById("mainAddTodo");
+const bodyTodoPage = document.getElementById("bodyTodoPage");
 const landingPage = document.getElementById("bodyLanding");
 const arrAllTodoButtons = document.querySelectorAll('.todoButton');
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', domContentLoaded);
 
-function init() {
-    //TODO: add a function to check if the DB exists
+// to manage to button click events
+function domContentLoaded() {
     if (landingPage) {
         console.log("App startet. . .");
-        document.getElementById("landingButton").addEventListener("click", changeToOverview);
-        document.getElementById("landingButtonImage").addEventListener("click", changeToOverview);
+
+        document.getElementById("landingButton").addEventListener("click", checkDbExists);
+        document.getElementById("landingButtonImage").addEventListener("click", checkDbExists);
     }
 
     if (contentOverview) {
-        console.log("Overview loading. . .")
+        console.log("Overview loading. . .");
         loadTodosAsyncForOverview().then(eventOverview);
     }
+
+    if (bodyTodoPage) {
+        console.log("bodyTodoPage loading . . .")
+        //sendData();
+    }
+}
+
+async function checkDbExists() {
+    try {
+        const checkDB = await fetch('http://localhost:8080/optimizer/src/backend/index.php/checkDb', {
+            mode: 'cors',
+            method: 'GET',
+        })
+            .then((response) => response.text())
+            .then((input) => console.log("\nscript.js/checkDbExists\n\n" + input));
+        ;
+    } catch (error) {
+        console.error("Frontend error in checkDbExists(): " . error);
+    }
+}
+
+function cl (input) {
+    console.log("Test" + input);
 }
 
 function changeToOverview() {
     window.location.href = "overview.html";
-}
-
-
-
-if (mainAddTodo) {
-    console.log("Todo Main loading . . .")
-    //sendData();
 }
 
 // for page: overview

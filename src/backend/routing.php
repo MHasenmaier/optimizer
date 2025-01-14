@@ -8,7 +8,7 @@ include("api.php");
  */
 function routing(): bool
 {
-    //http://localhost/optimizer/src/backend/index.php/ --- REST
+    //http://localhost:8080/optimizer/src/backend/index.php/ --- REST
     //                      [0]                         --- [1]
     $requestedPHPURL = explode('.php', $_SERVER['REQUEST_URI']);
     //check if the URL starts correctly
@@ -36,6 +36,13 @@ function routing(): bool
                         }
                         echo xmlFormatter($getAllActiveTodos);
                         return errormessage(200);
+
+					//to check if DB exists
+	                case 'checkDb':
+						$dbExists = checkDb();
+		                echo "DB exisitert? " . $dbExists;
+
+
                     //for archive and "marked as deleted"
                     case 'inactivetodos':
                         $getAllInactiveTodos = getAllInactiveTodos();
@@ -89,6 +96,15 @@ function routing(): bool
                 }
 
             case 'POST':
+				//initDB
+				if ((strcmp($requestedFinalURL[1], "checkdatabase") == 0) && strcmp(end($requestedFinalURL), $requestedFinalURL[1]) == 0) {
+					$initDb = initDb();
+					if (!$initDb) {
+						echo "Error in routing/POST/initDB - No DB created";
+						return errormessage(500);
+					}
+				}
+
                 //createTodo
                 if ((strcmp($requestedFinalURL[1], "todo") == 0) && strcmp(end($requestedFinalURL), $requestedFinalURL[1]) == 0) {
 
@@ -104,7 +120,7 @@ function routing(): bool
 
                     //check if createTodo works properly
                     if (!$createTodo) {
-                        echo "test";
+                        echo "test createTodo in routing/POST";
                         return errormessage(500);
                     }
 

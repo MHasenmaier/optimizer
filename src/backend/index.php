@@ -1,5 +1,5 @@
 <?php
-include("dbserver.php");
+include("server.php");
 include("routing.php");
 
 //	//login-credentials and properties for DB
