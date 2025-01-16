@@ -3,16 +3,17 @@ const contentOverview = document.getElementById("contentOverview");
 const bodyTodoPage = document.getElementById("bodyTodoPage");
 const landingPage = document.getElementById("bodyLanding");
 const arrAllTodoButtons = document.querySelectorAll('.todoButton');
+const btnLanding = document.getElementById("landingButton");
+const btnLandingImg = document.getElementById("landingButtonImage");
+
 
 document.addEventListener('DOMContentLoaded', domContentLoaded);
 
 // to manage to button click events
 function domContentLoaded() {
     if (landingPage) {
-        console.log("App startet. . .");
-
-        document.getElementById("landingButton").addEventListener("click", checkDbExists);
-        document.getElementById("landingButtonImage").addEventListener("click", checkDbExists);
+        btnLanding.addEventListener("click", checkDbExists);
+        btnLandingImg.addEventListener("click", checkDbExists);
     }
 
     if (contentOverview) {
@@ -28,25 +29,23 @@ function domContentLoaded() {
 
 async function checkDbExists() {
     try {
-        const checkDB = await fetch('http://localhost:8080/optimizer/src/backend/index.php/checkDb', {
+        /*let checkDB =*/ await fetch('http://localhost:8080/optimizer/src/backend/index.php/checkDb', {
             mode: 'cors',
             method: 'GET',
         })
             .then((response) => response.text())
-            .then((input) => console.log("\nscript.js/checkDbExists\n\n" + input));
-        ;
+            .then((input) => /*console.log("\nscript.js/checkDbExists\n\n" + */  /*debugging*/  input)
+            .then(() => {window.location.href = "overview.html"})
+        return true;
     } catch (error) {
         console.error("Frontend error in checkDbExists(): " . error);
+        return false;
     }
 }
 
-function cl (input) {
-    console.log("Test" + input);
-}
-
-function changeToOverview() {
-    window.location.href = "overview.html";
-}
+//function changeToOverview() {
+//    window.location.href = "overview.html";
+//}
 
 // for page: overview
 /**
@@ -55,11 +54,11 @@ function changeToOverview() {
  */
 async function loadTodosAsyncForOverview() {
     try {
-        const response = await fetch("http://localhost/optimizer/src/backend/index.php/activetodos", {
+        const response = await fetch("http://localhost:8080/optimizer/src/backend/index.php/activetodos", {
             mode: "cors",
         });
         const body = await response.text();
-        // console.log("body", body); // debugging
+        console.log("body", body); // debugging
 
         const xmlObject = parser.parseFromString(body, "text/xml");
         console.log('Todos async loaded\nXML formatted: \n', xmlObject, '\n');
@@ -119,6 +118,8 @@ function createTodoElements(xmlObject) {
         todoDiv.appendChild(checkbox);
         todoDiv.appendChild(todoTitle);
         todoDiv.appendChild(taskBox);
+
+        console.log(todoDiv);
     }
 }
 
@@ -139,10 +140,6 @@ async function eventOverview() {
                 })
                 .catch(err => console.error(`Something went wrong ${err}`));
         })
-
-
-
-
 
 //    //Step 1: load the click-event-handler and catch the button ID if clicked
 //    eventHandlerOverview().then(resp => {specificId = resp});
@@ -190,16 +187,16 @@ async function eventHandlerOverview () {
  */
 async function fetchDBTodo (inputSpecificID) {
     console.log(`function fetchDBTodo startet with ${inputSpecificID} . . .`);
+    const parser = new DOMParser();// ?? notwendig?
     //to prevent invalid IDs
     if (inputSpecificID > 0) {
         try {
-            const response = await fetch(`http://localhost/optimizer/src/backend/index.php/todo/?id=${intSpecificID}`, {
+            const response = await fetch(`http://localhost/optimizer/src/backend/index.php/todo/?id=${inputSpecificID}`, {
                 mode: "cors",
+                method: 'GET'
             });
             const body = await response.text();
             await console.log(`body: ${body}`);
-
-            const parser = new DOMParser();// ?? notwendig?
 
             const xmlTodo = await parser.parseFromString(body, "text/xml");
             await console.log('Todo async loaded\nXML formatted (xmlTodo loaded): \n', xmlTodo, '\n');
@@ -257,61 +254,11 @@ async function isTodoHTMLLoaded() {
 
 /**
  *
- * @param inputString (String)
  * @returns Document {XMLDocument}
  */
-function parseXMLString(inputString) {
-    const parser = new DOMParser();
-    return parser.parseFromString(inputString.trim, "application/xml");
-}
+//function parseXMLString(inputString) {
+//    const parser = new DOMParser();
+//    return parser.parseFromString(inputString.trim, "application/xml");
+//}
 
 // for page: todo
-function sendData() {
-    const buttonAddTodo = document.getElementById("buttonAddTodo");
-
-    const statusPopup = document.getElementById("statusPopup");
-    const todoTitle = document.getElementById("todoTitle");
-    const todoDescription = document.getElementById("todoDescription");
-
-    const todoElement = document.createElement("todo");
-    const todoID = document.createElement("ID");
-    const title = document.createElement("title");
-    const status = document.createElement("status");
-    const description = document.createElement("description");
-
-    todoElement.appendChild(todoID);
-    todoElement.appendChild(title);
-    todoElement.appendChild(status);
-    todoElement.appendChild(description);
-
-    buttonAddTodo.addEventListener("click", async function createTodoElement() {
-
-        let todoStatus = statusPopup.options[statusPopup.selectedIndex].value;
-
-        todoID.innerText = "9";
-        title.innerText = todoTitle.value;
-        status.innerText = todoStatus;
-        description.innerText = todoDescription.value;
-
-        //console.log(todoElement);
-
-        const url = "http://localhost/optimizer/src/backend/index.php/todo";
-
-        await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/xml",
-            },
-            body: todoElement
-            //    body: JSON.stringify({
-            //        id: todoID.innerText,
-            //        title: todoTitle.value,
-            //        description: todoDescription.value,
-            //        status: todoStatus.value
-            //        }
-            //    ),
-        })
-            .then((response) => console.log(response))
-            .then(() => console.log(todoElement))
-    });
-}

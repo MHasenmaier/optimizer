@@ -1,74 +1,15 @@
 <?php
-include 'server.php';
+	include_once("server.php");
 
 // todo functions
-	//TODO: add check function if DB exists
-	//TODO: add task functions
-
-	//TODO: initDb um sinnvollen rückgabewert erweitern
-	function initDb (): void
-	{
-		$tableArray = ["todotable", "tasktable", "linktable"];
-		try {
-			if (!checkDb()){
-				//setUpDb();
-				echo "DB set up.";
-			}
-
-			foreach ($tableArray as $table) {
-				if (!tableExists($table)) {
-					echo $table . " does not exist.";
-				} else {
-					echo "about to create " . $table;
-					createTables($table);
-				}
-			}
-
-			echo "Tables created.";
-
-		} catch(PDOException $e) {
-			echo "Fehler: " . $e->getMessage();
-		}
-	}
-
-	/** check if db named "optimizer" exists via pdo->query
-	 * @return bool
-	 */
-	function checkDb (): bool
-	{
-		global $dbPDO;
-		if (!$dbPDO) {
-			echo "DB fehlt.";
-			//$dbPDO = createNewDB();
-			usleep(500000);
-			if (!$dbPDO) {
-				echo "DB fehlt immer noch.";
-				return false;
-			}
-			return true;
-		} else {
-			return true;
-		}
-//		try {
-//			global $dbPDO;
-//			$result = $dbPDO->query("SHOW DATABASES LIKE optimizerdb");
-//			return $result->rowCount() > 0;
-//		} catch(PDOException $e) {
-//			echo "Fehler in api/checkDb: " . $e->getMessage();
-//			return false;
-//		}
-	}
-
 	/** create a table named "$table"
-	 *
 	 * @param $table
-	 *
 	 * @return void
 	 */
 	function createTables ($table): void
 	{
 		global $dbPDO;
-		$dbPDO->exec("USE optimizerdb");
+		$dbPDO->exec("USE optimizer");
 
 		//Todo table
 
@@ -111,17 +52,47 @@ include 'server.php';
 		}
 	}
 
+	//TODO: existiert die entsprechende Tabelle?
 	function tableExists (string $tableName): bool
 	{
-		try {
-			global $dbPDO;
-			$result = $dbPDO->query("SHOW TABLES LIKE " . $tableName);
-			return $result->rowCount() > 0;
-		} catch(PDOException $e) {
-			echo "Fehler in api/tableExists:\n" . $e->getMessage();
-			return false;
-		}
+		global $dbPDO;
 
+		try {
+			$queryAllTables = 'SHOW TABLES';
+			//FIXME: $dbPDO ist anscheinend nicht definiert - warum?
+			/* Datenbank erstellt in server.php/createNewDB
+			 * Datenbankverweis in $dbPDO -> als return von server.php/createNewDB::73::
+			 */
+			$allTables = $dbPDO->prepare($queryAllTables);
+			$allTables->execute();
+
+
+			$arrAllTables = [];
+
+			//if (!in_array($tableName, $allTables)) {
+			//	echo "Was letzte Tabelle $tableName existiert nicht? api.php/tableExists";
+			//	createTables($tableName);
+			//	return false;
+			//}
+
+			while ($row = $allTables->fetch(PDO::FETCH_NUM)) {
+				$arrAllTables[] = $row[0];
+			}
+
+			$todotable = 'todotable';
+			if (in_array($todotable, $arrAllTables)) {
+				echo "Die Tabelle '$todotable' existiert.";
+				// Hier kannst du deine Manipulationen vornehmen
+			} else {
+				echo "Die Tabelle '$todotable' existiert nicht.";
+				createTables($tableName);
+			}
+			return true;
+
+		} catch (Exception $e) {
+			die('Interner Fehler: Die Datenbank-Verbindung konnte nicht aufgebaut werden:' . $e->getMessage());
+		}
+		//return true;
 	}
 
     /**
@@ -218,6 +189,11 @@ include 'server.php';
 	function getAllActiveTodos(): array|false
 	{
 		global $dbPDO;
+		$todotable = 'todotable';
+
+		if (!tableExists($todotable)) {
+			return false;
+		}
 
 		try {
 			//status 1 => deleted, status 5 => done } => both inaktive
@@ -321,12 +297,6 @@ include 'server.php';
 			return false;
 		}
 	}
-
-    function printStuff($input)
-    {
-        echo "printStuff(input = $input)";
-        return $input;
-    }
 
     /**
      * update function
@@ -566,12 +536,14 @@ include 'server.php';
     }
 
     //actual not used - can be deleted if backend is working properly
-    /** converter for createTodo and updateTodo
-     * @param $inputKey
-     * @param $inputValue
-     * @return bool|int|string
-     */
-    function tagTypeConvert ($inputKey, $inputValue): bool|int|string {
+	/** converter for createTodo and updateTodo
+	 *
+	 * @param $inputKey
+	 * @param $inputValue
+	 *
+	 * @return int|string
+	 */
+    function tagTypeConvert ($inputKey, $inputValue): int|string {
         if (strcmp($inputKey, 'status') == 0) {
             return (int)$inputValue;
         } elseif (strcmp($inputKey, 'description') == 0 | strcmp($inputKey, 'lastUpdate') == 0 | strcmp($inputKey, 'title') == 0) {

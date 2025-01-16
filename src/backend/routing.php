@@ -1,5 +1,6 @@
 <?php
-include("api.php");
+include_once("api.php");
+include_once ("server.php");
 
 /**
  * routing function with switch-case for $_SERVER['REQUEST_METHOD']
@@ -39,9 +40,12 @@ function routing(): bool
 
 					//to check if DB exists
 	                case 'checkDb':
-						$dbExists = checkDb();
-		                echo "DB exisitert? " . $dbExists;
-
+						$dbExists = testDatabase();
+						if (!$dbExists) {
+							echo "Error in routing/GET/checkDb - DB couldn't be found";
+							return errormessage(500);
+						}
+						return errormessage(200);
 
                     //for archive and "marked as deleted"
                     case 'inactivetodos':
@@ -91,21 +95,12 @@ function routing(): bool
                                 return errormessage(404);
                             }
 
-                        default:
+                    default:
                         return errormessage(404);
                 }
 
-            case 'POST':
-				//initDB
-				if ((strcmp($requestedFinalURL[1], "checkdatabase") == 0) && strcmp(end($requestedFinalURL), $requestedFinalURL[1]) == 0) {
-					$initDb = initDb();
-					if (!$initDb) {
-						echo "Error in routing/POST/initDB - No DB created";
-						return errormessage(500);
-					}
-				}
-
-                //createTodo
+	        case 'POST':
+				//createTodo
                 if ((strcmp($requestedFinalURL[1], "todo") == 0) && strcmp(end($requestedFinalURL), $requestedFinalURL[1]) == 0) {
 
                     //grab the body -> string
@@ -127,7 +122,8 @@ function routing(): bool
                     echo xmlFormatterSingle($createTodo);
                     return errormessage(201);
 
-                } elseif (str_contains($requestedFinalURL[2], '?id=') && strcmp(end($requestedFinalURL), $requestedFinalURL[2]) == 0) {
+                } elseif (str_contains($requestedFinalURL[1], '?id=') && strcmp(end($requestedFinalURL), $requestedFinalURL[1
+	                ]) == 0) {
                     //updateTodo
                     //parse to int: $id
                     $id = intval(htmlspecialchars($_GET['id']));

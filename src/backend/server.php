@@ -15,25 +15,13 @@
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
      ];
 
-
-	/**
-	 * tests if the DB is already created - if not creates the 'optimizer' DB
-	 * send a message via echo: 200 => success / 500 + message => error
-	 */
-	if (!testDB()) {
-		$dbPDO = createNewDB();
-		response(201, "DB created");
-	} else {
-		response(200, "DB already exists");
-	}
-
 	/** to test if the DB exists
 	 * @return bool
 	 */
-	function testDB (): bool
+	function testDatabase (): bool
 	{
 		$hostName = 'localhost';
-		$dbName = 'optimizer';
+		//$dbName = 'optimizer';
 		$charset = 'utf8mb4';
 		$options = [
 			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -41,11 +29,10 @@
 		try {
 			$dsn = "mysql:host=$hostName; 'optimizer' ; charset=$charset";
 			$pdo = new PDO($dsn,'root', '', $options);
-			$query = $pdo->query("SHOW DATABASES LIKE '$dbName'");
+			$query = $pdo->query("SHOW DATABASES LIKE 'optimizer'");
 			$results = $query->fetch();
 
 			if ($results) {
-				response(200);
 				return true;
 			} else {
 				response(404);
@@ -56,7 +43,6 @@
 			return false;
 		}
 	}
-
 
 	/** create the 'optimizer' DB
 	 * @param string           $hostName
@@ -73,8 +59,8 @@
 		string $userName = 'root',
 		string $password = '',
 		array $options = [
-		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
+			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
 	): PDO|false
 	{
 		$dsn = "mysql:host=$hostName; 'optimizer' ; charset=$charset";
@@ -99,4 +85,15 @@
 			$response->addChild('message', $errormsg);
 		}
 		echo $response->asXML();
+	}
+
+	/**
+	 * tests if the DB is already created - if not creates the 'optimizer' DB
+	 * send a message via echo: 200 => success / 500 + message => error
+	 */
+	if (!testDatabase()) {
+		$dbPDO = createNewDB();
+		response(201);
+	} else {
+		response(200);
 	}
