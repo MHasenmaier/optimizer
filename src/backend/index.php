@@ -3,5 +3,5 @@ include_once("routing.php");
 
 	if(!routing())
 	{
-		errormessage(500);
+		statuscode(500);
 	}

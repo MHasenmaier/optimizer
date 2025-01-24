@@ -15,7 +15,7 @@ function routing(): bool
     //check if the URL starts correctly
     //ignore the "http://localhost" part of the URL, otherwise the function will break
     if (!($requestedPHPURL[0] === '/optimizer/src/backend/index')) {
-        return errormessage(404);
+        return statuscode(404);
     }
 
     //check if there is something more than just the index.php called
@@ -31,21 +31,22 @@ function routing(): bool
                 switch ($requestedFinalURL[1]) {
                     //for overview page
                     case 'activetodos':
+						echo checkTable("todotable");
                         $getAllActiveTodos = getAllActiveTodos();
                         if (empty($getAllActiveTodos)) {
                             return false;
                         }
                         echo xmlFormatter($getAllActiveTodos);
-                        return errormessage(200);
+                        return statuscode(200);
 
 					//to check if DB exists
 	                case 'checkDb':
 						$dbExists = testDatabase();
 						if (!$dbExists) {
 							echo "Error in routing/GET/checkDb - DB couldn't be found";
-							return errormessage(500);
+							return statuscode(500);
 						}
-						return errormessage(200);
+						return statuscode(200);
 
                     //for archive and "marked as deleted"
                     case 'inactivetodos':
@@ -54,7 +55,7 @@ function routing(): bool
                             return false;
                         }
                         echo xmlFormatter($getAllInactiveTodos);
-                        return errormessage(200);
+                        return statuscode(200);
                     case 'countaktivetodos' :
                         //returns number of all active todos (status != 5)
                         $countActiveTodos = countActiveTodos();
@@ -62,13 +63,13 @@ function routing(): bool
                             return false;
                         }
                         echo $countActiveTodos;
-                        return errormessage(200);
+                        return statuscode(200);
 
                     //for getting a specific todo
                     case 'todo' :
                         //check if a second part (f.e. ?id=) is missing
                             if (!isset($requestedFinalURL[2])) {
-                                return errormessage(404);
+                                return statuscode(404);
                             }
                             $IdToTest = $_GET['id'];
                             $formattedId = intval(htmlspecialchars($IdToTest));
@@ -80,23 +81,23 @@ function routing(): bool
 
                                 if (!isset($getTodoById)) {
 
-                                    return errormessage(404);
+                                    return statuscode(404);
                                 }
                                 //check if ID is known by the backend
                                 if (is_null($getTodoById) | empty($getTodoById) | ($getTodoById === false) | !(isset($getTodoById) === true)) {
-                                    return errormessage(404);
+                                    return statuscode(404);
                                 }
 
-                                header("Location: /http://localhost/optimizer/src/website/todo.html");
+                                //header("Location: /http://localhost/optimizer/src/website/todo.html");
 
                                 echo xmlFormatterSingle($getTodoById);
-                                return errormessage(200);
+                                return statuscode(200);
                             } else {
-                                return errormessage(404);
+                                return statuscode(404);
                             }
 
                     default:
-                        return errormessage(404);
+                        return statuscode(404);
                 }
 
 	        case 'POST':
@@ -108,7 +109,7 @@ function routing(): bool
 
                     //check if body is empty
                     if (!$entityBody) {
-                        return errormessage(404);
+                        return statuscode(404);
                     }
 
                     $createTodo = createTodo($entityBody);
@@ -116,11 +117,11 @@ function routing(): bool
                     //check if createTodo works properly
                     if (!$createTodo) {
                         echo "test createTodo in routing/POST";
-                        return errormessage(500);
+                        return statuscode(500);
                     }
 
                     echo xmlFormatterSingle($createTodo);
-                    return errormessage(201);
+                    return statuscode(201);
 
                 } elseif (str_contains($requestedFinalURL[1], '?id=') && strcmp(end($requestedFinalURL), $requestedFinalURL[1
 	                ]) == 0) {
@@ -133,14 +134,14 @@ function routing(): bool
 
                     $updateTodo = updateTodo($entityBody, $id);
                     if (is_null($updateTodo) | empty($updateTodo) | ($updateTodo === false)) {
-                        return errormessage(500);
+                        return statuscode(500);
                     }
 
                     echo xmlFormatterSingle($updateTodo);
-                    return errormessage(200);
+                    return statuscode(200);
                 }
 
-                return errormessage(404);
+                return statuscode(404);
 
             case 'DELETE':
                 //Delete specific to do
@@ -157,19 +158,19 @@ function routing(): bool
 
                     $getTodoById = getTodoById($formattedId);
                     if (!$getTodoById) {
-                        return errormessage(500);
+                        return statuscode(500);
                     }
 
                     if (deleteTodo($formattedId)) {
                         echo xmlFormatterSingle($getTodoById);
-                         return errormessage(200);
+                         return statuscode(200);
                     }
-                    return errormessage(500);
+                    return statuscode(500);
                 }
                 break;
 
             default:
-                errormessage(405);
+                statuscode(405);
         }
         return false;
     }
@@ -182,13 +183,13 @@ function routing(): bool
 }
 
 /**
- * @param $errorcode
+ * @param $statuscode
  * return false if unknown error code -> non-http error code
  *
  * @return true|false
  */
-function errormessage(int $errorcode): bool {
-    switch ($errorcode) {
+function statuscode(int $statuscode): bool {
+    switch ($statuscode) {
         case 200:   //all good
             http_response_code(200);
             echo json_encode(['message' => 'OK']);
@@ -214,12 +215,17 @@ function errormessage(int $errorcode): bool {
             echo json_encode(['message' => 'Bad Request']);
             break;
 
+	    case 403: //forbidden
+		    http_response_code(403);
+			echo json_encode(['message' => 'Forbidden']);
+			break;
+
         case 404:   //not found - server has not found anything matching the request-uri
             http_response_code(404);
             echo json_encode(['message' => 'Not Found']);
             break;
 
-        case 405:
+        case 405:   //Not allowed
             http_response_code(405);
             echo json_encode(['message' => 'Method Not Allowed']);
             break;
@@ -230,8 +236,8 @@ function errormessage(int $errorcode): bool {
             break;
 
         default:
-            http_response_code($errorcode);
-            echo json_encode(['message' => "Unknown Error: $errorcode"]);
+            http_response_code($statuscode);
+            echo json_encode(['message' => "Unknown Error: $statuscode"]);
             return false;
     }
     return true;

@@ -1,24 +1,27 @@
 const parser = new DOMParser();
 const contentOverview = document.getElementById("contentOverview");
 const bodyTodoPage = document.getElementById("bodyTodoPage");
-const landingPage = document.getElementById("bodyLanding");
+const bodyLandingPage = document.getElementById("bodyLanding");
 const arrAllTodoButtons = document.querySelectorAll('.todoButton');
 const btnLanding = document.getElementById("landingButton");
 const btnLandingImg = document.getElementById("landingButtonImage");
+const urlToIndex = "http://localhost:8080/optimizer/src/backend/index.php/";
 
-
+// starts with all html pages
 document.addEventListener('DOMContentLoaded', domContentLoaded);
 
 // to manage to button click events
 function domContentLoaded() {
-    if (landingPage) {
+    if (bodyLandingPage) {
         btnLanding.addEventListener("click", checkDbExists);
         btnLandingImg.addEventListener("click", checkDbExists);
     }
 
     if (contentOverview) {
         console.log("Overview loading. . .");
-        loadTodosAsyncForOverview().then(eventOverview);
+        eventOverview().then({
+            console
+        });
     }
 
     if (bodyTodoPage) {
@@ -29,23 +32,20 @@ function domContentLoaded() {
 
 async function checkDbExists() {
     try {
-        /*let checkDB =*/ await fetch('http://localhost:8080/optimizer/src/backend/index.php/checkDb', {
+        await fetch(urlToIndex + 'checkDb', {
             mode: 'cors',
             method: 'GET',
         })
-            .then((response) => response.text())
-            .then((input) => /*console.log("\nscript.js/checkDbExists\n\n" + */  /*debugging*/  input)
-            .then(() => {window.location.href = "overview.html"})
+            .then((response) => {response.text(); return true;})
+            //.then((input) => input)
+            //.then(() => {window.location.href = "overview.html"})
+            .then(() => {loadTodosAsyncForOverview()})
         return true;
     } catch (error) {
-        console.error("Frontend error in checkDbExists(): " . error);
+        console.error("Frontend error in script.js/checkDbExists: " . error);
         return false;
     }
 }
-
-//function changeToOverview() {
-//    window.location.href = "overview.html";
-//}
 
 // for page: overview
 /**
@@ -54,7 +54,7 @@ async function checkDbExists() {
  */
 async function loadTodosAsyncForOverview() {
     try {
-        const response = await fetch("http://localhost:8080/optimizer/src/backend/index.php/activetodos", {
+        const response = await fetch(urlToIndex + 'activetodos', {
             mode: "cors",
         });
         const body = await response.text();
@@ -99,7 +99,7 @@ function createTodoElements(xmlObject) {
         todoTitle.setAttribute("class", "todoButton");
         todoTitle.innerHTML = title;
 
-        todoTitle.setAttribute("href", "http://localhost/optimizer/src/backend/index.php/todo/?id=" + id);
+        todoTitle.setAttribute("href", urlToIndex + "todo/?id=" + id);
 
         // Create a new input checkbox element
         const checkbox = document.createElement("input");
@@ -127,7 +127,7 @@ function createTodoElements(xmlObject) {
  * handles the clickevents triggered by buttons at overview-page
  */
 async function eventOverview() {
-    console.log("Step 0: Overview finished loading.\neventOverview startet. . .");
+    console.log("Step 0: Overview finished loading.\nscript.js/eventOverview startet. . .");
 
     eventHandlerOverview()
         .then(specificId => {
@@ -138,7 +138,7 @@ async function eventOverview() {
                     isTodoHTMLLoaded();
                     renderTodoInAddTodo(todoXml);
                 })
-                .catch(err => console.error(`Something went wrong ${err}`));
+                .catch(err => console.error(`script.js/eventOverview - Something went wrong ${err}`));
         })
 
 //    //Step 1: load the click-event-handler and catch the button ID if clicked
@@ -191,7 +191,7 @@ async function fetchDBTodo (inputSpecificID) {
     //to prevent invalid IDs
     if (inputSpecificID > 0) {
         try {
-            const response = await fetch(`http://localhost/optimizer/src/backend/index.php/todo/?id=${inputSpecificID}`, {
+            const response = await fetch(urlToIndex + `todo/?id=${inputSpecificID}`, {
                 mode: "cors",
                 method: 'GET'
             });
@@ -221,8 +221,6 @@ function renderTodoInAddTodo(xmlInput) {
     let description = xmlInput.getElementsByTagName("description")[0].textContent;
 
     console.log(`id = ${id}\ntitle = ${title}\nstatus = ${status}\ndescription:\n${description}\n`);
-
-    //TODO: type-error (getelementbyID austauschen)
 
     givenTodoTitle.value = title;
 

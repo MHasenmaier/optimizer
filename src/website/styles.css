@@ -135,6 +135,7 @@ a:active {
   grid-area: date;
   font-size: 40px;
   text-decoration: none;
+  margin: auto;
 }
 
 .time {
@@ -143,6 +144,7 @@ a:active {
   align-items: center;
   grid-area: time;
   font-size: 56px;
+  margin: auto;
 }
 
 .menu {

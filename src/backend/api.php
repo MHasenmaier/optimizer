@@ -3,100 +3,80 @@
 
 // todo functions
 	/** create a table named "$table"
-	 * @param $table
+	 *
+	 * @param string $tableName
+	 *
 	 * @return void
 	 */
-	function createTables ($table): void
+	function createTable (string $tableName): void
 	{
 		global $dbPDO;
 		$dbPDO->exec("USE optimizer");
 
-		//Todo table
-
-		switch ($table) {
+		switch ($tableName) {
 			case "todotable":
 				$sqlSetUpTodoTable = "CREATE TABLE IF NOT EXISTS todotable (
     						id INT AUTO_INCREMENT PRIMARY KEY,
     						title VARCHAR(255) NOT NULL,
-    						description TEXT,
+    						description VARCHAR(255),
     						status INT NOT NULL,
-    						lastupdate TEXT
-		)";
+    						lastupdate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+				)";
 				$dbPDO->exec($sqlSetUpTodoTable);
-				echo $table . " installed";
 				break;
 
 			case "tasktable":
 				$sqlSetUpTaskTable = "CREATE TABLE IF NOT EXISTS tasktable (
                             id INT AUTO_INCREMENT PRIMARY_KEY,
     						title VARCHAR(255) NOT NULL,
-							description TEXT,
+							description VARCHAR(255),
                          	status INT NOT NULL,
+    						lastupdate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
                             FOREIGN KEY (todo_id) REFERENCES todotable (id)
-        )";
+        		)";
 				$dbPDO->exec($sqlSetUpTaskTable);
-				echo $table . " installed";
 				break;
-
-				case "linktable":
-					$sqlSetUpLinkTable = "CREATE TABLE IF NOT EXISTS linktable (
-    todo_id INT,
-    task_id INT,
-    PRIMARY KEY (todo_id, task_id),
-    FOREIGN KEY (todo_id) REFERENCES todotable(id),
-    FOREIGN KEY (task_id) REFERENCES tasktable(id)
-)";
-					$dbPDO->exec($sqlSetUpLinkTable);
-					echo $table . " installed";
-					break;
 		}
+		echo $tableName . " installed";
 	}
 
-	//TODO: existiert die entsprechende Tabelle?
-	function tableExists (string $tableName): bool
+	/** Check if table exists. Use to check task- ,todo- and linktable
+	 * @param string $tableName
+	 *
+	 * @return bool
+	 */
+	function checkTable (string $tableName): bool
 	{
 		global $dbPDO;
 
 		try {
-			$queryAllTables = 'SHOW TABLES';
-			//FIXME: $dbPDO ist anscheinend nicht definiert - warum?
-			/* Datenbank erstellt in server.php/createNewDB
-			 * Datenbankverweis in $dbPDO -> als return von server.php/createNewDB::73::
-			 */
-			$allTables = $dbPDO->prepare($queryAllTables);
-			$allTables->execute();
+				//$query = $dbPDO->prepare('SELECT * FROM tableName = :tableName');
+				//$query->bindParam(':tableName', $tableName, PDO::PARAM_STR);
+				//$query->execute();
 
+				//if ($query->rowCount() > 0) {
+				//	echo "Die Tabelle '$tableName' existiert.";
+				//	return true;
+				//} else {
+				//	echo "Die Tabelle '$tableName' existiert nicht.";
+				//	return false;
+				//}
 
-			$arrAllTables = [];
+			$sqlCheckTable = "SHOW TABLE STATUS FROM [optimizer]";
 
-			//if (!in_array($tableName, $allTables)) {
-			//	echo "Was letzte Tabelle $tableName existiert nicht? api.php/tableExists";
-			//	createTables($tableName);
-			//	return false;
-			//}
-
-			while ($row = $allTables->fetch(PDO::FETCH_NUM)) {
-				$arrAllTables[] = $row[0];
-			}
-
-			$todotable = 'todotable';
-			if (in_array($todotable, $arrAllTables)) {
-				echo "Die Tabelle '$todotable' existiert.";
-				// Hier kannst du deine Manipulationen vornehmen
-			} else {
-				echo "Die Tabelle '$todotable' existiert nicht.";
-				createTables($tableName);
-			}
+			$stmt = $dbPDO->prepare($sqlCheckTable);
+			$stmt->execute();
+			varDEBUG("checkTable", $sqlCheckTable);
 			return true;
 
-		} catch (Exception $e) {
-			die('Interner Fehler: Die Datenbank-Verbindung konnte nicht aufgebaut werden:' . $e->getMessage());
+			} catch (PDOException $e) {
+				echo 'Fehler in api.php/checkTable: ' . $e->getMessage();
+				return false;
+			}
 		}
-		//return true;
-	}
 
-    /**
-     * create function
+	/**
+     * create todos
      * assoc in values
      * if status != number 1-5, staus = 2 by default
      *
@@ -122,15 +102,15 @@
             return false;
         }
 
-		// check if status exists ant is valid
+		// check if status exists and is valid
 		if (array_key_exists('status', $newTodoArray)) {
             $newTodoArray['status'] = statusCheck($newTodoArray['status']);
 		} else {
-			//set status = 2 as default
+			//set status = 2 as default (2 == 'new todo')
             $newTodoArray['status'] = 2;
 		}
 
-        //set createDate to the actuall date
+        //set createDate to the actually date (ISO formatted)
         $createDate = date('Y-m-d', time());
 
 		try {
@@ -169,14 +149,10 @@
 			$stmt = $dbPDO->prepare($collectAllTodo);
 			$stmt->execute();
 
-			//TODO: de-comment
-			//header('Content-Type: application/json');
-
 			return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 		} catch (PDOException $e) {
-			//TODO: de-comment
-			echo 'Der getAllTodo hat nicht geklappt:<br>' . $e->getMessage();
+			echo 'Der api.php/getAllTodo hat nicht geklappt:<br>' . $e->getMessage();
 			//echo json_encode(['error' => $e->getMessage()]);
 			return false;
 		}
@@ -189,10 +165,14 @@
 	function getAllActiveTodos(): array|false
 	{
 		global $dbPDO;
-		$todotable = 'todotable';
 
-		if (!tableExists($todotable)) {
-			return false;
+		varDEBUG("pdo", $dbPDO);
+
+		if (!checkTable('todotable')) {
+			echo "table missing: 'todotable
+			create table now . . .
+			";
+			createTable('todotable');
 		}
 
 		try {
@@ -204,7 +184,7 @@
 
 			return $getAllActiveTodos->fetchAll(PDO::FETCH_ASSOC);
 		} catch (PDOException $e) {
-			echo 'getTodoByStatus hat nicht geklappt:
+			echo 'api.php/getAllActiveTodos hat nicht geklappt:
 			' . $e->getMessage();
 			return false;
 		}
@@ -254,7 +234,7 @@
 
 			return ($expectedTodoByStatus->fetchAll(PDO::FETCH_ASSOC));
 		} catch (PDOException $e) {
-			echo 'getTodoByStatus hat nicht geklappt:<br>' . $e->getMessage();
+			echo "api.php/getAllTodosByStatus hat nicht geklappt:<br>" . $e->getMessage();
 			return false;
 		}
 	}
@@ -287,13 +267,13 @@
 
 			//check if array is empty
 			if ($checkedIDTodo === false) {
-				return errormessage(404);
+				return statuscode(404);
 			}
 
 			return $checkedIDTodo;
 		} catch (PDOException $e) {
-			echo 'getTodoById hat nicht geklappt:
-            ' . $e->getMessage();
+			echo "api.php/getTodoById($id) hat nicht geklappt:
+            " . $e->getMessage();
 			return false;
 		}
 	}
@@ -324,12 +304,12 @@
 
 		//exit for invalid IDs
 		if (!($id > 0)) {
-			errormessage(404);
+			statuscode(404);
 			return true;
 		}
 
         if (empty($updateArray)) {
-            return errormessage(500);
+            return statuscode(500);
         }
 
 		try {
@@ -395,9 +375,57 @@
 
     //function createTask           //TODO Nr. 2: Task stuff
 
-    //function getTaskById          //TODO Nr. 2: Task stuff
+	function getTaskById(int $id): array|bool
+	{
+		global $dbPDO;
 
-    //function getAllTasksByTodoID  //TODO Nr. 2: Task stuff
+		try {
+			$sqlSelectTodoByID = 'SELECT * FROM tasktable WHERE ID = :id';
+
+			$expectedTaskById = $dbPDO->prepare($sqlSelectTodoByID);
+			$expectedTaskById->execute(['id' => $id]);
+
+			// PDOstmt -> array
+			$checkedIDTask = ($expectedTaskById->fetch(PDO::FETCH_ASSOC));
+
+			//check if array is empty
+			if ($checkedIDTask === false) {
+				return statuscode(404);
+			}
+
+			return $checkedIDTask;
+		} catch (PDOException $e) {
+			echo 'getTaskById hat nicht geklappt:
+            ' . $e->getMessage();
+			return false;
+		}
+	}
+
+	/**
+	 * @param $taskId
+	 * @param $todoId
+	 *
+	 * @return string|false
+	 */
+	function getSpecificTaskOfTodoById ($taskId, $todoId): false|string
+	{
+		global $dbPDO;
+		try {
+			$dbPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$stmt = $dbPDO->prepare("
+				SELECT *
+				FROM tasktable
+			    JOIN linktabelle ON tasktable.taskid = linktabelle.taskid
+				WHERE linktabelle.todoid = :todoId
+			        AND tasktable.taskid = :taskId
+	  			");
+			$stmt->execute(['todoId' => $todoId, 'taskId' => $taskId]);
+			return $stmt->fetchAll();
+		} catch (PDOException $e) {
+			echo 'api.php/grabTaskItemOfTodo hat nicht geklappt:</br>' . $e->getMessage();
+			return false;
+		}
+	}
 
     //function countTaskByTodoID    //TODO Nr. 2: Task stuff -> Maybe bullshit
 
@@ -506,11 +534,7 @@
     * @return array
     */
     function xmlToArray ($xml): array {
-        $outputArray = [];
-        foreach ($xml as $key => $value) {
-            $outputArray[$key] = $value;
-        }
-        return $outputArray;
+	    return array_map(function ($value) { return $value; }, $xml);
     }
 
     /** checks variable and datatype
@@ -535,7 +559,6 @@
         ";
     }
 
-    //actual not used - can be deleted if backend is working properly
 	/** converter for createTodo and updateTodo
 	 *
 	 * @param $inputKey
@@ -549,5 +572,5 @@
         } elseif (strcmp($inputKey, 'description') == 0 | strcmp($inputKey, 'lastUpdate') == 0 | strcmp($inputKey, 'title') == 0) {
             return (string)$inputValue;
         }
-        return errormessage(500);
+        return statuscode(500);
     }
