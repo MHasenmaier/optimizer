@@ -45,28 +45,16 @@
 	 *
 	 * @return bool
 	 */
-	function checkTable (string $tableName): bool
+	function tableExists (string $tableName): bool
 	{
 		global $dbPDO;
 
 		try {
-				//$query = $dbPDO->prepare('SELECT * FROM tableName = :tableName');
-				//$query->bindParam(':tableName', $tableName, PDO::PARAM_STR);
-				//$query->execute();
-
-				//if ($query->rowCount() > 0) {
-				//	echo "Die Tabelle '$tableName' existiert.";
-				//	return true;
-				//} else {
-				//	echo "Die Tabelle '$tableName' existiert nicht.";
-				//	return false;
-				//}
-
-			$sqlCheckTable = "SHOW TABLE STATUS FROM [optimizer]";
+			$sqlCheckTable = "SHOW TABLE STATUS FROM optimizer";
 
 			$stmt = $dbPDO->prepare($sqlCheckTable);
 			$stmt->execute();
-			varDEBUG("checkTable", $sqlCheckTable);
+			varDEBUG("checkTable", $dbPDO);     //FIXME: ist immer noch leer!
 			return true;
 
 			} catch (PDOException $e) {
@@ -152,7 +140,7 @@
 			return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 		} catch (PDOException $e) {
-			echo 'Der api.php/getAllTodo hat nicht geklappt:<br>' . $e->getMessage();
+			echo 'Fehler in api.php/getAllTodo: ' . $e->getMessage();
 			//echo json_encode(['error' => $e->getMessage()]);
 			return false;
 		}
@@ -168,7 +156,7 @@
 
 		varDEBUG("pdo", $dbPDO);
 
-		if (!checkTable('todotable')) {
+		if (!tableExists('todotable')) {
 			echo "table missing: 'todotable
 			create table now . . .
 			";
@@ -405,9 +393,9 @@
 	 * @param $taskId
 	 * @param $todoId
 	 *
-	 * @return string|false
+	 * @return array
 	 */
-	function getSpecificTaskOfTodoById ($taskId, $todoId): false|string
+	function getSpecificTaskOfTodoById ($taskId, $todoId): array|bool
 	{
 		global $dbPDO;
 		try {

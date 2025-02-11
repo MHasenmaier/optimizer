@@ -239,8 +239,7 @@ function renderTodoInAddTodo(xmlInput) {
  * @returns {true}
  */
 async function isTodoHTMLLoaded() {
-    console.log("function isTodoHTMLLoaded startet . . .")
-    //TODO: Solange Promise unerfüllt ist - Ladescreen
+    console.log("function isTodoHTMLLoaded startet . . .");
     window.location.href = "http://localhost/optimizer/src/website/todo.html";
     return new Promise(resolve => {
         window.addEventListener('load', () => {
