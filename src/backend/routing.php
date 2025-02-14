@@ -12,9 +12,11 @@ function routing(): bool
     //http://localhost:8080/optimizer/src/backend/index.php/ --- REST
     //                      [0]                         --- [1]
     $requestedPHPURL = explode('.php', $_SERVER['REQUEST_URI']);
+	echo "routing 1 success";
     //check if the URL starts correctly
     //ignore the "http://localhost" part of the URL, otherwise the function will break
     if (!($requestedPHPURL[0] === '/optimizer/src/backend/index')) {
+		echo "routing fail in 'ignore_part'";
         return statuscode(404);
     }
 
@@ -31,7 +33,7 @@ function routing(): bool
                 switch ($requestedFinalURL[1]) {
                     //for overview page
                     case 'activetodos':
-						echo checkTable("todotable");
+						//echo checkTable("todotable");
                         $getAllActiveTodos = getAllActiveTodos();
                         if (empty($getAllActiveTodos)) {
                             return false;
@@ -40,10 +42,12 @@ function routing(): bool
                         return statuscode(200);
 
 					//to check if DB exists
-	                case 'checkDb':
-						$dbExists = testDatabase();
-						if (!$dbExists) {
-							echo "Error in routing/GET/checkDb - DB couldn't be found";
+	                case 'setUpDB':
+						echo "routing to setUpDB successfully";
+						$setUpDB = setupDatabase();
+						echo "database is set up?\n" . $setUpDB . "\n----\n";
+						if (!$setUpDB) {
+							echo "Error in routing/GET/setUpDB - DB couldn't be found";
 							return statuscode(500);
 						}
 						return statuscode(200);

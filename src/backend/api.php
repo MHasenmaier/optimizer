@@ -18,7 +18,7 @@
 				$sqlSetUpTodoTable = "CREATE TABLE IF NOT EXISTS todotable (
     						id INT AUTO_INCREMENT PRIMARY KEY,
     						title VARCHAR(255) NOT NULL,
-    						description VARCHAR(255),
+    						description TEXT,
     						status INT NOT NULL,
     						lastupdate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 				)";
@@ -29,12 +29,21 @@
 				$sqlSetUpTaskTable = "CREATE TABLE IF NOT EXISTS tasktable (
                             id INT AUTO_INCREMENT PRIMARY_KEY,
     						title VARCHAR(255) NOT NULL,
-							description VARCHAR(255),
+							description TEXT,
                          	status INT NOT NULL,
-    						lastupdate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-                            FOREIGN KEY (todo_id) REFERENCES todotable (id)
+    						lastupdate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP 
         		)";
 				$dbPDO->exec($sqlSetUpTaskTable);
+				break;
+
+			case "linktable":
+				$sqlSetUpLinkTable = "CREATE TABLE IF NOT EXISTS linktable (
+    						task_id INT PRIMARY KEY,
+    						todo_id INT NOT NULL,
+    						FOREIGN KEY (todo_id) REFERENCES todotable(id),
+    						FOREIGN KEY (task_id) REFERENCES tasktable(id)
+                )";
+				$dbPDO->exec($sqlSetUpLinkTable);
 				break;
 		}
 		echo $tableName . " installed";
@@ -403,8 +412,8 @@
 			$stmt = $dbPDO->prepare("
 				SELECT *
 				FROM tasktable
-			    JOIN linktabelle ON tasktable.taskid = linktabelle.taskid
-				WHERE linktabelle.todoid = :todoId
+			    JOIN linktable ON tasktable.taskid = linktable.taskid
+				WHERE linktable.todoid = :todoId
 			        AND tasktable.taskid = :taskId
 	  			");
 			$stmt->execute(['todoId' => $todoId, 'taskId' => $taskId]);
@@ -415,7 +424,7 @@
 		}
 	}
 
-    //function countTaskByTodoID    //TODO Nr. 2: Task stuff -> Maybe bullshit
+    //function countTaskByTodoID    //TODO Nr. 2: Task stuff -> Maybe bullshit -> count array elements in 'getSpecificTaskOfTodoById'
 
     //function updateTask           //TODO Nr. 2: Task stuff
 

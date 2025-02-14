@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', domContentLoaded);
 // to manage to button click events
 function domContentLoaded() {
     if (bodyLandingPage) {
-        btnLanding.addEventListener("click", checkDbExists);
-        btnLandingImg.addEventListener("click", checkDbExists);
+        btnLanding.addEventListener("click", setUpDB);      //funktionsnamen ("setUpDB") ändern
+        btnLandingImg.addEventListener("click", setUpDB);   //funktionsnamen ("setUpDB") ändern
     }
 
     if (contentOverview) {
@@ -29,23 +29,28 @@ function domContentLoaded() {
         //sendData();
     }
 }
-
-async function checkDbExists() {
-    try {
-        await fetch(urlToIndex + 'checkDb', {
-            mode: 'cors',
-            method: 'GET',
-        })
-            .then((response) => {response.text(); return true;})
-            //.then((input) => input)
-            //.then(() => {window.location.href = "overview.html"})
-            .then(() => {loadTodosAsyncForOverview()})
-        return true;
-    } catch (error) {
-        console.error("Frontend error in script.js/checkDbExists: " . error);
-        return false;
-    }
-}
+//FIXME: funktion neu schreiben - "await fetch(..) funktioniert nicht richtig. syntaxfehler?
+        //          async function setUpDB() {
+        //              console.log("setUpDB/script.js loaded!");   //wird ausgegeben
+        //              try {
+        //                  const response = await fetch(urlToIndex + 'setUpDB', {
+        //                      mode: 'cors',
+        //                      method: 'GET'
+        //                  })
+        //                  console.log("fetch abgeschlossen");     //wird nicht ausgegeben
+        //                      /*const fetchResponse = */await console.log(response);
+        //                  //console.log("fetchResponse in setUpDB/script.js:\n" + fetchResponse);
+        //                      //.then((response) => {response.text(); console.log("response in setUpDB/script.js ist:\n" + response); return true;})
+        //                      //.then((input) => input)
+        //                      //.then(() => {window.location.href = "overview.html"})
+        //                      //.then(() => {loadTodosAsyncForOverview()})
+        //                  console.log("erfolgreich in try");
+        //                  return true;
+        //              } catch (error) {
+        //                  console.error("Frontend error in script.js/setUpDB: " . error);
+        //                  return false;
+        //              }
+        //          }
 
 // for page: overview
 /**
@@ -240,7 +245,7 @@ function renderTodoInAddTodo(xmlInput) {
  */
 async function isTodoHTMLLoaded() {
     console.log("function isTodoHTMLLoaded startet . . .");
-    window.location.href = "http://localhost/optimizer/src/website/todo.html";
+    window.location.href = "http://localhost:8080/optimizer/src/website/todo.html";
     return new Promise(resolve => {
         window.addEventListener('load', () => {
             console.log("isTodoHTMLLoaded: Todo Page loaded . . .");
