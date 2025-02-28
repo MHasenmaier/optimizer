@@ -2,39 +2,36 @@
 <html lang="de-DE">
     <head>
         <meta charset="utf-8">
-        <title>Optimizer - Übersicht</title>
+        <title>Übersicht</title>
         <link rel="stylesheet" href="styles.css">
     </head>
-    <body class="mainOverview">
-        <header class="header">
+    <body id="bodyOverview" class="bodyLandingHome">
+
+        <header>
             <div class="date">04. April 2024</div>
             <div class="time">14:40</div>
             <div class="menu">
-                <button class="menubutton">
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
+                <button id="menuButton">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
                 </button>
             </div>
-            <div class="menuwindow">
-                <ul>
-                    <li>
-                        <button>
-                            Archiv
-                        </button>
-                    </li>
-                    <li>Focus</li>
-                </ul>
+
+            <div class="menuWindow">
+                <button>Archiv</button>
+                <button>Fokus</button>
             </div>
         </header>
-        <div id="contentOverview"></div>
-        <footer class="footer">
+
+        <div class="contentOverview"></div>
+
+        <footer>
             <a href="http://localhost/optimizer/src/website/todo.html">
-                <button class="footerButton">
-                    +
-                </button>
+                <button id="footerButton">+</button>
             </a>
         </footer>
+
         <script src="script.js"></script>
     </body>
 </html>

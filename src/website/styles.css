@@ -1,491 +1,454 @@
-/**
+/*
 *
-*   landing page
+* general stuff
 *
- */
+*/
 
-.landingPic {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+body {
+    display: grid;
+    grid-template-areas:
+    "header"
+    "content"
+    "footer";
+    width: 360px;
+    height: 800px;
+    background: #fafafa;
+    border: 1px solid #000000;
+    font-family: sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    color: #000000;
 }
 
-.startButton {
-  display: flex;
-  padding: 12px 32px;
-  margin: auto;
-  font-size: 30px;
-  color: #fafafa;
-  border-radius: 8px;
-  border: #d3d3d3 solid 2px;
-  cursor: pointer;
-  justify-content: center;
-  align-items: center;
-  background-color: #436CFE;
+footer {
+    display: flex;
+    grid-area: footer;
+    justify-content: center;
+    align-items: center;
 }
 
-#landingButtonImage {
-  display: flex;
-  appearance: none;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  cursor: pointer;
+footer button {
+    font-size: 35px;
+    width: 270px;
+    padding: 8px 16px;
+    border-radius: 24px;
+    background-color: white;
+    border: #d3d3d3 solid 1px;
+    cursor: pointer;
+}
+
+footer button:active {
+    background-color: #b9b9b9;
+}
+
+footer button:active {
+    background-color: #b9b9b9;
+}
+
+
+
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+a:active {
+    text-decoration: none;
 }
 
 /*
 *
-*   missing db
-*
- */
-
-#todoListMissingPage {
-  display: flex;
-  flex-direction: column;
-}
-
-#todoListMissingPage div {
-  display: flex;
-  flex-direction: column;
-  margin: 170px 25px;
-}
-
-#todoListMissingPage div h1 {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 0;
-}
-
-#todoListMissingPage p {
-  display: flex;
-  margin: 80px 0 20px 0;
-  justify-content: center;
-}
-
-#setupNewDbButton {
-  display: flex;
-  padding: 12px 32px;
-  margin: 0 auto;
-  font-size: 30px;
-  color: #fafafa;
-  border-radius: 8px;
-  border: #d3d3d3 solid 2px;
-  cursor: pointer;
-  justify-content: center;
-  align-items: center;
-  background-color: #436CFE;
-}
-
-/**
-*
-*   overview
+*   landing page / overview
 *
 */
 
-a:link {
-  text-decoration: none;
+.containerLandingPic {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-a:visited {
-  text-decoration: none;
+.buttonLanding {
+    display: flex;
+    padding: 12px 32px;
+    margin: auto;
+    font-size: 30px;
+    color: #fafafa;
+    border-radius: 8px;
+    border: #d3d3d3 solid 2px;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    background-color: #436CFE;
 }
 
-a:hover {
-  text-decoration: none;
+.buttonLandingImage {
+    display: flex;
+    appearance: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    box-shadow: 0 0 20px 12px #ffffff;
 }
 
-a:active {
-  text-decoration: none;
+.bodyLandingHome {
+    grid-template-rows: 3fr 11fr 2fr;
 }
 
-.mainOverview {
-  display: grid;
-  grid-template-areas:
-    "header"
-    "content"
-    "footer";
-  grid-template-rows: 1fr 3fr 1fr;
-  position: relative;
-  width: 360px;
-  height: 800px;
-  background: #fafafa;
-  border: 1px solid #000000;
-
-  font-family: sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  color: #000000;
-}
-
-.header {
-  display: grid;
-  grid-template-columns: 15% 70% 15%;
-  grid-template-areas:
+.bodyLandingHome header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-areas:
     ". date ."
     ". time menu";
-  grid-area: header;
-  height: 162px;
-  box-shadow: inset 0 -1px #000000;
+    grid-area: header;
+}
+
+.bodyLandingHome footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.date, .time, .menu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .date {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  grid-area: date;
-  font-size: 40px;
-  text-decoration: none;
-  margin: auto;
+    grid-area: date;
+    font-size: 40px;
 }
 
 .time {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  grid-area: time;
-  font-size: 56px;
-  margin: auto;
+    grid-area: time;
+    font-size: 56px;
 }
 
 .menu {
-  display: flex;
-  grid-area: menu;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
+    grid-area: menu;
+    cursor: pointer;
 }
 
-.menu:active {
-  box-shadow: inset grey 0 0;
+.menu button {
+    display: flex;
+    flex-direction: column;
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
 }
 
-.menubutton {
-  display: flex;
-  flex-direction: column;
-  border-color: white;
-  text-decoration: none;
+.menuButton:active,
+.menuButton:focus {
+    outline: none;
 }
 
-.menubutton:active {
-  background-color: #b9b9b9;
-  border-radius: 75%;
-  box-shadow: #b9b9b9 0 0 2px 5px;
-  border-color: #b9b9b9;
+.menuWindow {
+    display: none;
+    /*display: flex;*/
+    position: absolute;
+    width: 170px;
+    height: 88px;
+    top: 140px;
+    right: 150px;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .1), 0 2px 4px 1px rgba(0, 0, 0, .18);
+    border-radius: 8px;
+    flex-direction: column;
 }
 
-.menubutton:active div {
-  background-color: white;
-  border-color: black;
-}
-
-.menuwindow {
-  display: none;
-  /*display: flex;*/
-  position: absolute;
-  width: 170px;
-  height: 100px;
-  border: 1px solid #000000;
-  box-shadow: 0 1px 2px #000000;
-  flex-direction: column;
-  top: 145px;
-  border-radius: 8px;
-  right: 12px;
-  background-color: lightgrey;
-}
-
-.menuwindow ul {
-  list-style-type: none;
-}
-
-.menuwindow ul li button {
-  font-size: 30px;
-  background-color: grey;
-  border: none;
-  border-radius: 8px;
+.menuWindow button {
+    display: flex;
+    width: 162px;
+    height: 35px;
+    font-size: 24px;
+    background-color: #ffffff;
+    border: 10px #0a0a0a;
+    border-radius: 8px;
+    align-items: center;
+    padding: 0 0 0 12px;
+    margin: 4px;
+    cursor: pointer;
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
-  margin: 3px;
-  background: #000000;
-  border-radius: 100%;
+    width: 8px;
+    height: 8px;
+    margin: 3px;
+    background: #000000;
+    border-radius: 50%;
 }
 
-#contentOverview {
-  display: flex;
-  grid-area: content;
-  flex-direction: column;
-  height: 515px;
-  overflow-y: auto;
-  padding: 12px 0;
-}
-
-#contentOverview div {
-  display: flex;
-  align-items: center;
-  margin: 15px 0 15px 40px;
-}
-
-#contentOverview div input {
-  display: flex;
-  justify-content: center;
-  border: lightgrey solid 3px;
-  border-radius: 6px;
-  margin-right: 24px;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  background-color: white;
-}
-
-#contentOverview section input:active {
-  background-color: #b9b9b9;
-}
-
-.todoButton {
-  display: flex;
-  border: lightgrey solid 1px;
-  border-radius: 6px;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  background-color: white;
-  width: 60%;
-  height: 40px;
-  padding: 0 6px;
-  color: black;
-}
-
-.todoButton:active {
-  background-color: #b9b9b9;
-}
-
-.taskButton {
-  height: 25px;
-  width: 40px;
-  display: flex;
-  border-radius: 75%;
-  border: lightgrey solid 1px;
-  cursor: pointer;
-  justify-content: center;
-  align-items: center;
-  background-color: white;
-  position: relative;
-  bottom: 20px;
-  right: 20px;
-}
-
-.taskButton :active {
-  background-color: #b9b9b9;
-}
-
-.footer {
-  display: flex;
-  grid-area: footer;
-  box-shadow: inset 0 1px #000000;
-  justify-content: center;
-  align-items: center;
-  /*height: 10vh;*/
-}
-
-.add_todo_button {
-  display: flex;
-  height: 50px;
-  width: 50px;
-  border: solid 5px;
-  border-radius: 75%;
-  font-size: 75px;
-  padding: 0.5em;
-  letter-spacing: 0;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.add_todo_button:active {
-  background-color: #b9b9b9;
-}
-
-/**
-*
-*   createTodo
+/*
+* overview
 *
 */
 
-#bodyTodoPage {
-  display: grid;
-  grid-template-areas:
-    "formArea"
-    "taskArea"
-    "todoAdd";
-  grid-template-rows: 80% 8% 12%;
-  width: 360px;
-  height: 800px;
-  padding: 39px 30px 0;
-  background: #fafafa;
-  border: 1px solid #000000;
-
-  font-family: sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  color: #000000;
+.contentOverview {
+    display: flex;
+    grid-area: content;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 12px 0;
 }
 
-#todoAddForms {
-  display: grid;
-  grid-area: formArea;
-  grid-template-areas:
-    "statusPopupArea"
-    "todoTitleArea"
-    "todoDescriptionArea";
-  grid-template-rows: 10% 10% 80%;
+.contentOverview div {
+    display: flex;
+    align-items: center;
+    margin: 15px 0 15px 40px;
 }
 
-#todoAddForms label {
-  display: none;
+.contentOverview div input {
+    display: flex;
+    justify-content: center;
+    border: lightgrey solid 3px;
+    border-radius: 6px;
+    margin-right: 24px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    background-color: white;
 }
 
-#statusPopupArea {
-  display: grid;
-  grid-area: statusPopupArea;
+.contentOverview section input:active {
+    background-color: #b9b9b9;
 }
 
-#statusPopup {
-  display: flex;
-  justify-self: right;
-  align-self: end;
-  margin: 0;
-  padding: 5px;
-  border: none;
-  border-radius: 15px;
-  font-size: xx-large;
-  cursor: pointer;
+.todoButton {
+    display: flex;
+    border: lightgrey solid 1px;
+    border-radius: 6px;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background-color: white;
+    width: 60%;
+    height: 40px;
+    padding: 0 6px;
+    color: black;
 }
 
-#statusPopup:focus {
-  border: none;
-  box-shadow: none;
+.todoButton:active {
+    background-color: #b9b9b9;
 }
 
-#statusPopup option:first-child {
-  display: none;
+.taskButton {
+    height: 25px;
+    width: 40px;
+    display: flex;
+    border-radius: 75%;
+    border: lightgrey solid 1px;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    position: relative;
+    bottom: 20px;
+    right: 20px;
 }
 
-#statusPopup option:checked {
-  color: black;
+.taskButton :active {
+    background-color: #b9b9b9;
 }
 
-#statusPopup::placeholder {
-  color: #d3d3d3;
+.add_todo_button {
+    display: flex;
+    height: 50px;
+    width: 50px;
+    border: solid 5px;
+    border-radius: 75%;
+    font-size: 75px;
+    padding: 0.5em;
+    letter-spacing: 0;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
 }
 
-#statusName {
-  font-size: 35px;
+.add_todo_button:active {
+    background-color: #b9b9b9;
 }
 
-#statusButton {
-  display: flex;
+/**
+*   progression pages
+*   createTodo / createTask / archiv / focus /
+*
+*   1. status
+*   2. title
+*   3. description
+*
+*/
+
+.bodyDoing {
+    grid-template-rows: 1fr 8fr 1fr ;
 }
 
-.todoItem {
-  display: flex;
-  grid-area: todoItem;
-  flex-direction: column;
+/*header contains staus function*/
+
+.bodyDoing header {
+    grid-area: header;
 }
 
-#todoTitleArea {
-  display: flex;
-  grid-area: todoTitleArea;
-  flex-direction: column;
+.doingHeader {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-content: flex-end;
+    flex-wrap: wrap;
+    width: 100%;
+    height: 100%;
 }
 
-#todoPageTodoTitle {
-  font-size: 18px;
-  padding: 9px 5px;
-  margin: 9px 0 9px;
-  border-radius: 6px;
-  font-family: sans-serif;
-  border: #d3d3d3 solid 2px;
+.doingHeader form {
+    margin-right: 16px;
 }
 
-#todoPageTodoTitle::placeholder {
-  color: #d3d3d3;
+.contentDoing {
+    grid-area: content;
+    display: flex;
+    flex-direction: column;
 }
 
-#todoDescriptionArea {
-  display: flex;
-  grid-area: todoDescriptionArea;
-  flex-direction: column;
+/*  <-- 1. status --> */
+
+.containerItemStatus {
+    display: flex;
+    justify-self: right;
+    align-self: end;
+    margin: 32px 16px 0 0;
+    padding: 5px;
+    border: none;
+    border-radius: 15px;
+    font-size: xx-large;
+    cursor: pointer;
 }
 
-#todoDescription {
-  display: flex;
-  height: 100%;
-  padding: 9px 5px;
-  border-radius: 6px;
-  font-size: 18px;
-  font-family: sans-serif;
-  border: #d3d3d3 solid 2px;
-  box-sizing: border-box;
-  resize: none;
-  overflow: visible;
+.labelItemStatus {
+    display: none;
 }
 
-#todoDescription::placeholder {
-  color: #d3d3d3;
+.containerItemStatus:focus {
+    border: none;
+    box-shadow: none;
 }
 
-.taskAdd {
-  display: flex;
-  grid-area: taskArea;
-  align-items: center;
+/*to hide the first element in the list*/
+.containerItemStatus option:first-child {
+    display: none;
 }
 
-.taskAddText {
-  display: flex;
-  flex-direction: row;
-  font-size: 20px;
-  margin: 10px 16px;
-  align-items: flex-start;
+.containerItemStatus option:checked {
+    color: black;
 }
 
-.taskAddButton {
-  display: flex;
-  height: 20px;
-  width: 20px;
-  border: solid 1px;
-  border-radius: 75%;
-  font-size: 45px;
-  padding: 15px;
-  margin: -5px 10px;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
+.containerItemStatus::placeholder {
+    color: #d3d3d3;
 }
 
-.taskAddButton:active {
-  background-color: #b9b9b9;
+.selectItemStatus {
+    border: none;
+    font-size: 24px;
+    padding: 4px;
+    background-color: rgb(0 0 0 / 0);
 }
 
-.footerButton {
-  font-size: 35px;
-  padding: 8px 60px;
-  border-radius: 24px;
-  background-color: white;
-  border: #d3d3d3 solid 2px;
-  cursor: pointer;
+/*  <-- 2. title --> */
+
+.containerItemTitle {
+    display: flex;
+    border-radius: 6px;
+    font-size: 18px;
+    font-family: sans-serif;
+    border: #d3d3d3 solid 2px;
+    box-sizing: border-box;
+    resize: none;
+    overflow: visible;
+    margin: 16px 16px 4px 16px;
 }
 
-.footerButton:active {
-  background-color: #b9b9b9;
+.labelItemTitle {
+    display: none;
+}
+
+.inputItemTitle {
+    border: none;
+    border-radius: 6px;
+    padding: 12px 6px;
+    width: 100%;
+}
+
+/*  <-- 3. status --> */
+
+.containerItemDescription {
+    display: flex;
+    height: 100%;
+    border-radius: 8px;
+    font-size: 18px;
+    font-family: sans-serif;
+    border: #d3d3d3 solid 2px;
+    box-sizing: border-box;
+    resize: none;
+    overflow: visible;
+    margin: 4px 16px;
+}
+
+.containerItemDescription::placeholder {
+    color: #d3d3d3;
+}
+
+.textareaItemDescription {
+    width: 100%;
+    margin: 0;
+    padding: 8px;
+    resize: none;
+    border: none;
+    border-radius: 6px;
+}
+
+/**
+*   "add task" function - only at todo page
+*/
+
+.containerTodoContent {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.containerButtonAddTask {
+    display: flex;
+    border: none;
+    background: none;
+    width: fit-content;
+    height: 8%;
+    margin: 8px 0 0 30px;
+    align-items: center;
+    cursor: pointer;
+}
+
+.buttonAddTask {
+    border-radius: 100%;
+    border: 1px black solid;
+    padding: 0 8px;
+    font-size: xx-large;
+    font-weight: bold;
+    margin: 0 12px;
 }
 
 .addTodoFooter {
-  grid-area: todoAdd;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    grid-area: todoAdd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /**
@@ -494,336 +457,208 @@ a:active {
 *
 */
 
-.mainAddTask {
-  display: grid;
-  grid-template-areas:
-    "formArea"
-    "taskAdd";
-  grid-template-rows: 5% 85% 10%;
-  width: 360px;
-  height: 800px;
-  padding: 39px 30px 0;
-  background: #fafafa;
-  border: 1px solid #000000;
-
-  font-family: sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  color: #000000;
-}
-
-.taskAddForms {
-  display: grid;
-  grid-area: formArea;
-  grid-template-areas:
+.addTaskFormsArea {
+    display: grid;
+    grid-area: content;
+    grid-template-areas:
     "taskTitle"
     "taskDescription";
-  grid-template-rows: 10% 90%;
+    grid-template-rows: 10% 90%;
 }
 
 .taskItem {
-  display: flex;
-  grid-area: taskItem;
-  flex-direction: column;
-}
-
-#taskTitle {
-  grid-area: taskTitle;
-  font-size: 18px;
-  padding: 9px 5px;
-  margin: 9px 0 9px;
-  border-radius: 6px;
-  font-family: sans-serif;
-  border: #d3d3d3 solid 2px;
-}
-
-#taskTitle::placeholder {
-  color: #d3d3d3;
-}
-
-#taskDescription::placeholder {
-  color: #d3d3d3;
+    display: flex;
+    grid-area: taskItem;
+    flex-direction: column;
 }
 
 .taskAdd {
-  display: flex;
-  grid-area: taskArea;
-  align-items: center;
+    display: flex;
+    grid-area: taskArea;
+    align-items: center;
 }
 
 .taskAddText {
-  display: flex;
-  flex-direction: row;
-  font-size: 20px;
-  margin: 10px 16px;
-  align-items: flex-start;
+    display: flex;
+    flex-direction: row;
+    font-size: 20px;
+    margin: 10px 16px;
+    align-items: flex-start;
 }
 
 .taskAddButton:active {
-  background-color: #b9b9b9;
-}
-
-.footerButton {
-  font-size: 35px;
-  padding: 8px 60px;
-  border-radius: 24px;
-  background-color: white;
-  border: #d3d3d3 solid 2px;
-  cursor: pointer;
-}
-
-.footerButton:active {
-  background-color: #b9b9b9;
+    background-color: #b9b9b9;
 }
 
 .addTaskFooter {
-  grid-area: taskAdd;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    grid-area: footer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-
 
 /**
 *
-*   Archiv and delete
+*   Archiv ( done / deleted )
 *
 */
 
-.archivBody {
-  display: grid;
-  grid-template-areas:
-        'header'
-        'main'
-        'footer';
-  grid-template-rows: 7% 83% 10%;
-  position: relative;
-  width: 360px;
-  height: 800px;
-  background: #fafafa;
-  border: 1px solid #000000;
-  padding: 10px 20px;
-}
-
 .archivHeader {
-  display: flex;
-  grid-area: header;
-  justify-content: space-between;
-  box-shadow: #000000 0 1px 0 0;
-  align-items: center;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    gap: 2px;
+    margin-left: 24px;
 }
 
-.archivHeader Button {
-  padding: 10px;
-  margin: 8px 0;
+.archivHeader button {
+    display: flex;
+    height: fit-content;
+    margin: 12px 0;
+    padding: 12px 16px;
+    border-left: 1px grey solid;
+    border-top: 1px grey solid;
+    border-right: 1px grey solid;
+    border-bottom: none;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    cursor: pointer;
+    background: none;
+    font-size: 24px;
 }
 
-.archivHeader h1 {
-  padding: 0;
-  margin: 0 15px;
+.contentDoing hr {
+    border: black solid 1px;
+    width: 90%;
 }
 
-.archivHeader p {
-  padding: 0;
-  margin: 0 15px;
+.contentDoingHeader {
+    display: flex;
+    gap: 14px;
 }
 
-.archivMain {
-  display: grid;
-  grid-template-areas: 'mainheader'
-                        'mainsection';
-  grid-template-rows: 7% 93%;
-}
-
-.archivMain header {
-  display: flex;
-  grid-area: mainheader;
-}
-
-.archivMain header p {
-  padding: 0 0 0 15px;
-  margin: 20px 0 5px 0;
-}
-
-.archivMain header p:first-child {
-  float: left;
-  width: 30%;
-}
-
-.archivMain header p:last-child {
-  float: left;
+.contentDoingHeader span {
+    margin-left: 12px;
+    font-size: large;
 }
 
 .archivMainSection {
-  display: flex;
-  grid-area: mainsection;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
-.archivMainSection section {
-  display: flex;
-  margin: 8px 0;
-  height: 40px;
-  border: 1px solid #d3d3d3;
-  border-radius: 6px;
-  align-items: center;
+.archivMainSection div {
+    display: flex;
+    margin: 8px;
+    height: 40px;
+    border: 1px solid #d3d3d3;
+    border-radius: 6px;
+    align-items: center;
+    cursor: pointer;
 }
 
-.archivMainSection section p {
-  display: block;
-  margin: 8px 0;
-  padding: 0 0 0 15px;
+.archivMainSection div p {
+    display: block;
+    margin: 8px 0;
+    padding: 0 0 0 15px;
 }
 
-.archivMainSection section:hover {
-  box-shadow: #000000 0 0 2px;
+.archivMainSection div:hover {
+    box-shadow: #000000 0 0 2px;
 }
 
-.archivMainSection section p:first-child {
-  float: left;
-  width: 30%;
+.archivMainSection div p:first-child {
+    float: left;
+    width: 30%;
 }
 
-.archivMainSection section p:last-child {
-  float: left;
-  width: auto;
+.archivMainSection div p:last-child {
+    float: left;
+    width: auto;
 }
 
-.archivFooter {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/*
+*
+*   Focus
+*
+*/
+
+.headerFocusExt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.focusBody {
-  display: grid;
-  grid-template-areas:
-        'header'
-        'main'
-        'footer';
-  grid-template-rows: 7% 83% 10%;
-  position: relative;
-  width: 360px;
-  height: 800px;
-  background: #fafafa;
-  border: 1px solid #000000;
-  padding: 10px 20px;
-}
-
-.focusHeader {
-  display: flex;
-  grid-area: header;
-  justify-content: center;
-  box-shadow: #000000 0 1px 0 0;
-  align-items: center;
-}
-
-.focusHeader Button {
-  padding: 10px;
-  margin: 8px 0;
-}
-
-.focusHeader h1 {
-  padding: 0;
-  margin: 0 15px;
-}
-
-.focusHeader p {
-  padding: 0;
-  margin: 0 15px;
-}
-
-.focusMain {
-  display: flex;
-  flex-direction: column;
-  grid-area: main;
-}
-
-.focusFooter {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.focusToggle {
+    margin-left: 25px;
 }
 
 /* The switch - the box around the slider */
-.archivToggle {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-
 .focusSliderToggle {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
 }
 
 /* Hide default HTML checkbox */
-.archivToggle input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
 .focusSliderToggle input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
 .focusSliderToggle p {
-  padding: 0;
-  margin: auto 0;
+    padding: 0;
+    margin: auto 0;
 }
 
 /* The slider */
 .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 34px;
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
 }
 
 .slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
 }
 
 input:checked + .slider {
-  background-color: #f32121;
+    background-color: #f32121;
 }
 
 input:checked + .focusSliderPopup:before {
-  display: block;
+    display: block;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px #f32121;
+    box-shadow: 0 0 1px #f32121;
 }
 
 input:checked + .slider:before {
-  transform: translateX(26px);
+    transform: translateX(26px);
 }
 
 /*  focus slider */
-.sliderContainer {
-  padding: 30px;
+.containerFocusSlider {
+/*FIXME: still relevant?*/
 }
 
 .focusSliderPopup {
-  display: none;
+    /*display: none;*/
 }

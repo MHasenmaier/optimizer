@@ -1,56 +1,59 @@
 <!DOCTYPE html>
 <html lang="de-DE">
-<head>
-    <meta charset="utf-8">
-    <title>Optimizer - Neues Todo anlegen</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body id="bodyTodoPage">
+    <head>
+        <meta charset="utf-8">
+        <title>Todo anlegen</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body id="todoBody" class="bodyDoing">
 
-<!--action="http://localhost:8080/optimizer/src/backend/index.php/todo"-->
-<form id="todoAddForms" method="post">
-    <div id="statusPopupArea">
-        <label for="statusPopup" class="labelStatus">Label for status - you shouldn't see this text</label>
-        <select name="statusPopup" id="statusPopup">
-            <option value="" disabled selected>Status</option>
-            <option value="1">löschen</option>
-            <option value="2">neu</option>
-            <option value="3">geplant</option>
-            <option value="4">begonnen</option>
-            <option value="5">fertig</option>
-        </select>
-    </div>
+        <header>
+            <div class="doingHeader">
+                <form class="containerItemContent" method="post" id="itemStatus">
+                    <label for="statusPopup"></label>
+                    <select class="selectItemStatus" name="statusPopup" id="statusPopup">
+                        <option value="" disabled selected>Status</option>
+                        <option value="1">Löschen</option>
+                        <option value="2">Neu</option>
+                        <option value="3">Geplant</option>
+                        <option value="4">Begonnen</option>
+                        <option value="5">Fertig</option>
+                    </select>
+                </form>
+            </div>
+        </header>
 
-    <div id="todoTitleArea">
-        <label for="todoPageTodoTitle" class="labelTodoTitle">Label for title - you shouldn't see this text</label>
-        <input
-                name="todoTitle"
-                id="todoPageTodoTitle"
-                type="text"
-                placeholder="Titel eingeben"
-                required
-        >
-    </div>
+        <form class="contentDoing">
+            <div class="containerItemTitle">
+                <label for="labelItemTitle"></label>
+                <input
+                        class="inputItemTitle"
+                        name="title of the todo"
+                        autofocus
+                        id="labelItemTitle"
+                        type="text"
+                        placeholder="Titel eingeben"
+                        required
+                >
+            </div>
 
-    <div id="todoDescriptionArea" >
-        <label for="todoDescription" class="labelTodoDescription">Label for description - you shouldn't see this text</label>
-        <textarea name="todoDescription" id="todoDescription" type="text" placeholder="Beschreibung eingeben"></textarea>
-    </div>
+            <div class="containerItemDescription">
+                <label for="textareaItemDescription"></label>
+                <textarea name="describe the todo" class="textareaItemDescription" id="textareaItemDescription"
+                          placeholder="Beschreibung eingeben"></textarea>
+            </div>
 
-</form>
-<div class="taskAdd">
-    <a href="http://localhost:8080/optimizer/src/website/newTask.html" class="taskAddText">
-        Task
-        <button class="taskAddButton">+</button>
-    </a>
-</div>
-<footer class="addTodoFooter">
-   <a> <!-- href="http://localhost/optimizer/src/website/overview.html"-->
-        <button type="submit" class="footerButton" id="buttonAddTodo">
-            Todo anlegen
-        </button>
-    </a>
-</footer>
-<script src="script.js"></script>
-</body>
+            <button class="containerButtonAddTask">
+                <span class="buttonAddTask">+</span>Tasks anzeigen
+            </button>
+        </form>
+
+        <footer>
+            <button type="submit" class="footerButton" id="buttonAddTodo">
+                Todo anlegen
+            </button>
+        </footer>
+
+        <script src="script.js"></script>
+    </body>
 </html>

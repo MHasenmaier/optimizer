@@ -1,38 +1,55 @@
 <!DOCTYPE html>
 <html lang="de-DE">
 <head>
-  <meta charset="utf-8">
-  <title>Optimizer - Neuen Task anlegen</title>
-  <link rel="stylesheet" href="styles.css">
+	<meta charset="utf-8">
+	<title>Task anlegen</title>
+	<link rel="stylesheet" href="styles.css">
 </head>
+<body id="taskBody" class="bodyDoing">
 
-<body class="mainAddTask">
+<header>
+	<div class="doingHeader">
+		<form class="containerItemContent" method="post" id="itemStatus">
+			<label for="statusPopup"></label>
+			<select class="selectItemStatus" name="statusPopup" id="statusPopup">
+				<option value="" disabled selected>Status</option>
+				<option value="1">Löschen</option>
+				<option value="2">Neu</option>
+				<option value="3">Geplant</option>
+				<option value="4">Begonnen</option>
+				<option value="5">Fertig</option>
+			</select>
+		</form>
+	</div>
+</header>
 
-<select class="status" name="Status" id="statusPopup">
-  <option value="" disabled selected>Status</option>
-  <option>löschen</option>
-  <option>neu</option>
-  <option>geplant</option>
-  <option>begonnen</option>
-  <option>fertig</option>
-</select>
+<form class="contentDoing">
+	<div class="containerItemTitle">
+		<label for="labelItemTitle"></label>
+		<input
+				class="inputItemTitle"
+				name="title of the todo"
+				autofocus
+				id="labelItemTitle"
+				type="text"
+				placeholder="Titel eingeben"
+				required
+		>
+	</div>
 
-<form class="taskAddForms" action="http://localhost/optimizer/src/backend/backend.php" method="post">
-  <input
-          name="taskTitle"
-          id="taskTitle"
-          type="text"
-          placeholder="Tasktitel eingeben"
-          required
-  >
-  <textarea id="taskDescription" type="text" placeholder="Beschreibung eingeben"></textarea>
+	<div class="containerItemDescription">
+		<label for="textareaItemDescription"></label>
+		<textarea name="describe the todo" class="textareaItemDescription" id="textareaItemDescription"
+				  placeholder="Beschreibung eingeben"></textarea>
+	</div>
 </form>
-<footer class="addTaskFooter">
-  <a href="http://localhost/optimizer/src/website/createTodo.html">
-    <button class="footerButton">
-      Task anlegen
-    </button>
-  </a>
+
+<footer>
+	<a> <!-- href="http://localhost/optimizer/src/website/overview.html"-->
+		<button type="submit" class="footerButton" id="buttonAddTodo">Task anlegen</button>
+	</a>
 </footer>
+
+<script src="script.js"></script>
 </body>
 </html>
