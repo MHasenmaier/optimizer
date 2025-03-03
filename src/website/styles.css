@@ -20,11 +20,16 @@ body {
     color: #000000;
 }
 
+header {
+    grid-area: header;
+}
+
 footer {
     display: flex;
     grid-area: footer;
     justify-content: center;
-    align-items: center;
+    align-items: end;
+    margin-bottom: 25px;
 }
 
 footer button {
@@ -44,7 +49,6 @@ footer button:active {
 footer button:active {
     background-color: #b9b9b9;
 }
-
 
 
 a:link {
@@ -78,8 +82,7 @@ a:active {
 .buttonLanding {
     display: flex;
     padding: 12px 32px;
-    margin: auto;
-    font-size: 30px;
+    font-size: 26px;
     color: #fafafa;
     border-radius: 8px;
     border: #d3d3d3 solid 2px;
@@ -99,7 +102,7 @@ a:active {
 }
 
 .bodyLandingHome {
-    grid-template-rows: 3fr 11fr 2fr;
+
 }
 
 .bodyLandingHome header {
@@ -108,19 +111,19 @@ a:active {
     grid-template-areas:
     ". date ."
     ". time menu";
-    grid-area: header;
+    height: fit-content;
+    margin-top: 16px;
 }
 
 .bodyLandingHome footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+
 }
 
 .date, .time, .menu {
     display: flex;
     justify-content: center;
     align-items: center;
+    margin: 0;
 }
 
 .date {
@@ -135,7 +138,6 @@ a:active {
 
 .menu {
     grid-area: menu;
-    cursor: pointer;
 }
 
 .menu button {
@@ -151,36 +153,39 @@ a:active {
 .menuButton:focus {
     outline: none;
 }
-
 .menuWindow {
     display: none;
     /*display: flex;*/
-    position: absolute;
-    width: 170px;
-    height: 88px;
-    top: 140px;
-    right: 150px;
-    border: 2px solid #ffffff;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, .1), 0 2px 4px 1px rgba(0, 0, 0, .18);
-    border-radius: 8px;
     flex-direction: column;
+    justify-content: center;
+
+    position: absolute;
+    top: 130px;
+    right: 150px;
+
+    border: 1px solid #d3d3d3;
+    border-radius: 8px;
+    box-shadow: 3px 3px 8px 0 #b9b9b9;
 }
 
 .menuWindow button {
     display: flex;
-    width: 162px;
-    height: 35px;
-    font-size: 24px;
-    background-color: #ffffff;
-    border: 10px #0a0a0a;
-    border-radius: 8px;
     align-items: center;
-    padding: 0 0 0 12px;
+
+    width: 160px;
+
+    padding: 4px 4px 4px 12px;
     margin: 4px;
+
+    background-color: transparent;
+    border: 1px solid #d3d3d3;
+    border-radius: 8px;
+
+    font-size: 24px;
     cursor: pointer;
 }
 
-.dot {
+.menuDot {
     width: 8px;
     height: 8px;
     margin: 3px;
@@ -293,7 +298,6 @@ a:active {
 }
 
 /*header contains staus function*/
-
 .bodyDoing header {
     grid-area: header;
 }
@@ -591,6 +595,7 @@ a:active {
 
 .focusToggle {
     margin-left: 25px;
+    margin-bottom: 25px;
 }
 
 /* The switch - the box around the slider */
@@ -613,7 +618,13 @@ a:active {
     margin: auto 0;
 }
 
-/* The slider */
+.containerFocusSlider {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* slider span */
 .slider {
     position: absolute;
     cursor: pointer;
@@ -654,11 +665,15 @@ input:checked + .slider:before {
     transform: translateX(26px);
 }
 
-/*  focus slider */
-.containerFocusSlider {
-/*FIXME: still relevant?*/
+/*  focus popup window */
+.focusSliderPopup {
+    display: none;
+    /*display: flex;*/ /*use for debugging*/
+    align-items: center;
+    gap: 12px;
 }
 
-.focusSliderPopup {
-    /*display: none;*/
+.focusSliderPopup input {
+    width: 25%;
+    border-radius: 6px;
 }
