@@ -116,7 +116,7 @@ a:active {
 }
 
 .bodyLandingHome footer {
-    /*TODO: still usefull?*/
+    /*TODO: still usefully?*/
 }
 
 .date, .time, .menu {
@@ -219,6 +219,8 @@ a:active {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+
+    cursor: pointer;
 }
 
 .contentOverview div button {
@@ -232,6 +234,12 @@ a:active {
 }
 
 /* checkbox */
+.contentOverview div label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .contentOverview div input {
     display: flex;
     justify-content: center;

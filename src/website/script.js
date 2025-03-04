@@ -1,5 +1,7 @@
 const parser = new DOMParser();
-const contentOverview = document.getElementById("contentOverview");
+const bodyOverview = document.getElementById("bodyOverview");
+const classContentOverview = document.querySelector('.contentOverview');
+const pOverview = document.querySelectorAll('p');
 const bodyTodoPage = document.getElementById("bodyTodoPage");
 const bodyLandingPage = document.getElementById("bodyLanding");
 const arrAllTodoButtons = document.querySelectorAll('.todoButton');
@@ -7,46 +9,54 @@ const btnLanding = document.getElementById("landingButton");
 const btnLandingImg = document.getElementById("landingButtonImage");
 const urlToIndex = "http://localhost:8080/optimizer/src/backend/index.php/";
 
-//MOCK-DATA
+//FIXME: MOCK-DATA - Array>3 Objects => id, title, description, status, task
 const todoData = [
     {
         id: 1,
         title: "todoTitle 1",
         description: "Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum ",
-        staus: 2,
+        status: 3,
         task: [1, 2, 5, 10, 11, 12]
     },
     {
         id: 2,
         title: "todoTitle 2",
         description: "Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum ",
-        staus: 4,
+        status: 1,
         task: [3, 4]
     },
     {
         id: 3,
         title: "todoTitle 3",
         description: "Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum ",
-        staus: 1,
+        status: 5,
         task: [6, 7, 8, 9]
     }
-]
+];
 
 
 // starts with all html pages
 document.addEventListener('DOMContentLoaded', domContentLoaded);
 
+
+
+
 // to manage to button click events
 function domContentLoaded() {
     if (bodyLandingPage) {
-        btnLanding.addEventListener("click", setUpDB);      //funktionsnamen ("setUpDB") ändern
-        btnLandingImg.addEventListener("click", setUpDB);   //funktionsnamen ("setUpDB") ändern
+        btnLanding.addEventListener("click", setUpDB);      //FIXME: funktionsnamen ("setUpDB") ändern
+        btnLandingImg.addEventListener("click", setUpDB);   //FIXME: funktionsnamen ("setUpDB") ändern
     }
 
-    if (contentOverview) {
+    if (bodyOverview) {
         console.log("Overview loading. . .");
-        eventOverview().then({
-            console
+        //FIXME: get rid of the mock data "todoData"
+        createTodoOverview(todoData);
+        classContentOverview.addEventListener('click', function(event) {
+            if(event.target.tagName === 'P') {
+                //FIXME: mock output for debugging
+                console.log("Paragraph clicked:", event.target.innerText);
+            }
         });
     }
 
@@ -55,6 +65,42 @@ function domContentLoaded() {
         //sendData();
     }
 }
+
+/**
+ * create html elements and provide information
+ * @param todoData
+ * return boolean
+ */
+function createTodoOverview (todoData) {
+    if (bodyOverview) {
+        for (const todo of todoData) {
+            const div = document.createElement("div");
+            const label = document.createElement("label");
+            const input = document.createElement("input");
+            input.setAttribute("type", "checkbox");
+            const paragraph = document.createElement("p");
+            const button = document.createElement("button");
+
+            classContentOverview.appendChild(div);
+            div.appendChild(label);
+            div.appendChild(paragraph);
+            div.appendChild(button);
+            label.appendChild(input);
+
+            if (todo.status === 5) {
+                input.checked = true;
+            }
+
+            paragraph.innerText = todo.title;
+
+            button.innerText = todo.task.length.toString();
+        }
+        return true;
+    }
+    return false;
+}
+
+
 //FIXME: funktion neu schreiben - "await fetch(..) funktioniert nicht richtig. syntaxfehler?
         //          async function setUpDB() {
         //              console.log("setUpDB/script.js loaded!");   //wird ausgegeben
@@ -102,6 +148,7 @@ async function loadTodosAsyncForOverview() {
     }
 }
 
+//TODO: rework necessary!
 /**
  * create the to-do boxes for each to-do inside the XML
  * @param xmlObject - xml formatted
@@ -287,5 +334,3 @@ async function isTodoHTMLLoaded() {
 //    const parser = new DOMParser();
 //    return parser.parseFromString(inputString.trim, "application/xml");
 //}
-
-// for page: todo

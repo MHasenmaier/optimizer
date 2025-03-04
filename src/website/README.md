@@ -1,8 +1,13 @@
 # Pages
 
+## landing page
+
+the userflow starts with this page.
+click the button or the picture to get access to the overview page.
+
 ## overview
 
-this page is both landingpage and overviewpage.
+this page is the overviewpage.
 the user can navigate from this page to:
 
 - archiv
@@ -18,7 +23,7 @@ when the user activate the button the attached tasks are dropdown-like listed be
 
 ## archiv
 
-this page contains todos marked "deleted.
+this page contains todos marked "deleted" or "done".
 
 ## focus page
 
