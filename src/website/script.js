@@ -7,6 +7,32 @@ const btnLanding = document.getElementById("landingButton");
 const btnLandingImg = document.getElementById("landingButtonImage");
 const urlToIndex = "http://localhost:8080/optimizer/src/backend/index.php/";
 
+//MOCK-DATA
+const todoData = [
+    {
+        id: 1,
+        title: "todoTitle 1",
+        description: "Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum ",
+        staus: 2,
+        task: [1, 2, 5, 10, 11, 12]
+    },
+    {
+        id: 2,
+        title: "todoTitle 2",
+        description: "Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum ",
+        staus: 4,
+        task: [3, 4]
+    },
+    {
+        id: 3,
+        title: "todoTitle 3",
+        description: "Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum ",
+        staus: 1,
+        task: [6, 7, 8, 9]
+    }
+]
+
+
 // starts with all html pages
 document.addEventListener('DOMContentLoaded', domContentLoaded);
 
@@ -85,6 +111,7 @@ function createTodoElements(xmlObject) {
     //Fetch all <todo> elements from XML
     const todos = xmlObject.getElementsByTagName("todo");
 
+
     // Loop through each <todo>
     for (let i = 0; i < todos.length; i++) {
         const todo = todos[i];
@@ -113,8 +140,6 @@ function createTodoElements(xmlObject) {
         //Task box
         const taskBox = document.createElement("button");
         taskBox.setAttribute("class", "taskButton");
-
-        // TODO: box einblenden mit ANZAHL angehängter tasks
 
         // Append the newly created div to an existing container on your page
         contentOverview.appendChild(todoDiv);
