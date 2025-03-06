@@ -214,11 +214,15 @@ a:active {
 }
 
 .contentOverview div p {
-    width: 184px;
+    width: 162px;
+    padding: 10px;
 
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+
+    border: grey 1px solid;
+    border-radius: 8px;
 
     cursor: pointer;
 }
@@ -230,7 +234,13 @@ a:active {
     min-width: 40px;
     height: fit-content;
 
+    position: relative;
+    right: 25px;
+    top: 6px;
+
     border-radius: 12px;
+
+    cursor: pointer;
 }
 
 /* checkbox */

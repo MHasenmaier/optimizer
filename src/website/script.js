@@ -9,39 +9,50 @@ const btnLanding = document.getElementById("landingButton");
 const btnLandingImg = document.getElementById("landingButtonImage");
 const urlToIndex = "http://localhost:8080/optimizer/src/backend/index.php/";
 
-//FIXME: MOCK-DATA - Array>3 Objects => id, title, description, status, task
-const todoData = [
-    {
-        id: 1,
-        title: "todoTitle 1",
-        description: "Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum ",
-        status: 3,
-        task: [1, 2, 5, 10, 11, 12]
-    },
-    {
-        id: 2,
-        title: "todoTitle 2",
-        description: "Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum ",
-        status: 1,
-        task: [3, 4]
-    },
-    {
-        id: 3,
-        title: "todoTitle 3",
-        description: "Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum ",
-        status: 5,
-        task: [6, 7, 8, 9]
-    }
-];
-
+//FIXME: MOCK-DATA - xml => id, title, description, status, task
+const mockXMLData = `<todos>
+    <todo>
+        <id>1</id>
+        <title>todoTitle 1</title>
+        <description>Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum </description>
+        <status>3</status>
+        <tasks>
+            <task>1</task>
+            <task>2</task>
+            <task>5</task>
+            <task>10</task>
+            <task>11</task>
+            <task>12</task>
+        </tasks>
+    </todo>
+    <todo>
+        <id>2</id>
+        <title>todoTitle 2</title>
+        <description>Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum </description>
+        <status>1</status>
+        <tasks>
+            <task>3</task>
+            <task>4</task>
+        </tasks>
+    </todo>
+    <todo>
+        <id>3</id>
+        <title>todoTitle 3</title>
+        <description>Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum </description>
+        <status>5</status>
+        <tasks>
+            <task>6</task>
+            <task>7</task>
+            <task>8</task>
+            <task>9</task>
+        </tasks>
+    </todo>
+</todos>`;
 
 // starts with all html pages
 document.addEventListener('DOMContentLoaded', domContentLoaded);
 
-
-
-
-// to manage to button click events
+//to manage to button click events
 function domContentLoaded() {
     if (bodyLandingPage) {
         btnLanding.addEventListener("click", setUpDB);      //FIXME: funktionsnamen ("setUpDB") ändern
@@ -50,79 +61,95 @@ function domContentLoaded() {
 
     if (bodyOverview) {
         console.log("Overview loading. . .");
-        //FIXME: get rid of the mock data "todoData"
-        createTodoOverview(todoData);
-        classContentOverview.addEventListener('click', function(event) {
-            if(event.target.tagName === 'P') {
+        //FIXME: get rid of the mock data "mockData"
+        createTodoOverview(xmlToArray(mockXMLData));
+        console.log(xmlToArray(mockXMLData));
+            classContentOverview.addEventListener('click', function(event) {
+            if(event.target.tagName === 'P') {  //click todo
                 //FIXME: mock output for debugging
                 console.log("Paragraph clicked:", event.target.innerText);
+                const index = event.target.getAttribute("data-index");
+                const element = xmlToArray(mockXMLData)[index];
+                //TODO: include DB content
+                //FIXME: at fetchDBTodo() function
+                const dbTodo = fetchDBTodo(index);
+                console.log(element);
+                console.log("from DB:\n" + dbTodo);
+                //open link todo page
+            } else if (event.target.tagName === 'input') {  //click checkbox
+                //FIXME:
+                console.log("Checkbox checked: ", event.target.parentElement.parentElement.querySelector('p').innerText);
             }
         });
     }
 
     if (bodyTodoPage) {
-        console.log("bodyTodoPage loading . . .")
+        console.log("Todo page loading . . .")
         //sendData();
     }
 }
 
+//FIXME: how to debug, if the function fails? return false?
 /**
  * create html elements and provide information
  * @param todoData
- * return boolean
+ * return true if successful
  */
-function createTodoOverview (todoData) {
-    if (bodyOverview) {
-        for (const todo of todoData) {
-            const div = document.createElement("div");
-            const label = document.createElement("label");
-            const input = document.createElement("input");
-            input.setAttribute("type", "checkbox");
-            const paragraph = document.createElement("p");
-            const button = document.createElement("button");
+function createTodoOverview(todoData) {
+    const contentOverview = document.querySelector(".contentOverview");
+    contentOverview.innerHTML = "";
 
-            classContentOverview.appendChild(div);
-            div.appendChild(label);
-            div.appendChild(paragraph);
-            div.appendChild(button);
-            label.appendChild(input);
+    todoData.forEach((todo, arrayIndex) => {
+        const div = document.createElement("div");
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.setAttribute("type", "checkbox");
+        const paragraph = document.createElement("p");
+        paragraph.setAttribute("data-index", arrayIndex);
+        const button = document.createElement("button");
 
-            if (todo.status === 5) {
-                input.checked = true;
-            }
+        contentOverview.appendChild(div);
+        div.appendChild(label);
+        div.appendChild(paragraph);
+        div.appendChild(button);
+        label.appendChild(input);
 
-            paragraph.innerText = todo.title;
-
-            button.innerText = todo.task.length.toString();
+        if (todo.status === 5) {
+            input.checked = true;
         }
-        return true;
-    }
-    return false;
+
+        paragraph.innerText = todo.title;
+        button.innerText = todo.task.length.toString();
+    });
+
+    return true;
 }
 
 
-//FIXME: funktion neu schreiben - "await fetch(..) funktioniert nicht richtig. syntaxfehler?
-        //          async function setUpDB() {
-        //              console.log("setUpDB/script.js loaded!");   //wird ausgegeben
-        //              try {
-        //                  const response = await fetch(urlToIndex + 'setUpDB', {
-        //                      mode: 'cors',
-        //                      method: 'GET'
-        //                  })
-        //                  console.log("fetch abgeschlossen");     //wird nicht ausgegeben
-        //                      /*const fetchResponse = */await console.log(response);
-        //                  //console.log("fetchResponse in setUpDB/script.js:\n" + fetchResponse);
-        //                      //.then((response) => {response.text(); console.log("response in setUpDB/script.js ist:\n" + response); return true;})
-        //                      //.then((input) => input)
-        //                      //.then(() => {window.location.href = "overview.html"})
-        //                      //.then(() => {loadTodosAsyncForOverview()})
-        //                  console.log("erfolgreich in try");
-        //                  return true;
-        //              } catch (error) {
-        //                  console.error("Frontend error in script.js/setUpDB: " . error);
-        //                  return false;
-        //              }
-        //          }
+/**
+ *
+ * @param xml
+ * @returns {*[id, title, description, status, task: tasks]}
+ */
+function xmlToArray(xml) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, "text/xml");
+    const todos = xmlDoc.getElementsByTagName("todo");
+    const result = [];
+
+    for (let i = 0; i < todos.length; i++) {
+        const todo = todos[i];
+        const id = parseInt(todo.getElementsByTagName("id")[0].textContent);
+        const title = todo.getElementsByTagName("title")[0].textContent;
+        const description = todo.getElementsByTagName("description")[0].textContent;
+        const status = parseInt(todo.getElementsByTagName("status")[0].textContent);
+        const tasks = Array.from(todo.getElementsByTagName("task")).map(task => parseInt(task.textContent));
+
+        result.push({ id, title, description, status, task: tasks });
+    }
+
+    return result;
+}
 
 // for page: overview
 /**
@@ -145,58 +172,6 @@ async function loadTodosAsyncForOverview() {
 
     } catch (err) {
         console.error("Frontend error in loadTodosAsyncForOverviews(): \n", err);
-    }
-}
-
-//TODO: rework necessary!
-/**
- * create the to-do boxes for each to-do inside the XML
- * @param xmlObject - xml formatted
- */
-function createTodoElements(xmlObject) {
-
-    //Fetch all <todo> elements from XML
-    const todos = xmlObject.getElementsByTagName("todo");
-
-
-    // Loop through each <todo>
-    for (let i = 0; i < todos.length; i++) {
-        const todo = todos[i];
-
-        // Extract the relevant data
-        const id = todo.getElementsByTagName("ID")[0].textContent;
-        const title = todo.getElementsByTagName("title")[0].textContent;
-        //let status = todo.getElementsByTagName("status")[0].textContent;
-
-        // Create the div for the todo
-        const todoDiv = document.createElement("div");
-        todoDiv.setAttribute("id", id);
-        todoDiv.setAttribute("class", "todoCountClass");
-
-        //Set the title of the todo
-        const todoTitle = document.createElement("button");
-        todoTitle.setAttribute("class", "todoButton");
-        todoTitle.innerHTML = title;
-
-        todoTitle.setAttribute("href", urlToIndex + "todo/?id=" + id);
-
-        // Create a new input checkbox element
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-
-        //Task box
-        const taskBox = document.createElement("button");
-        taskBox.setAttribute("class", "taskButton");
-
-        // Append the newly created div to an existing container on your page
-        contentOverview.appendChild(todoDiv);
-
-        //order of the includes is important
-        todoDiv.appendChild(checkbox);
-        todoDiv.appendChild(todoTitle);
-        todoDiv.appendChild(taskBox);
-
-        console.log(todoDiv);
     }
 }
 
@@ -235,27 +210,7 @@ async function eventOverview() {
 //    await renderTodoInAddTodo(todoXml);
 }
 
-/**
- * async function - click event listener for all todo buttons to get the ID of the clicked todo
- * returns string - ID number if promise is fulfilled
- * @returns {Promise<void>}
- */
-async function eventHandlerOverview () {
-    return new Promise((resolve) => {
-
-        console.log("function eventHandlerOverview: resolve = " , resolve);
-        arrAllTodoButtons.forEach(button => {
-            button.addEventListener('click', (event) => {
-            //get ID of the todo (parent div of the button)
-                console.log("function eventHandlerOverview: button clicked . . .");
-                const id = (event.target.parentElement.id);
-                console.log(`clicked button ID = ${id}`);
-                resolve(id);
-            });
-        });
-    });
-}
-
+//TODO: check DB connection / valid DB data return
 /**
  * take the provided ID and fetch the todo data of it from the DB
  * returns the XML formatted todo data if promise is fulfilled
@@ -264,7 +219,7 @@ async function eventHandlerOverview () {
  */
 async function fetchDBTodo (inputSpecificID) {
     console.log(`function fetchDBTodo startet with ${inputSpecificID} . . .`);
-    const parser = new DOMParser();// ?? notwendig?
+    const parser = new DOMParser();
     //to prevent invalid IDs
     if (inputSpecificID > 0) {
         try {
@@ -286,6 +241,7 @@ async function fetchDBTodo (inputSpecificID) {
     }
 }
 
+//FIXME: rename function & maybe rewrite function
 /**
  * create the imaginary elements for a todo in AddTodo
  * @param xmlInput
@@ -310,6 +266,7 @@ function renderTodoInAddTodo(xmlInput) {
     //document.getElementById("todoDescription").innerText = xmlInput.getElementsByTagName("description")[0].textContent;
 }
 
+//FIXME: still relevant?
 /**
  * async function to switch to the (Add-New-)To-do-Page
  * returns 'true' if page is loaded
@@ -325,12 +282,3 @@ async function isTodoHTMLLoaded() {
         });
     });
 }
-
-/**
- *
- * @returns Document {XMLDocument}
- */
-//function parseXMLString(inputString) {
-//    const parser = new DOMParser();
-//    return parser.parseFromString(inputString.trim, "application/xml");
-//}
