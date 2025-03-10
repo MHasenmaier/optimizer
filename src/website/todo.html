@@ -5,7 +5,7 @@
         <title>Todo anlegen</title>
         <link rel="stylesheet" href="styles.css">
     </head>
-    <body id="todoBody" class="bodyDoing">
+    <body id="bodyTodoPage" class="bodyDoing">
 
         <header>
             <div class="doingHeader">
@@ -23,7 +23,7 @@
             </div>
         </header>
 
-        <form class="contentDoing">
+        <form class="contentDoing" id="todoForm">
             <div class="containerItemTitle">
                 <label for="labelItemTitle"></label>
                 <input
@@ -33,25 +33,33 @@
                         id="labelItemTitle"
                         type="text"
                         placeholder="Titel eingeben"
-                        required
-                >
+                        required>
             </div>
 
             <div class="containerItemDescription">
                 <label for="textareaItemDescription"></label>
                 <textarea name="describe the todo" class="textareaItemDescription" id="textareaItemDescription"
-                          placeholder="Beschreibung eingeben"></textarea>
+                          placeholder="Beschreibung eingeben" spellcheck="true"></textarea>
             </div>
 
-            <button class="containerButtonAddTask">
-                <span class="buttonAddTask">+</span>Tasks anzeigen
+            <div class="containerHiddenTasks">
+                <button id="buttonHideTasks" type="button">
+                    <span>-</span>Tasks
+                </button>
+                <div>
+                    <p data-index="1">Tasktitel 1</p>
+                    <p data-index="2">Tasktitel 2</p>
+                    <p data-index="3">Tasktitel 3</p>
+                </div>
+            </div>
+
+            <button class="containerButtonShowTasks" id="buttonShowTasks" type="button">
+                <span class="buttonShowTasks">+</span>Tasks
             </button>
         </form>
 
         <footer>
-            <button type="submit" class="footerButton" id="buttonAddTodo">
-                Todo anlegen
-            </button>
+            <input type="submit" class="footerButton" id="buttonAddTodo" form="todoForm" value="Todo anlegen">
         </footer>
 
         <script src="script.js"></script>

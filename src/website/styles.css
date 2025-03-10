@@ -32,7 +32,7 @@ footer {
     margin-bottom: 25px;
 }
 
-footer button {
+footer input {
     font-size: 35px;
     width: 270px;
     padding: 8px 16px;
@@ -42,11 +42,7 @@ footer button {
     cursor: pointer;
 }
 
-footer button:active {
-    background-color: #b9b9b9;
-}
-
-footer button:active {
+footer input:active {
     background-color: #b9b9b9;
 }
 
@@ -92,7 +88,7 @@ a:active {
     background-color: #436CFE;
 }
 
-.buttonLandingImage {
+.imageLanding {
     display: flex;
     appearance: none;
     border: none;
@@ -464,27 +460,33 @@ a:active {
 *   "add task" function - only at todo page
 */
 
+/*TODO: still relevant?*/
 .containerTodoContent {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.containerButtonAddTask {
+.containerButtonShowTasks {
     display: flex;
-    border: none;
-    background: none;
+    align-items: center;
     width: fit-content;
+
+    border: none;
+
+    background: none;
+    font-size: large;
+
     height: 8%;
     margin: 8px 0 8px 30px;
-    align-items: center;
+
     cursor: pointer;
 }
 
-.buttonAddTask {
-    border-radius: 100%;
-    border: 1px black solid;
-    padding: 0 8px;
+.buttonShowTasks {
+    border-radius: 20px;
+    border: 2px black solid;
+    padding: 0 9px;
     font-size: xx-large;
     font-weight: bold;
     margin: 0 12px;
@@ -496,6 +498,65 @@ a:active {
     justify-content: center;
     align-items: center;
 }
+
+.containerHiddenTasks {
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+
+    padding-left: 46px;
+    margin-bottom: 16px;
+}
+
+.containerHiddenTasks button {
+    display: flex;
+    align-items: center;
+
+    border: 1px solid transparent;
+    border-radius: 8px;
+
+    padding: 6px;
+    gap: 8px;
+    margin: 6px 0;
+
+    background-color: transparent;
+    font-size: large;
+
+    cursor: pointer;
+}
+
+.containerHiddenTasks button span {
+    border: 2px solid black;
+    border-radius: 100%;
+    padding: 0 12px 4px;
+
+    font-size: x-large;
+    font-weight: bold;
+}
+
+.containerHiddenTasks div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.containerHiddenTasks div p {
+    border: 1px solid transparent;
+    border-radius: 8px;
+
+    width: 242px;
+    padding: 10px 24px;
+    margin: 0;
+
+    background-color: #d3d3d3;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    cursor: pointer;
+}
+
 
 /**
 *
