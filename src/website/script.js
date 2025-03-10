@@ -207,20 +207,3 @@ function renderTodoInAddTodo(xmlInput) {
     //document.getElementById("todoTitle").innerText = xmlInput.getElementsByTagName("title")[0].textContent;
     //document.getElementById("todoDescription").innerText = xmlInput.getElementsByTagName("description")[0].textContent;
 }
-
-//FIXME: still relevant?
-/**
- * async function to switch to the (Add-New-)To-do-Page
- * returns 'true' if page is loaded
- * @returns {true}
- */
-async function isTodoHTMLLoaded() {
-    console.log("function isTodoHTMLLoaded startet . . .");
-    window.location.href = "http://localhost:8080/optimizer/src/website/todo.html";
-    return new Promise(resolve => {
-        window.addEventListener('load', () => {
-            console.log("isTodoHTMLLoaded: Todo Page loaded . . .");
-            resolve(true);
-        });
-    });
-}
