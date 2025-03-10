@@ -151,64 +151,6 @@ function xmlToArray(xml) {
     return result;
 }
 
-// for page: overview
-/**
- * loads all todos at overview.html
- * @returns Promise
- */
-async function loadTodosAsyncForOverview() {
-    try {
-        const response = await fetch(urlToIndex + 'activetodos', {
-            mode: "cors",
-        });
-        const body = await response.text();
-        console.log("body", body); // debugging
-
-        const xmlObject = parser.parseFromString(body, "text/xml");
-        console.log('Todos async loaded\nXML formatted: \n', xmlObject, '\n');
-
-        createTodoElements(xmlObject);
-        return true;
-
-    } catch (err) {
-        console.error("Frontend error in loadTodosAsyncForOverviews(): \n", err);
-    }
-}
-
-/**
- * handles the clickevents triggered by buttons at overview-page
- */
-async function eventOverview() {
-    console.log("Step 0: Overview finished loading.\nscript.js/eventOverview startet. . .");
-
-    eventHandlerOverview()
-        .then(specificId => {
-            console.log(`Step 1: specificId = ${specificId}`);
-            fetchDBTodo(specificId)
-                .then (todoXml => {
-                    console.log(`Step 2: fetched todoXml = ${JSON.stringify(todoXml)}`);
-                    isTodoHTMLLoaded();
-                    renderTodoInAddTodo(todoXml);
-                })
-                .catch(err => console.error(`script.js/eventOverview - Something went wrong ${err}`));
-        })
-
-//    //Step 1: load the click-event-handler and catch the button ID if clicked
-//    eventHandlerOverview().then(resp => {specificId = resp});
-//    //const specificId = await eventHandlerOverview();
-//    console.log(`Step 1: specificId = ${specificId}`);
-//
-//    //Step 2: send the ID to the backend and fetch the todo data
-//    const todoXml = await fetchDBTodo(specificId);
-//    console.log(`Step 2: fetched todoXml = ${JSON.stringify(todoXml)}`);
-//
-//    //Step 3: load the todo page
-//    const isTodoPageLoaded = await isTodoHTMLLoaded();
-//    console.log(`Step 3: isTodoPageLoaded? = ${isTodoPageLoaded}`);
-//
-//    //Step 4: fill the todo page with todo data
-//    await renderTodoInAddTodo(todoXml);
-}
 
 //TODO: check DB connection / valid DB data return
 /**
