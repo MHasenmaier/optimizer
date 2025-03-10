@@ -149,22 +149,32 @@ a:active {
 .menuButton:focus {
     outline: none;
 }
-.menuWindow {
-    display: none;
-    /*display: flex;*/
+
+.popupMenuWindow {
     flex-direction: column;
     justify-content: center;
 
     position: absolute;
     top: 130px;
-    right: 150px;
+    right: 275px;
 
     border: 1px solid #d3d3d3;
     border-radius: 8px;
     box-shadow: 3px 3px 8px 0 #b9b9b9;
+
+    z-index: 10;
+    background-color: white;
 }
 
-.menuWindow button {
+.popupMenuWindowShow {
+    display: flex;
+}
+
+.popupMenuWindowHide {
+    display: none;
+}
+
+.popupMenuWindow button {
     display: flex;
     align-items: center;
 
@@ -173,7 +183,7 @@ a:active {
     padding: 4px 4px 4px 12px;
     margin: 4px;
 
-    background-color: transparent;
+    /*background-color: transparent;*/
     border: 1px solid #d3d3d3;
     border-radius: 8px;
 

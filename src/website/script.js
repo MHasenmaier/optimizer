@@ -5,6 +5,9 @@ const urlWebsiteRoot = "http://localhost:8080/optimizer/src/website/";
 const bodyOverview = document.getElementById("bodyOverview");
 const classContentOverview = document.querySelector('.contentOverview');
 const footerOverviewAddTodoButton = document.getElementById('footerOverviewAddTodoButton');
+const headerOverviewDisplayPopupMenuButton = document.getElementById("menuButton");
+const headerOverviewDisplayPopupMenuButtonSpan = document.getElementById("menuButton").querySelector("span");
+const classHeaderOverviewPopupMenuWindow = document.querySelector(".popupMenuWindow");
 const headerOverviewFocusButton = document.getElementById('headerOverviewFocusButton');
 const headerOverviewArchivButton = document.getElementById('headerOverviewArchivButton');
 
@@ -26,6 +29,7 @@ const bodyDeleted = document.getElementById("deletedBody");
 const bodyArchiv = document.getElementById("doneBody");
 
 const bodyFocus = document.getElementById("bodyFocus");
+const btnFocusBack = document.getElementById("closeFocusButton");
 
 
 //FIXME: MOCK-DATA - xml => id, title, description, status, task
@@ -91,13 +95,15 @@ function domContentLoaded() {
         footerOverviewAddTodoButton.addEventListener('click', overviewAddNewTodo);  //FIXME: better function name
         headerOverviewFocusButton.addEventListener('click', overviewLinkOpenFocus);
         headerOverviewArchivButton.addEventListener('click', overviewLinkOpenArchiv);
+        headerOverviewDisplayPopupMenuButton.addEventListener("click", overviewPopupMenuWindowControl);
+        headerOverviewDisplayPopupMenuButtonSpan.addEventListener("click", overviewPopupMenuWindowControl);
     }
 
     //todo.html
     if (bodyTodoPage) {
         console.log("Todo page loading . . .")
         //TODO: click "Todo anlegen"
-        btnTodoAddTodo.addEventListener("click", todoAddTodoEvent);
+        btnTodoAddTodo.addEventListener("click", forwardToOverview);
         //TODO: click "+ Tasks"
         btnTodoShowTasks.addEventListener("click", todoShowTasks);
         btnTodoHideTasks.addEventListener("click", todoHideTasks);
@@ -124,7 +130,9 @@ function domContentLoaded() {
 
     //focus.html
     if (bodyFocus) {
+        //TODO: continue - why doesnt this work?
         console.log("Focus page loading . . .")
+        btnFocusBack.addEventListener("click", forwardToOverview);
     }
 }
 
@@ -133,19 +141,19 @@ function domContentLoaded() {
  * TODO: include return values (true/false?) for all event functions
  */
 
-function overviewAddNewTodo (input) {
+function overviewAddNewTodo() {
     console.log("New Todo will be created... soon.");
 
     location.href = urlWebsiteRoot + "todo.html";
 }
 
-function todoAddTodoEvent () {
+function forwardToOverview() {
     console.log("Open link to overview.html");
 
     location.href = urlWebsiteRoot + "overview.html";
 }
 
-function todoShowTasks () {
+function todoShowTasks() {
     console.log("Show Tasks");
     classContainerHiddenTasks.style.display = "flex";
     btnTodoShowTasks.style.display = "none";
@@ -153,9 +161,11 @@ function todoShowTasks () {
 
 function todoOpenTask(event) {
     console.log("Task clicked: " + event.target.innerText);
+
+    location.href = urlWebsiteRoot + "task.html"; //TODO: work-around entfernen /?id=" + element.id;
 }
 
-function todoHideTasks () {
+function todoHideTasks() {
     console.log("Hide Tasks");
     classContainerHiddenTasks.style.display = "none";
     btnTodoShowTasks.style.display = "flex";
@@ -165,8 +175,9 @@ function todoHideTasks () {
  * Function for the event if the checkbox (overview.html) is checked/unchecked
  * @param event (click event)
  */
-function overviewCheckboxClick (event) {
+function overviewCheckboxClick(event) {
     if (event.target.tagName === 'INPUT' && event.target.type === 'checkbox') {  //change on checkbox
+        //TODO: debugging output
         console.log("Checkbox checked: ", event.target.parentElement.parentElement.querySelector('p').innerText);
 
         // Ausgabe des Inhalts des Paragraphs
@@ -186,8 +197,8 @@ function overviewCheckboxClick (event) {
  * Function for the event if the title of a todo (overview.html) is clicked
  * @param event (click event)
  */
-function overviewTodoClick (event) {
-    if(event.target.tagName === 'P') {  //click todo
+function overviewTodoClick(event) {
+    if (event.target.tagName === 'P') {  //click todo
         //FIXME: mock output for debugging
         console.log("Paragraph clicked:", event.target.innerText);
         const index = event.target.getAttribute("data-index");
@@ -206,20 +217,30 @@ function overviewTodoClick (event) {
     }
 }
 
-function overviewLinkOpenArchiv (event) {
+function overviewPopupMenuWindowControl() {
+    if (classHeaderOverviewPopupMenuWindow.classList.contains('popupMenuWindowHide')) {
+        console.log("show popup menu");
+        classHeaderOverviewPopupMenuWindow.classList.replace('popupMenuWindowHide', 'popupMenuWindowShow');
+    } else {
+        console.log("hide popup menu");
+        classHeaderOverviewPopupMenuWindow.classList.replace('popupMenuWindowShow', 'popupMenuWindowHide');
+    }
+}
+
+function overviewLinkOpenArchiv() {
     console.log("Archiv will be opened ... soon");
 
     location.href = urlWebsiteRoot + "archiv.html";
 }
 
-function overviewLinkOpenFocus (event) {
+function overviewLinkOpenFocus() {
     console.log("Focus mode will be opened ... soon");
 
     location.href = urlWebsiteRoot + "focus.html";
 }
 
-//FIXME: mocked function
-function landingStartApp (event) {
+//TODO: mocked function
+function landingStartApp(event) {
     console.log("Change page to overview.html" + event);
 
     //TODO: install function to check existence of DB and tables, return true/false
@@ -253,7 +274,7 @@ function landingStartApp (event) {
  * checks if a DB exists
  * @returns {boolean}
  */
-function checkDB () {
+function checkDB() {
     console.log("DB will be checked ... soon");
     //TODO: install DB call to check if DB is accessible
     const dbState = true;
@@ -265,18 +286,18 @@ function checkDB () {
  * set DB up if none is found
  * @returns {true}
  */
-function setupNewDB () {
+function setupNewDB() {
     console.log("DB and tables will be ready for business ... soon");
     //TODO: contact URL for set up a new DB
     return true;
 }
 
-function checkDBTables () {
+function checkDBTables() {
     console.log("Tables will be checked ... soon");
     //TODO: install DB call to check if the tables are accessible
     const tableState = true;
     console.log("Status Tables is: " + tableState);
-    return  tableState;
+    return tableState;
 }
 
 function setupDBTables() {
@@ -373,7 +394,7 @@ function xmlToArray(xml) {
         const status = parseInt(todo.getElementsByTagName("status")[0].textContent);
         const tasks = Array.from(todo.getElementsByTagName("task")).map(task => parseInt(task.textContent));
 
-        result.push({ id, title, description, status, task: tasks });
+        result.push({id, title, description, status, task: tasks});
     }
 
     return result;
@@ -387,7 +408,7 @@ function xmlToArray(xml) {
  * @param inputSpecificID
  * @returns {Promise<Document>}
  */
-async function fetchDBTodo (inputSpecificID) {
+async function fetchDBTodo(inputSpecificID) {
     console.log(`function fetchDBTodo started with element #${inputSpecificID} . . .`);
     const parser = new DOMParser();
     //to prevent invalid IDs
@@ -406,7 +427,7 @@ async function fetchDBTodo (inputSpecificID) {
             console.log(`function fetchDBTodo: xmlTodo = ${xmlTodo}`);
             return xmlTodo;
         } catch (err) {
-            console.log("frontend error in getSpecificTodo:\n" , err , "\n");
+            console.log("frontend error in getSpecificTodo:\n", err, "\n");
         }
     }
 }
