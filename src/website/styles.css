@@ -780,8 +780,6 @@ input:checked + .slider:before {
 
 /*  focus popup window */
 .focusSliderPopup {
-    display: none;
-    /*display: flex;*/ /*use for debugging*/
     align-items: center;
     gap: 12px;
 }
@@ -789,4 +787,12 @@ input:checked + .slider:before {
 .focusSliderPopup input {
     width: 25%;
     border-radius: 6px;
+}
+
+.focusSliderPopupHide {
+    display: none;
+}
+
+.focusSliderPopupShow {
+    display: flex;
 }

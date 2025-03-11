@@ -22,10 +22,10 @@
 			<p>Todo Fokus setzen</p>
 		</div>
 
-		<div class="focusSliderPopup">
+		<div class="focusSliderPopup focusSliderPopupHide" id="focusMaxTodosPopup">
 			<p>Max aktive Todos?</p>
 			<label for="focusMaxTodos"></label>
-			<input type="number" id="focusMaxTodos">
+			<input type="number" min="1" step="1" inputmode="decimal" id="focusMaxTodos" value="1">
 		</div>
 	</div>
 
@@ -38,10 +38,10 @@
 			<p>Task Fokus setzen</p>
 		</div>
 
-		<div class="focusSliderPopup">
+		<div class="focusSliderPopup focusSliderPopupHide" id="focusMaxTasksPopup">
 			<p>Max aktive Tasks?</p>
 			<label for="focusMaxTasks"></label>
-			<input type="number" id="focusMaxTasks"/>
+			<input type="number" min="1" step="1" inputmode="decimal" id="focusMaxTasks" value="1"/>
 		</div>
 	</div>
 
@@ -50,5 +50,6 @@
 <footer>
 	<input type="button" class="footerButton" id="closeFocusButton" value="Zurück">
 </footer>
+<script src="script.js"></script>
 </body>
 </html>

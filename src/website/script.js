@@ -6,7 +6,6 @@ const bodyOverview = document.getElementById("bodyOverview");
 const classContentOverview = document.querySelector('.contentOverview');
 const footerOverviewAddTodoButton = document.getElementById('footerOverviewAddTodoButton');
 const headerOverviewDisplayPopupMenuButton = document.getElementById("menuButton");
-const headerOverviewDisplayPopupMenuButtonSpan = document.getElementById("menuButton").querySelector("span");
 const classHeaderOverviewPopupMenuWindow = document.querySelector(".popupMenuWindow");
 const headerOverviewFocusButton = document.getElementById('headerOverviewFocusButton');
 const headerOverviewArchivButton = document.getElementById('headerOverviewArchivButton');
@@ -29,8 +28,17 @@ const bodyDeleted = document.getElementById("deletedBody");
 const bodyArchiv = document.getElementById("doneBody");
 
 const bodyFocus = document.getElementById("bodyFocus");
+const slideTodoFocus = document.getElementById("focusTodoCheck");
+const slideTaskFocus = document.getElementById("focusTaskCheck");
+const popupFocusMaxTodos = document.getElementById("focusMaxTodosPopup");
+const popupFocusMaxTasks = document.getElementById("focusMaxTasksPopup");
+const inputFocusMaxTodos = document.getElementById("focusMaxTodos");
+const inputFocusMaxTasks = document.getElementById("focusMaxTasks");
 const btnFocusBack = document.getElementById("closeFocusButton");
 
+//TODO: temporär globale variable
+let maxTodos = 1;
+let maxTasks = 1;
 
 //FIXME: MOCK-DATA - xml => id, title, description, status, task
 const mockXMLData = `<todos>
@@ -70,6 +78,35 @@ const mockXMLData = `<todos>
             <task>9</task>
         </tasks>
     </todo>
+    <todo>
+        <id>5</id>
+        <title>todoTitle 5</title>
+        <description>Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum </description>
+        <status>4</status>
+        <tasks>
+            <task>13</task>
+        </tasks>
+    </todo>
+        <todo>
+        <id>10</id>
+        <title>todoTitle 10</title>
+        <description>Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum </description>
+        <status>4</status>
+        <tasks>
+            <task>14</task>
+            <task>15</task>
+            <task>16</task>
+            <task>17</task>
+        </tasks>
+    </todo>
+        <todo>
+        <id>21</id>
+        <title>todo ohne task 21</title>
+        <description>Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum </description>
+        <status>4</status>
+        <tasks>
+        </tasks>
+    </todo>
 </todos>`;
 
 // starts with all html pages
@@ -87,16 +124,17 @@ function domContentLoaded() {
     //overview.html
     if (bodyOverview) {
         console.log("Overview loading. . .");
-        createTodoOverview(xmlToArray(mockXMLData));    //FIXME: mocked data
+        createTodoOverview(xmlToArray(mockXMLData));    //TODO: mocked data
         console.log(xmlToArray(mockXMLData));
 
         classContentOverview.addEventListener('click', overviewTodoClick);
         classContentOverview.addEventListener('change', overviewCheckboxClick);
-        footerOverviewAddTodoButton.addEventListener('click', overviewAddNewTodo);  //FIXME: better function name
+        footerOverviewAddTodoButton.addEventListener('click', overviewAddNewTodo);  //TODO: better function name
         headerOverviewFocusButton.addEventListener('click', overviewLinkOpenFocus);
         headerOverviewArchivButton.addEventListener('click', overviewLinkOpenArchiv);
         headerOverviewDisplayPopupMenuButton.addEventListener("click", overviewPopupMenuWindowControl);
-        headerOverviewDisplayPopupMenuButtonSpan.addEventListener("click", overviewPopupMenuWindowControl);
+        //FIXME: bug! bei klick wird das fenster nicht zuverlässig geöffnet/geschlossen
+        headerOverviewDisplayPopupMenuButton.querySelector("span").addEventListener("click", overviewPopupMenuWindowControl);
     }
 
     //todo.html
@@ -120,18 +158,28 @@ function domContentLoaded() {
 
     //archiv.html
     if (bodyArchiv) {
-        console.log("Archiv loading . . .")
+        console.log("Archiv loading . . .");
+        //TODO: button anpassen
+        btnFocusBack.addEventListener("click", forwardToOverview);
     }
 
     //deleted.html
     if (bodyDeleted) {
-        console.log("Deleted page loading . . .")
+        console.log("Deleted page loading . . .");
+        //TODO: button anpassen
+        btnFocusBack.addEventListener("click", forwardToOverview);
     }
 
     //focus.html
     if (bodyFocus) {
-        //TODO: continue - why doesnt this work?
-        console.log("Focus page loading . . .")
+        console.log("Focus page loading . . .");
+        //TODO: todo & task generisch zusammenfassen
+        slideTodoFocus.addEventListener("change", () => focusSetDisplayOfPopup("todo"));
+        slideTaskFocus.addEventListener("change", () => focusSetDisplayOfPopup("task"));
+        //TODO: "Save"
+        //TODO: todo & task generisch zusammenfassen
+        inputFocusMaxTodos.addEventListener("input", () => setFocus("todo"));
+        inputFocusMaxTasks.addEventListener("input", () => setFocus("task"));
         btnFocusBack.addEventListener("click", forwardToOverview);
     }
 }
@@ -264,11 +312,70 @@ function landingStartApp(event) {
     location.href = urlWebsiteRoot + "overview.html";
 }
 
+function focusSetDisplayOfPopup(todoOrTask) {
+    console.log("Focus Task Toggle toggled . . .");
+    if (todoOrTask === "task") {
+        if (popupFocusMaxTasks.classList.contains("focusSliderPopupHide")) {
+            popupFocusMaxTasks.classList.replace("focusSliderPopupHide", "focusSliderPopupShow");
+            return true;
+        } else {
+            popupFocusMaxTasks.classList.replace("focusSliderPopupShow", "focusSliderPopupHide");
+            return true;
+        }
+    } else if (todoOrTask === "todo") {
+        if (popupFocusMaxTodos.classList.contains("focusSliderPopupHide")) {
+            popupFocusMaxTodos.classList.replace("focusSliderPopupHide", "focusSliderPopupShow");
+            return true;
+        } else {
+            popupFocusMaxTodos.classList.replace("focusSliderPopupShow", "focusSliderPopupHide");
+            return true;
+        }
+    } else {
+        console.error("Error in js/focusSetFocus");
+        return false;
+    }
+}
+
+function setFocus(todoOrTask) {
+    if (todoOrTask === "todo") {
+        maxTodos = inputFocusMaxTodos.value;
+        console.log("max Todos: " + maxTodos);
+        return true;
+    } else if (todoOrTask === "task") {
+        maxTasks = inputFocusMaxTasks.value;
+        console.log("max Tasks: " + maxTasks);
+        return true;
+    } else {
+        console.error("js/setFocus run into an error");
+        return false;
+    }
+}
+
+//TODO: function für Statuscheck beim Bearbeiten eines Todos vorbereitet
+function isStatusAllowed(todoOrTask, elementStatus) {
+    const activeTodos = countActiveTodos();
+
+    if (maxTodos < activeTodos) {
+        console.log("Status is not allowed. Finish Todos or rise the focus limit");
+        return false;
+    }
+    return true;
+}
+
+function countActiveTodos() {
+    const mockArray = xmlToArray(mockXMLData);
+    let activeTodos = 0;
+    for (const todo of mockArray) {
+        if (todo.status === 4) {
+            activeTodos++;
+        }
+    }
+    return activeTodos;
+}
 
 /**
  * DB and table status functions
  */
-
 
 /**
  * checks if a DB exists
@@ -401,6 +508,10 @@ function xmlToArray(xml) {
 }
 
 
+/**
+ * necessitate of function unknown
+ */
+
 //TODO: check DB connection / valid DB data return
 /**
  * take the provided ID and fetch the todo data of it from the DB
@@ -432,7 +543,7 @@ async function fetchDBTodo(inputSpecificID) {
     }
 }
 
-//TODO: rename function & maybe rewrite function
+//TODO: rework function
 /**
  * create the imaginary elements for a todo in AddTodo
  * @param xmlInput
