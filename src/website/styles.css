@@ -547,20 +547,25 @@ a:active {
 .containerHiddenTasks div {
     display: flex;
     flex-direction: column;
+
     gap: 8px;
+
+    max-height: 200px;
+    overflow: auto;
 }
 
 .containerHiddenTasks div p {
     border: 1px solid transparent;
     border-radius: 8px;
 
-    width: 242px;
+    width: 100% /*242px*/;
     padding: 10px 24px;
     margin: 0;
+    box-sizing: border-box;
 
     background-color: #d3d3d3;
 
-    overflow: hidden;
+    overflow: auto;
     text-overflow: ellipsis;
     white-space: nowrap;
 

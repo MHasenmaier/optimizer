@@ -2,6 +2,10 @@ const parser = new DOMParser();
 const urlToIndex = "http://localhost:8080/optimizer/src/backend/index.php/";
 const urlWebsiteRoot = "http://localhost:8080/optimizer/src/website/";
 
+const bodyLandingPage = document.getElementById("bodyLanding");
+const btnLanding = document.getElementById("buttonLanding");
+const btnLandingImg = document.getElementById("imageLanding");
+
 const bodyOverview = document.getElementById("bodyOverview");
 const classContentOverview = document.querySelector('.contentOverview');
 const footerOverviewAddTodoButton = document.getElementById('footerOverviewAddTodoButton');
@@ -15,13 +19,13 @@ const btnTodoAddTodo = document.getElementById("buttonAddTodo");
 const btnTodoShowTasks = document.getElementById("buttonShowTasks");
 const btnTodoHideTasks = document.getElementById("buttonHideTasks");
 const classContainerHiddenTasks = document.querySelector(".containerHiddenTasks");
-
-
-const bodyLandingPage = document.getElementById("bodyLanding");
-const btnLanding = document.getElementById("buttonLanding");
-const btnLandingImg = document.getElementById("imageLanding");
+const statusPopupTodo = document.getElementById("statusPopupTodo");
+const classContainerStatusPopupTodo = document.querySelector(".selectItemStatus");
+const todoTitleInput = document.getElementById("todoTitleInput");
+const todoDescriptionTextarea = document.getElementById("todoDescriptionTextarea")
 
 const bodyTask = document.getElementById("taskBody");
+const statusPopupTask = document.getElementById("statusPopupTask");
 
 const bodyDeleted = document.getElementById("deletedBody");
 
@@ -148,7 +152,7 @@ function domContentLoaded() {
         //TODO: click a task at todo page
         classContainerHiddenTasks.querySelector("div").addEventListener("click", todoOpenTask);
 
-
+        statusPopupTodo.addEventListener("change", () => saveStatus("todo", statusPopupTodo.options[statusPopupTodo.selectedIndex].value));
     }
 
     //task.html
@@ -173,10 +177,10 @@ function domContentLoaded() {
     //focus.html
     if (bodyFocus) {
         console.log("Focus page loading . . .");
+
         //TODO: todo & task generisch zusammenfassen
         slideTodoFocus.addEventListener("change", () => focusSetDisplayOfPopup("todo"));
         slideTaskFocus.addEventListener("change", () => focusSetDisplayOfPopup("task"));
-        //TODO: "Save"
         //TODO: todo & task generisch zusammenfassen
         inputFocusMaxTodos.addEventListener("input", () => setFocus("todo"));
         inputFocusMaxTasks.addEventListener("input", () => setFocus("task"));
@@ -353,24 +357,44 @@ function setFocus(todoOrTask) {
 
 //TODO: function für Statuscheck beim Bearbeiten eines Todos vorbereitet
 function isStatusAllowed(todoOrTask, elementStatus) {
-    const activeTodos = countActiveTodos();
-
-    if (maxTodos < activeTodos) {
-        console.log("Status is not allowed. Finish Todos or rise the focus limit");
-        return false;
-    }
-    return true;
-}
-
-function countActiveTodos() {
     const mockArray = xmlToArray(mockXMLData);
     let activeTodos = 0;
+
     for (const todo of mockArray) {
         if (todo.status === 4) {
             activeTodos++;
         }
     }
-    return activeTodos;
+
+    if (todoOrTask === "todo" && elementStatus === "4") {
+        if (maxTodos < activeTodos) {
+            //TODO: return feedback to user as a popup/warning/etc
+            console.log("Status is not allowed. Finish Todos (" + activeTodos + " active todos) or rise the focus limit (actual limit: " + maxTodos + " )");
+            return false;
+        }
+    }
+    return true;
+}
+
+function saveStatus (todoOrTask, elementStatus) {
+    let statusValue = statusPopupTodo.options[statusPopupTodo.selectedIndex].value;
+    console.log("Status is: " + statusValue);
+
+    if (!isStatusAllowed(todoOrTask, elementStatus)) {
+        return false;
+    }
+    //TODO: ändere den "status"-wert im array von diesem todo
+    console.log("js/saveStatus set to: " + elementStatus);
+
+    saveTodo();
+}
+
+function saveTodo () {
+    console.log("todo will be saved ... soon");
+
+console.log("todoTitleInput.value = " + todoTitleInput.value);
+console.log("todoDescriptionTextarea.value = " + todoDescriptionTextarea.value);
+
 }
 
 /**

@@ -10,8 +10,8 @@
         <header>
             <div class="doingHeader">
                 <form class="containerItemContent" method="post" id="itemStatus">
-                    <label for="statusPopup"></label>
-                    <select class="selectItemStatus" name="statusPopup" id="statusPopup">
+                    <label for="statusPopupTodo"></label>
+                    <select class="selectItemStatus" name="statusPopup" id="statusPopupTodo">
                         <option value="" disabled selected>Status</option>
                         <option value="1">Löschen</option>
                         <option value="2">Neu</option>
@@ -25,20 +25,20 @@
 
         <form class="contentDoing" id="todoForm">
             <div class="containerItemTitle">
-                <label for="labelItemTitle"></label>
+                <label for="todoTitleInput"></label>
                 <input
                         class="inputItemTitle"
                         name="title of the todo"
                         autofocus
-                        id="labelItemTitle"
+                        id="todoTitleInput"
                         type="text"
                         placeholder="Titel eingeben"
                         required>
             </div>
 
             <div class="containerItemDescription">
-                <label for="textareaItemDescription"></label>
-                <textarea name="describe the todo" class="textareaItemDescription" id="textareaItemDescription"
+                <label for="todoDescriptionTextarea"></label>
+                <textarea name="describe the todo" class="textareaItemDescription" id="todoDescriptionTextarea"
                           placeholder="Beschreibung eingeben" spellcheck="true"></textarea>
             </div>
 
