@@ -18,14 +18,12 @@ const bodyTodoPage = document.getElementById("bodyTodoPage");
 const btnTodoAddTodo = document.getElementById("buttonAddTodo");
 const btnTodoShowTasks = document.getElementById("buttonShowTasks");
 const btnTodoHideTasks = document.getElementById("buttonHideTasks");
-const classContainerHiddenTasks = document.querySelector(".containerHiddenTasks");
+const classContainerHiddenTasksContainedTasks = document.querySelector(".containerHiddenTasksContainedTasks");
 const statusPopupTodo = document.getElementById("statusPopupTodo");
-const classContainerStatusPopupTodo = document.querySelector(".selectItemStatus");
 const todoTitleInput = document.getElementById("todoTitleInput");
 const todoDescriptionTextarea = document.getElementById("todoDescriptionTextarea")
 
 const bodyTask = document.getElementById("taskBody");
-const statusPopupTask = document.getElementById("statusPopupTask");
 
 const bodyDeleted = document.getElementById("deletedBody");
 
@@ -45,7 +43,7 @@ let maxTodos = 1;
 let maxTasks = 1;
 
 //FIXME: MOCK-DATA - xml => id, title, description, status, task
-const mockXMLData = `<todos>
+const mockXMLDataTodo = `<todos>
     <todo>
         <id>1</id>
         <title>todoTitle 1</title>
@@ -113,7 +111,7 @@ const mockXMLData = `<todos>
     </todo>
 </todos>`;
 
-const mochXmlDataTask = <tasks>
+const mockXMLDataTask = `<tasks>
     <task>
         <id>1</id>
         <title>Task Titel 1</title>
@@ -233,7 +231,7 @@ const mochXmlDataTask = <tasks>
         <status>5</status>
         <todo>10</todo>
     </task>
-</tasks>
+</tasks>`
 
 // starts with all html pages
 document.addEventListener('DOMContentLoaded', domContentLoaded);
@@ -250,8 +248,8 @@ function domContentLoaded() {
     //overview.html
     if (bodyOverview) {
         console.log("Overview loading. . .");
-        createTodoOverview(xmlToArray(mockXMLData));    //TODO: mocked data
-        console.log(xmlToArray(mockXMLData));
+        createTodoOverview(xmlToArray(mockXMLDataTodo));    //TODO: mocked data
+        console.log(xmlToArray(mockXMLDataTodo));
 
         classContentOverview.addEventListener('click', overviewTodoClick);
         classContentOverview.addEventListener('change', overviewCheckboxClick);
@@ -267,12 +265,12 @@ function domContentLoaded() {
     if (bodyTodoPage) {
         console.log("Todo page loading . . .")
         //TODO: click "Todo anlegen"
-        btnTodoAddTodo.addEventListener("click", forwardToOverview);
+        btnTodoAddTodo.addEventListener("click", clickEventAcceptTodo);
         //TODO: click "+ Tasks"
         btnTodoShowTasks.addEventListener("click", todoShowTasks);
         btnTodoHideTasks.addEventListener("click", todoHideTasks);
         //TODO: click a task at todo page
-        classContainerHiddenTasks.querySelector("div").addEventListener("click", todoOpenTask);
+        classContainerHiddenTasksContainedTasks.querySelector("p").addEventListener("click", todoOpenTask);
 
         statusPopupTodo.addEventListener("change", () => saveStatus("todo", statusPopupTodo.options[statusPopupTodo.selectedIndex].value));
     }
@@ -314,11 +312,52 @@ function domContentLoaded() {
  * Click events
  * TODO: include return values (true/false?) for all event functions
  */
-
 function overviewAddNewTodo() {
     console.log("New Todo will be created... soon.");
 
     location.href = urlWebsiteRoot + "todo.html";
+}
+
+function collectData () {
+    console.log("Todo data will be collected . . . soon.");
+
+    let todoArray = xmlToArray(mockXMLDataTodo);
+    //let todoArrayLength = todoArray.length;
+    //let nextId = xmlToArray(mockXMLDataTodo)[todoArrayLength].id;
+    //nextId++;
+
+    const paragraphs = classContainerHiddenTasksContainedTasks.querySelectorAll("p");
+    const dataIndices = [];
+
+    //TODO: ist das sinnvoll? neuer task erstellen fragt id von db an und zeigt hier nur die ids an
+    paragraphs.forEach(p => {
+        const dataIndex = p.getAttribute("data-index");
+        if (dataIndex) {
+           dataIndices.push(dataIndex);
+        }
+    })
+
+    console.log("todoArray: " + todoArray);
+    console.log("todoArray[0]: " + todoArray[0]);
+
+    const newTodo = {
+        id: todoArray.pop().id, //TODO: ist das sinnvoll? id wird von der db erstellt
+        title: todoTitleInput.value,
+        description: todoDescriptionTextarea.value,
+        status: statusPopupTodo.options[statusPopupTodo.selectedIndex].value,
+        task: dataIndices   //TODO: keine INT, sondern string
+    }
+
+    todoArray.push(newTodo);
+
+
+    console.log("New Todo: " + JSON.stringify(newTodo));
+    console.log("todoArray: " + JSON.stringify(todoArray));
+}
+
+function clickEventAcceptTodo () {
+    collectData();
+    forwardToOverview();
 }
 
 function forwardToOverview() {
@@ -329,7 +368,7 @@ function forwardToOverview() {
 
 function todoShowTasks() {
     console.log("Show Tasks");
-    classContainerHiddenTasks.style.display = "flex";
+    classContainerHiddenTasksContainedTasks.style.display = "flex";
     btnTodoShowTasks.style.display = "none";
 }
 
@@ -341,7 +380,7 @@ function todoOpenTask(event) {
 
 function todoHideTasks() {
     console.log("Hide Tasks");
-    classContainerHiddenTasks.style.display = "none";
+    classContainerHiddenTasksContainedTasks.style.display = "none";
     btnTodoShowTasks.style.display = "flex";
 }
 
@@ -376,7 +415,7 @@ function overviewTodoClick(event) {
         //FIXME: mock output for debugging
         console.log("Paragraph clicked:", event.target.innerText);
         const index = event.target.getAttribute("data-index");
-        const element = xmlToArray(mockXMLData)[index];
+        const element = xmlToArray(mockXMLDataTodo)[index];
         //TODO: include DB content
         //FIXME: at fetchDBTodo() function
         const dbTodo = fetchDBTodo(index);
@@ -479,7 +518,7 @@ function setFocus(todoOrTask) {
 
 //TODO: function für Statuscheck beim Bearbeiten eines Todos vorbereitet
 function isStatusAllowed(todoOrTask, elementStatus) {
-    const mockArray = xmlToArray(mockXMLData);
+    const mockArray = xmlToArray(mockXMLDataTodo);
     let activeTodos = 0;
 
     for (const todo of mockArray) {
@@ -507,16 +546,6 @@ function saveStatus(todoOrTask, elementStatus) {
     }
     //TODO: ändere den "status"-wert im array von diesem todo
     console.log("js/saveStatus set to: " + elementStatus);
-
-    saveTodo();
-}
-
-function saveTodo() {
-    console.log("todo will be saved ... soon");
-
-    console.log("todoTitleInput.value = " + todoTitleInput.value);
-    console.log("todoDescriptionTextarea.value = " + todoDescriptionTextarea.value);
-
 }
 
 /**
