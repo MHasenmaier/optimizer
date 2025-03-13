@@ -544,32 +544,36 @@ a:active {
     font-weight: bold;
 }
 
-.containerHiddenTasks div {
+.containerHiddenTasksContainedTasks {
     display: flex;
     flex-direction: column;
 
     gap: 8px;
 
-    max-height: 200px;
+    max-height: 150px;
     overflow: auto;
 }
 
-.containerHiddenTasks div p {
+.containerHiddenTasksContainedTasks p {
     border: 1px solid transparent;
     border-radius: 8px;
 
-    width: 100% /*242px*/;
+    width: 242px;
     padding: 10px 24px;
     margin: 0;
     box-sizing: border-box;
 
     background-color: #d3d3d3;
 
-    overflow: auto;
     text-overflow: ellipsis;
     white-space: nowrap;
 
     cursor: pointer;
+}
+
+.containerHiddenTasksButtons {
+    display: flex;
+    flex-direction: row;
 }
 
 

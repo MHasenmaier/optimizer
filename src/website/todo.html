@@ -43,10 +43,17 @@
             </div>
 
             <div class="containerHiddenTasks">
-                <button id="buttonHideTasks" type="button">
-                    <span>-</span>Tasks
-                </button>
-                <div>
+                <div class="containerHiddenTasksButtons">
+                    <!--FIXME: "Fenster schließen" und "Task öffnen" Links funktionieren nicht -->
+                    <button id="buttonHideTasks" type="button">
+                        <span>v</span>Ausblenden
+                    </button>
+                    <button id="buttonTodoAddNewTask" type="button">
+                        <span>+</span>Neu
+                    </button>
+                </div>
+
+                <div class="containerHiddenTasksContainedTasks">
                     <p data-index="1">Tasktitel 1</p>
                     <p data-index="2">Tasktitel 2</p>
                     <p data-index="3">Tasktitel 3</p>
@@ -54,7 +61,7 @@
             </div>
 
             <button class="containerButtonShowTasks" id="buttonShowTasks" type="button">
-                <span class="buttonShowTasks">+</span>Tasks
+                <span class="buttonShowTasks">A</span>Tasks
             </button>
         </form>
 
