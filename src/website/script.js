@@ -1,3 +1,5 @@
+import {clickEventAcceptTodo} from "./todo";
+
 const parser = new DOMParser();
 const urlToIndex = "http://localhost:8080/optimizer/src/backend/index.php/";
 const urlWebsiteRoot = "http://localhost:8080/optimizer/src/website/";
@@ -13,15 +15,6 @@ const headerOverviewDisplayPopupMenuButton = document.getElementById("menuButton
 const classHeaderOverviewPopupMenuWindow = document.querySelector(".popupMenuWindow");
 const headerOverviewFocusButton = document.getElementById('headerOverviewFocusButton');
 const headerOverviewArchivButton = document.getElementById('headerOverviewArchivButton');
-
-const bodyTodoPage = document.getElementById("bodyTodoPage");
-const btnTodoAddTodo = document.getElementById("buttonAddTodo");
-const btnTodoShowTasks = document.getElementById("buttonShowTasks");
-const btnTodoHideTasks = document.getElementById("buttonHideTasks");
-const classContainerHiddenTasksContainedTasks = document.querySelector(".containerHiddenTasksContainedTasks");
-const statusPopupTodo = document.getElementById("statusPopupTodo");
-const todoTitleInput = document.getElementById("todoTitleInput");
-const todoDescriptionTextarea = document.getElementById("todoDescriptionTextarea")
 
 const bodyTask = document.getElementById("taskBody");
 
@@ -267,8 +260,8 @@ function domContentLoaded() {
         //TODO: click "Todo anlegen"
         btnTodoAddTodo.addEventListener("click", clickEventAcceptTodo);
         //TODO: click "+ Tasks"
-        btnTodoShowTasks.addEventListener("click", todoShowTasks);
-        btnTodoHideTasks.addEventListener("click", todoHideTasks);
+        btnTodoShowTasks.addEventListener("click", todoDisplayToggleTasks);
+        btnTodoHideTasks.addEventListener("click", todoDisplayToggleTasks);
         //TODO: click a task at todo page
         classContainerHiddenTasksContainedTasks.querySelector("p").addEventListener("click", todoOpenTask);
 
@@ -318,46 +311,33 @@ function overviewAddNewTodo() {
     location.href = urlWebsiteRoot + "todo.html";
 }
 
-function collectData () {
-    console.log("Todo data will be collected . . . soon.");
 
-    let todoArray = xmlToArray(mockXMLDataTodo);
-    //let todoArrayLength = todoArray.length;
-    //let nextId = xmlToArray(mockXMLDataTodo)[todoArrayLength].id;
-    //nextId++;
-
-    const paragraphs = classContainerHiddenTasksContainedTasks.querySelectorAll("p");
-    const dataIndices = [];
-
-    //TODO: ist das sinnvoll? neuer task erstellen fragt id von db an und zeigt hier nur die ids an
-    paragraphs.forEach(p => {
-        const dataIndex = p.getAttribute("data-index");
-        if (dataIndex) {
-           dataIndices.push(dataIndex);
-        }
-    })
-
-    console.log("todoArray: " + todoArray);
-    console.log("todoArray[0]: " + todoArray[0]);
-
-    const newTodo = {
-        id: todoArray.pop().id, //TODO: ist das sinnvoll? id wird von der db erstellt
-        title: todoTitleInput.value,
-        description: todoDescriptionTextarea.value,
-        status: statusPopupTodo.options[statusPopupTodo.selectedIndex].value,
-        task: dataIndices   //TODO: keine INT, sondern string
+function todoTaskToXmlFormatter(todoOrTask, inputObj) {
+    if (todoOrTask === "todo") {
+        const xmlTodo = `
+        <todo>
+            <id>${inputObj.id}</id>
+            <title>${inputObj.title}</title>
+            <description>${inputObj.description}</description>
+            <status>${inputObj.status}</status>
+            <tasks>
+                ${inputObj.task}
+            </tasks>
+        </todo>`;
+        console.log(xmlTodo);
+        return xmlTodo;
+    } else if (todoOrTask === "task") {
+        const xmlTask = `
+        <task>
+            <id>${inputObj.id}</id>
+            <title>${inputObj.title}</title>
+            <description>${inputObj.description}</description>
+            <status>${inputObj.status}</status>
+        </task>`;
+        console.log("Task array -> task xml start . . .");
+    } else {
+        console.error("script.js/arrayToXmlFormatter didnt get /todo nor /task as a first parameter . . .");
     }
-
-    todoArray.push(newTodo);
-
-
-    console.log("New Todo: " + JSON.stringify(newTodo));
-    console.log("todoArray: " + JSON.stringify(todoArray));
-}
-
-function clickEventAcceptTodo () {
-    collectData();
-    forwardToOverview();
 }
 
 function forwardToOverview() {
@@ -366,23 +346,9 @@ function forwardToOverview() {
     location.href = urlWebsiteRoot + "overview.html";
 }
 
-function todoShowTasks() {
-    console.log("Show Tasks");
-    classContainerHiddenTasksContainedTasks.style.display = "flex";
-    btnTodoShowTasks.style.display = "none";
-}
 
-function todoOpenTask(event) {
-    console.log("Task clicked: " + event.target.innerText);
 
-    location.href = urlWebsiteRoot + "task.html"; //TODO: work-around entfernen /?id=" + element.id;
-}
 
-function todoHideTasks() {
-    console.log("Hide Tasks");
-    classContainerHiddenTasksContainedTasks.style.display = "none";
-    btnTodoShowTasks.style.display = "flex";
-}
 
 /**
  * Function for the event if the checkbox (overview.html) is checked/unchecked
@@ -516,37 +482,7 @@ function setFocus(todoOrTask) {
     }
 }
 
-//TODO: function für Statuscheck beim Bearbeiten eines Todos vorbereitet
-function isStatusAllowed(todoOrTask, elementStatus) {
-    const mockArray = xmlToArray(mockXMLDataTodo);
-    let activeTodos = 0;
 
-    for (const todo of mockArray) {
-        if (todo.status === 4) {
-            activeTodos++;
-        }
-    }
-
-    if (todoOrTask === "todo" && elementStatus === "4") {
-        if (maxTodos < activeTodos) {
-            //TODO: return feedback to user as a popup/warning/etc
-            console.log("Status is not allowed. Finish Todos (" + activeTodos + " active todos) or rise the focus limit (actual limit: " + maxTodos + " )");
-            return false;
-        }
-    }
-    return true;
-}
-
-function saveStatus(todoOrTask, elementStatus) {
-    let statusValue = statusPopupTodo.options[statusPopupTodo.selectedIndex].value;
-    console.log("Status is: " + statusValue);
-
-    if (!isStatusAllowed(todoOrTask, elementStatus)) {
-        return false;
-    }
-    //TODO: ändere den "status"-wert im array von diesem todo
-    console.log("js/saveStatus set to: " + elementStatus);
-}
 
 /**
  * DB and table status functions
@@ -654,36 +590,6 @@ async function loadTodosAsyncForOverview() {
 
 
 /**
- * support functions
- */
-
-/**
- *
- * @param xml
- * @returns {*[id, title, description, status, task: tasks]}
- */
-function xmlToArray(xml) {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xml, "text/xml");
-    const todos = xmlDoc.getElementsByTagName("todo");
-    const result = [];
-
-    for (let i = 0; i < todos.length; i++) {
-        const todo = todos[i];
-        const id = parseInt(todo.getElementsByTagName("id")[0].textContent);
-        const title = todo.getElementsByTagName("title")[0].textContent;
-        const description = todo.getElementsByTagName("description")[0].textContent;
-        const status = parseInt(todo.getElementsByTagName("status")[0].textContent);
-        const tasks = Array.from(todo.getElementsByTagName("task")).map(task => parseInt(task.textContent));
-
-        result.push({id, title, description, status, task: tasks});
-    }
-
-    return result;
-}
-
-
-/**
  * necessitate of function unknown
  */
 
@@ -716,29 +622,4 @@ async function fetchDBTodo(inputSpecificID) {
             console.log("frontend error in getSpecificTodo:\n", err, "\n");
         }
     }
-}
-
-//TODO: rework function
-/**
- * create the imaginary elements for a todo in AddTodo
- * @param xmlInput
- */
-function renderTodoInAddTodo(xmlInput) {
-    const givenTodoTitle = document.getElementById("todoPageTodoTitle");
-    const id = xmlInput.getElementsByTagName("ID")[0].textContent;
-    let title = xmlInput.getElementsByTagName("title")[0].textContent;
-    let status = xmlInput.getElementsByTagName("status")[0].textContent;
-    let description = xmlInput.getElementsByTagName("description")[0].textContent;
-
-    console.log(`id = ${id}\ntitle = ${title}\nstatus = ${status}\ndescription:\n${description}\n`);
-
-    givenTodoTitle.value = title;
-
-
-    //let descriptionAtPage = document.getElementById("todoDescription").innerHTML;
-
-    //console.log(`todoPageTodoTitle = ${titelAtPage}`);
-
-    //document.getElementById("todoTitle").innerText = xmlInput.getElementsByTagName("title")[0].textContent;
-    //document.getElementById("todoDescription").innerText = xmlInput.getElementsByTagName("description")[0].textContent;
 }

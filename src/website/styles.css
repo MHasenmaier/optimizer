@@ -478,7 +478,6 @@ a:active {
 }
 
 .containerButtonShowTasks {
-    display: flex;
     align-items: center;
     width: fit-content;
 
@@ -491,6 +490,14 @@ a:active {
     margin: 8px 0 8px 30px;
 
     cursor: pointer;
+}
+
+.containerButtonShowTasksShow {
+    display: flex;
+}
+
+.containerButtonShowTasksHide {
+    display: none;
 }
 
 .buttonShowTasks {
@@ -510,7 +517,6 @@ a:active {
 }
 
 .containerHiddenTasks {
-    display: none;
     flex-direction: column;
     align-items: flex-start;
 
@@ -542,6 +548,14 @@ a:active {
 
     font-size: x-large;
     font-weight: bold;
+}
+
+.containerHiddenTasksShow {
+    display: flex;
+}
+
+.containerHiddenTasksHide {
+    display: none;
 }
 
 .containerHiddenTasksContainedTasks {

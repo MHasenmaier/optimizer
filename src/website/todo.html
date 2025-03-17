@@ -42,7 +42,7 @@
                           placeholder="Beschreibung eingeben" spellcheck="true"></textarea>
             </div>
 
-            <div class="containerHiddenTasks">
+            <div class="containerHiddenTasks containerHiddenTasksHide">
                 <div class="containerHiddenTasksButtons">
                     <button id="buttonHideTasks" type="button">
                         <span>v</span>Ausblenden
@@ -59,8 +59,8 @@
                 </div>
             </div>
 
-            <button class="containerButtonShowTasks" id="buttonShowTasks" type="button">
-                <span class="buttonShowTasks">A</span>Tasks
+            <button class="containerButtonShowTasks containerButtonShowTasksShow" id="buttonShowTasks" type="button">
+                <span class="buttonShowTasks">^</span>Tasks einblenden
             </button>
         </form>
 
@@ -68,6 +68,6 @@
             <input type="submit" class="footerButton" id="buttonAddTodo" form="todoForm" value="Todo anlegen">
         </footer>
 
-        <script src="script.js"></script>
+        <script type="module" src="script.js"></script>
     </body>
 </html>
