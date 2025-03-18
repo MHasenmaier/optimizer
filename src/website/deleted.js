@@ -1,0 +1,1 @@
+const bodyDeleted = document.getElementById("deletedBody");

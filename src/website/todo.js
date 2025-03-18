@@ -1,10 +1,15 @@
-const bodyTodoPage = document.getElementById("bodyTodoPage");
+import {saveStatus, urlWebsiteRoot} from "./services.js";
+
+export const bodyTodoPage = document.getElementById("bodyTodoPage");
 
 const classContainerHiddenTasksContainedTasks = document.querySelector(".containerHiddenTasksContainedTasks");
 const classContainerHiddenTasks = document.querySelector(".containerHiddenTasks");
-const statusPopupTodo = document.getElementById("statusPopupTodo");
+export const statusPopupTodo = document.getElementById("statusPopupTodo");
 const todoTitleInput = document.getElementById("todoTitleInput");
-const todoDescriptionTextarea = document.getElementById("todoDescriptionTextarea")
+const todoDescriptionTextarea = document.getElementById("todoDescriptionTextarea");
+const btnTodoAddTodo = document.getElementById("buttonAddTodo");
+const btnTodoShowTasks = document.getElementById("buttonShowTasks");
+const btnTodoHideTasks = document.getElementById("buttonHideTasks");
 
 //FIXME: MOCK-DATA - xml => id, title, description, status, task
 const mockXMLDataTodo = `<todos>
@@ -76,6 +81,26 @@ const mockXMLDataTodo = `<todos>
 </todos>`;
 
 
+document.addEventListener('DOMContentLoaded', todoPageLoaded);
+
+function todoPageLoaded () {
+    if (bodyTodoPage) {
+        console.log("Todo page loading . . .")
+        //TODO: click "Todo anlegen"
+        btnTodoAddTodo.addEventListener("click", clickEventAcceptTodo);
+        //TODO: click "+ Tasks"
+        btnTodoShowTasks.addEventListener("click", todoDisplayToggleTasks);
+        btnTodoHideTasks.addEventListener("click", todoDisplayToggleTasks);
+        //TODO: click a task at todo page
+        classContainerHiddenTasksContainedTasks.querySelector("p").addEventListener("click", todoOpenTask);
+
+        statusPopupTodo.addEventListener("change", () => saveStatus(
+            "todo",
+            statusPopupTodo.options[statusPopupTodo.selectedIndex].value
+        ));
+    }
+}
+
 function collectData() {
     let todoArray = xmlToArray(mockXMLDataTodo);
 
@@ -131,18 +156,6 @@ function todoDisplayToggleTasks() {
     }
 }
 
-
-//services
-
-const parser = new DOMParser();
-const urlToIndex = "http://localhost:8080/optimizer/src/backend/index.php/";
-const urlWebsiteRoot = "http://localhost:8080/optimizer/src/website/";
-
-//TODO: temporär globale variable
-let maxTodos = 1;
-let maxTasks = 1;
-
-
 function todoTaskToXmlFormatter(todoOrTask, inputObj) {
     if (todoOrTask === "todo") {
         const xmlTodo = `
@@ -171,66 +184,3 @@ function todoTaskToXmlFormatter(todoOrTask, inputObj) {
     }
 }
 
-/**
- *
- * @param xml
- * @returns {*[id, title, description, status, task: tasks]}
- */
-function xmlToArray(xml) {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xml, "text/xml");
-    const todos = xmlDoc.getElementsByTagName("todo");
-    const result = [];
-
-    for (let i = 0; i < todos.length; i++) {
-        const todo = todos[i];
-        const id = parseInt(todo.getElementsByTagName("id")[0].textContent);
-        const title = todo.getElementsByTagName("title")[0].textContent;
-        const description = todo.getElementsByTagName("description")[0].textContent;
-        const status = parseInt(todo.getElementsByTagName("status")[0].textContent);
-        const tasks = Array.from(todo.getElementsByTagName("task")).map(task => parseInt(task.textContent));
-
-        result.push({id, title, description, status, task: tasks});
-    }
-
-    return result;
-}
-
-
-function forwardToOverview() {
-    console.log("Open link to overview.html");
-
-    location.href = urlWebsiteRoot + "overview.html";
-}
-
-//TODO: function für Statuscheck beim Bearbeiten eines Todos vorbereitet
-function isStatusAllowed(todoOrTask, elementStatus) {
-    const mockArray = xmlToArray(mockXMLDataTodo);
-    let activeTodos = 0;
-
-    for (const todo of mockArray) {
-        if (todo.status === 4) {
-            activeTodos++;
-        }
-    }
-
-    if (todoOrTask === "todo" && elementStatus === "4") {
-        if (maxTodos < activeTodos) {
-            //TODO: return feedback to user as a popup/warning/etc
-            console.log("Status is not allowed. Finish Todos (" + activeTodos + " active todos) or rise the focus limit (actual limit: " + maxTodos + " )");
-            return false;
-        }
-    }
-    return true;
-}
-
-function saveStatus(todoOrTask, elementStatus) {
-    let statusValue = statusPopupTodo.options[statusPopupTodo.selectedIndex].value;
-    console.log("Status is: " + statusValue);
-
-    if (!isStatusAllowed(todoOrTask, elementStatus)) {
-        return false;
-    }
-    //TODO: ändere den "status"-wert im array von diesem todo
-    console.log("js/saveStatus set to: " + elementStatus);
-}
