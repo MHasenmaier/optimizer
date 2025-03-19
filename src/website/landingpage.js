@@ -102,7 +102,6 @@ function setupDBTables() {
 }
 
 
-
 /**
  * necessitate of function unknown
  */

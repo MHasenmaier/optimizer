@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", taskPageLoaded);
 function taskPageLoaded () {
     if (bodyTask) {
         console.log("Task page loading . . .");
+
+        //save status change
         statusPopupTask.addEventListener("change", () => saveStatus(
             "task",
             statusPopupTask.options[statusPopupTask.selectedIndex].value

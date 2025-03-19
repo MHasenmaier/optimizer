@@ -1,4 +1,4 @@
-import {saveStatus, urlWebsiteRoot} from "./services.js";
+import {saveStatus, urlWebsiteRoot, xmlToArray} from "./services.js";
 
 export const bodyTodoPage = document.getElementById("bodyTodoPage");
 
@@ -180,7 +180,7 @@ function todoTaskToXmlFormatter(todoOrTask, inputObj) {
         </task>`;
         console.log("Task array -> task xml start . . .");
     } else {
-        console.error("script.js/arrayToXmlFormatter didnt get /todo nor /task as a first parameter . . .");
+        console.error("todo.js/arrayToXmlFormatter didnt get /todo nor /task as a first parameter . . .");
     }
 }
 

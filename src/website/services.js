@@ -1,9 +1,10 @@
 import {statusPopupTodo} from "./todo.js";
 import {statusPopupTask} from "./task.js";
+import {maxTaskSetByFocus, maxTodoSetByFocus} from "./focus.js";
 
 //TODO: include data import from DB
 export function getTodosFromDBAsXml () {
-    const todos = `<todos>
+    return `<todos>
     <todo>
         <id>1</id>
         <title>todoTitle 1</title>
@@ -70,7 +71,6 @@ export function getTodosFromDBAsXml () {
         </tasks>
     </todo>
 </todos>`;
-    return todos;
 }
 
 export function getTasksFromDBAsXml () {
@@ -240,7 +240,7 @@ export function forwardToOverview() {
  * @param elementStatus expects string-number of the status of the item (function will return false if != 4)
  * @returns {boolean}   true if the status is allowed, false if there are too many items of the same type (f.e. "todo") and status (only "4")
  */
-export function isStatusAllowed(todoOrTask, elementStatus) {
+function isStatusAllowed(todoOrTask, elementStatus) {
     if (todoOrTask === "todo" && elementStatus === "4") {
         let activeTodos = 0;
         const mockArrayTodo = xmlToArray(getTodosFromDBAsXml);
@@ -250,7 +250,7 @@ export function isStatusAllowed(todoOrTask, elementStatus) {
             }
         }
 
-        if (maxTodos < activeTodos) {
+        if (maxTodoSetByFocus < activeTodos) {
             //TODO: return feedback to user as a popup/warning/etc
             console.log("Status is not allowed. Finish Todos (" + activeTodos + " active todos) or rise the focus limit (actual limit: " + maxTodos + " )");
             return false;
@@ -266,7 +266,7 @@ export function isStatusAllowed(todoOrTask, elementStatus) {
             }
         }
 
-        if (maxTasks < activeTasks) {
+        if (maxTaskSetByFocus < activeTasks) {
             //TODO: return feedback to user as a popup/warning/etc
             console.log("Status is not allowed. Finish Tasks (" + activeTasks + " active tasks) or rise the focus limit (actual limit: " + maxTasks + " )");
             return false;
@@ -276,16 +276,37 @@ export function isStatusAllowed(todoOrTask, elementStatus) {
     return true;
 }
 
+/**
+ * "Save" the collected status value of the item (dropdown option)
+ * @param todoOrTask is "todo" or "task" as a string.
+ * @param elementStatus is the value of the option the user has chosen via dropdown
+ * @returns {boolean}   false if: 1) the status is not allowed (check Focus)
+ *                                2) the function has been called with invalid parameters
+ */
 export function saveStatus(todoOrTask, elementStatus) {
-    let todoStatusValue = statusPopupTodo.options[statusPopupTodo.selectedIndex].value;
-    console.log("Status is: " + todoStatusValue);
 
-    let taskStatusValue = statusPopupTask.options[statusPopupTask.selected].value;
-    console.log("Status  is: " + taskStatusValue);
-
-    if (!isStatusAllowed(todoOrTask, elementStatus)) {
+    if (isNaN(elementStatus) || elementStatus < 0 || elementStatus > 5) {
+        console.error("service.js/saveStatus got an invalid parameter. Given: " + elementStatus);
         return false;
     }
-    //TODO: ändere den "status"-wert im array von diesem todo
+
+    if (todoOrTask === "todo") {
+        let todoStatusValue = statusPopupTodo.options[statusPopupTodo.selectedIndex].value;
+        console.log("Status Todo is: " + todoStatusValue);
+        if (!isStatusAllowed(todoOrTask, elementStatus)) {
+            return false;
+        }
+    } else if (todoOrTask === "task") {
+        let taskStatusValue = statusPopupTask.options[statusPopupTask.selectedIndex].value;
+        console.log("Status Task is: " + taskStatusValue);
+        if (!isStatusAllowed(todoOrTask, elementStatus)) {
+            return false;
+        }
+    } else {
+        console.error("service.js/saveStatus got an invalid parameter. Given: " + todoOrTask);
+        return false;
+    }
+
     console.log("js/saveStatus set to: " + elementStatus);
+    return true;
 }

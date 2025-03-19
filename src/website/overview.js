@@ -1,4 +1,5 @@
-import {mockXMLDataTodo, urlWebsiteRoot, xmlToArray} from "./services.js";
+import {getTodosFromDBAsXml, getTasksFromDBAsXml, urlWebsiteRoot, xmlToArray} from "./services.js";
+import {updateDateTime} from "./clock.js";
 
 const bodyOverview = document.getElementById("bodyOverview");
 const classContentOverview = document.querySelector('.contentOverview');
@@ -13,8 +14,9 @@ document.addEventListener('DOMContentLoaded', overviewPageLoaded);
 function overviewPageLoaded () {
     if (bodyOverview) {
         console.log("Overview loading. . .");
-        createTodoOverview(xmlToArray(mockXMLDataTodo));    //TODO: mocked data
-        console.log(xmlToArray(mockXMLDataTodo));
+        updateDateTime();
+        createTodoOverview(xmlToArray(getTodosFromDBAsXml()));    //TODO: mocked data
+        console.log("debug mock data: " + xmlToArray(getTodosFromDBAsXml()));
 
         classContentOverview.addEventListener('click', overviewTodoClick);
         classContentOverview.addEventListener('change', overviewCheckboxClick);
@@ -50,9 +52,7 @@ function overviewAddNewTodo() {
  * return true if successful
  */
 function createTodoOverview(todoData) {
-    const contentOverview = document.querySelector(".contentOverview");
-    contentOverview.innerHTML = "";
-
+    classContentOverview.innerHTML = "";
     todoData.forEach((todo, arrayIndex) => {
         const div = document.createElement("div");
         const label = document.createElement("label");
@@ -62,7 +62,7 @@ function createTodoOverview(todoData) {
         paragraph.setAttribute("data-index", arrayIndex);
         const button = document.createElement("button");
 
-        contentOverview.appendChild(div);
+        classContentOverview.appendChild(div);
         div.appendChild(label);
         div.appendChild(paragraph);
         div.appendChild(button);
@@ -111,10 +111,10 @@ function overviewTodoClick(event) {
         //FIXME: mock output for debugging
         console.log("Paragraph clicked:", event.target.innerText);
         const index = event.target.getAttribute("data-index");
-        const element = xmlToArray(mockXMLDataTodo)[index];
+        const element = xmlToArray(getTodosFromDBAsXml)[index];
         //TODO: include DB content
         //FIXME: at fetchDBTodo() function
-        const dbTodo = fetchDBTodo(index);
+        const dbTodo = "" //function fetchDBTodo(index) no longer in use;
         console.log(element);
         console.log("from DB:\n" + dbTodo);
         //open link todo page
