@@ -1,5 +1,6 @@
 import {getTodosFromDBAsXml, getTasksFromDBAsXml, urlWebsiteRoot, xmlToArray} from "./services.js";
 import {updateDateTime} from "./clock.js";
+import {bodyTodoPage, showExistingTodo} from "./todo.js";
 
 const bodyOverview = document.getElementById("bodyOverview");
 const classContentOverview = document.querySelector('.contentOverview');
@@ -16,20 +17,17 @@ function overviewPageLoaded () {
         console.log("Overview loading. . .");
         updateDateTime();
         createTodoOverview(xmlToArray(getTodosFromDBAsXml()));    //TODO: mocked data
-        console.log("debug mock data: " + xmlToArray(getTodosFromDBAsXml()));
+        console.log("debug mock data: " + JSON.stringify(xmlToArray(getTodosFromDBAsXml())));
 
         classContentOverview.addEventListener('click', overviewTodoClick);
         classContentOverview.addEventListener('change', overviewCheckboxClick);
-        footerOverviewAddTodoButton.addEventListener('click', overviewAddNewTodo);  //TODO: better function name
+        footerOverviewAddTodoButton.addEventListener('click', overviewAddNewTodo);
         headerOverviewFocusButton.addEventListener('click', overviewLinkOpenFocus);
         headerOverviewArchivButton.addEventListener('click', overviewLinkOpenArchiv);
         headerOverviewDisplayPopupMenuButton.addEventListener("click", overviewPopupMenuWindowControl);
-        //FIXME: bug! bei klick wird das fenster nicht zuverlässig geöffnet/geschlossen
         headerOverviewDisplayPopupMenuButton.querySelector("span").addEventListener("click", overviewPopupMenuWindowControl);
     }
 }
-
-
 
 /**
  * Click events
@@ -79,52 +77,58 @@ function createTodoOverview(todoData) {
     return true;
 }
 
-
+//TODO: add return value to the function for "checkbox is checked ? yes/no"
 /**
  * Function for the event if the checkbox (overview.html) is checked/unchecked
  * @param event (click event)
  */
 function overviewCheckboxClick(event) {
-    if (event.target.tagName === 'INPUT' && event.target.type === 'checkbox') {  //change on checkbox
-        //TODO: debugging output
+    if (event.target.tagName === 'INPUT' && event.target.type === 'checkbox') {
         console.log("Checkbox checked: ", event.target.parentElement.parentElement.querySelector('p').innerText);
 
         // Ausgabe des Inhalts des Paragraphs
         const parentDiv = event.target.parentElement.closest('div');
-        console.log("Parent div found:", parentDiv);
         const paragraph = parentDiv ? parentDiv.querySelector('p') : null;
-        console.log("Paragraph element:", paragraph);
         if (paragraph) {
             console.log("Paragraph Content:", paragraph.innerText);
         } else {
-            console.log("No paragraph found.");
+            console.error("No paragraph found.");
         }
     }
+}
+
+async function overviewTodoClick(event) {
+    console.log("Todo ->" + event + "<- clicked.");
+
+    await overviewLinkOpenTodo;
+    await bodyTodoPage;
+    showExistingTodo(overviewCollectDataOfClickedItem(event));
 }
 
 /**
  * Function for the event if the title of a todo (overview.html) is clicked
  * @param event (click event)
  */
-function overviewTodoClick(event) {
+function overviewCollectDataOfClickedItem(event) {
     if (event.target.tagName === 'P') {  //click todo
-        //FIXME: mock output for debugging
         console.log("Paragraph clicked:", event.target.innerText);
         const index = event.target.getAttribute("data-index");
-        const element = xmlToArray(getTodosFromDBAsXml)[index];
-        //TODO: include DB content
-        //FIXME: at fetchDBTodo() function
-        const dbTodo = "" //function fetchDBTodo(index) no longer in use;
-        console.log(element);
-        console.log("from DB:\n" + dbTodo);
-        //open link todo page
-
-        //id of requested todo in URL
-        //TODO: informationsübertrag funktioniert noch nicht korrekt
-        //TODO: 1. index.php öffnen -> 2. php öffnet todo-html
-        location.href = urlWebsiteRoot + "todo.html"; //TODO: work-around entfernen /?id=" + element.id;
+        const element = xmlToArray(getTodosFromDBAsXml())[index];
+        console.log("JSON element = " + JSON.stringify(element));
+        return element;
     }
 }
+
+/**
+ * 1. function um click entgegen zu nehmen
+ * 2. function um todo objekt temporär zu speichern
+ * [ok] 3. function um neue seite aufzurufen
+ *  -->     overviewLinkOpenTodo
+ * 4. function um bei seitenaufruf mit todo objekt info felder zu befüllen
+ *
+ *         //TODO: include DB content like: const dbTodo = urlToIndex + "?id=" + element.id;
+ *         const dbTodo = "imagine here is what the DB contains" //TODO: connect the DB here
+ */
 
 function overviewPopupMenuWindowControl() {
     if (classHeaderOverviewPopupMenuWindow.classList.contains('popupMenuWindowHide')) {
@@ -134,6 +138,10 @@ function overviewPopupMenuWindowControl() {
         console.log("hide popup menu");
         classHeaderOverviewPopupMenuWindow.classList.replace('popupMenuWindowShow', 'popupMenuWindowHide');
     }
+}
+
+function overviewLinkOpenTodo() {
+    location.href = urlWebsiteRoot + "todo.html"; //TODO: work-around entfernen /?id=" + element.id;
 }
 
 function overviewLinkOpenArchiv() {

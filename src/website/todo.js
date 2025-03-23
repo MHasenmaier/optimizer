@@ -101,6 +101,30 @@ function todoPageLoaded () {
     }
 }
 
+export async function callExistingTodo (inputTodo) {
+    console.log("todo existiert bereits:" + JSON.stringify(inputTodo));
+    await changePageToTodo();
+    showExistingTodo(inputTodo);
+
+}
+
+export function showExistingTodo (inputTodo) {
+    console.log("showExistingTodo work!" + JSON.stringify(inputTodo));
+    //statusPopupTodo.options[statusPopupTodo.selectedIndex].value = inputTodo.status;
+    console.log(todoTitleInput.value);
+    console.log(todoDescriptionTextarea.value);
+
+    todoTitleInput.value = inputTodo.title;
+    todoDescriptionTextarea.value = inputTodo.description;
+    return true;
+}
+
+
+
+/**
+ * 1. spezielle showExistingTodo function aufrufen und todo als parameter übergeben
+ */
+
 function collectData() {
     let todoArray = xmlToArray(mockXMLDataTodo);
 
