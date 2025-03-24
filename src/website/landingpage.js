@@ -66,6 +66,10 @@ function setupNewDB() {
     return true;
 }
 
+/**
+ * TODO:comment schreiben
+ * @returns {boolean}
+ */
 function checkDBTables() {
     console.log("Tables will be checked ... soon");
     //TODO: install DB call to check if the tables are accessible
@@ -74,6 +78,10 @@ function checkDBTables() {
     return tableState;
 }
 
+/**
+ * TODO:comment schreiben
+ * @returns {boolean}
+ */
 function setupDBTables() {
     console.log("Tables of the DB will be ready for business ... soon");
     /** TODO: SQL line to set up tables in the DB

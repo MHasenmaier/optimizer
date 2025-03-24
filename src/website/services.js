@@ -74,7 +74,7 @@ export function getTodosFromDBAsXml () {
 }
 
 export function getTasksFromDBAsXml () {
-     const tasks = `<tasks>
+    return `<tasks>
     <task>
         <id>1</id>
         <title>Task Titel 1</title>
@@ -195,7 +195,6 @@ export function getTasksFromDBAsXml () {
         <todo>10</todo>
     </task>
 </tasks>`;
-return tasks;
 }
 
 export const parser = new DOMParser();
@@ -203,7 +202,7 @@ export const urlToIndex = "http://localhost:8080/optimizer/src/backend/index.php
 export const urlWebsiteRoot = "http://localhost:8080/optimizer/src/website/";
 
 /**
- *
+ * TODO:comment schreiben
  * @param xml
  * @returns {*[id, title, description, status, task: tasks]}
  */
@@ -227,6 +226,9 @@ export function xmlToArray(xml) {
     return result;
 }
 
+/**
+ * TODO:comment schreiben
+ */
 export function forwardToOverview() {
     console.log("Open link to overview.html");
 

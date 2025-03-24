@@ -1,4 +1,4 @@
-import {getTodosFromDBAsXml, saveStatus, urlWebsiteRoot, xmlToArray} from "./services.js";
+import {forwardToOverview, getTodosFromDBAsXml, saveStatus, urlWebsiteRoot, xmlToArray} from "./services.js";
 
 export const bodyTodoPage = document.getElementById("bodyTodoPage");
 
@@ -12,6 +12,8 @@ const btnTodoShowTasks = document.getElementById("buttonShowTasks");
 const btnTodoHideTasks = document.getElementById("buttonHideTasks");
 
 document.addEventListener('DOMContentLoaded', todoPageLoaded);
+
+let todos = xmlToArray(getTodosFromDBAsXml());
 
 function todoPageLoaded() {
     if (!bodyTodoPage) return;
@@ -27,7 +29,7 @@ function todoPageLoaded() {
     }
 
     // Event-Listener für Buttons und Interaktionen setzen
-    btnTodoAddTodo.addEventListener("click", clickEventAcceptTodo);
+    btnTodoAddTodo.addEventListener("click", () => saveOrUpdateTodo(index));
     btnTodoShowTasks.addEventListener("click", todoDisplayToggleTasks);
     btnTodoHideTasks.addEventListener("click", todoDisplayToggleTasks);
 
@@ -39,8 +41,11 @@ function todoPageLoaded() {
     statusPopupTodo.addEventListener("change", handleStatusChange);
 }
 
+/**
+ * TODO: comment schreiben
+ * @param index
+ */
 function setTodoData(index) {
-    const todos = xmlToArray(getTodosFromDBAsXml());
     const todo = todos[index];
 
     if (todo) {
@@ -50,10 +55,44 @@ function setTodoData(index) {
     }
 }
 
+/**
+ * TODO: comment schreiben
+ * @param index
+ */
+function saveOrUpdateTodo(index) {
+    const updatedTodo = {
+        id: index !== null ? todos[index].id : todos.length + 1, // use already existing todo or create a new one
+        title: todoTitleInput.value,
+        description: todoDescriptionTextarea.value,
+        status: statusPopupTodo.value,
+    };
+
+    if (index !== null) {
+        //update todo
+        todos[index] = updatedTodo;
+        console.log(`Todo mit Index ${index} aktualisiert:`, updatedTodo);
+    } else {
+        //create new todo
+        todos.push(updatedTodo);
+        console.log("Neues Todo hinzugefügt:", updatedTodo);
+    }
+
+    console.log("Aktualisierte Todos:", todos);
+
+    forwardToOverview();
+}
+
+/**
+ * TODO: comment schreiben
+ */
 function handleStatusChange() {
     saveStatus("todo", statusPopupTodo.options[statusPopupTodo.selectedIndex].value);
 }
 
+/**
+ * TODO: comment schreiben
+ * @returns {{id: number, title, description, status, task: *[]}}
+ */
 function collectData() {
     let todoArray = getTodosFromDBAsXml();
 
@@ -78,7 +117,7 @@ function collectData() {
 
     //TODO: mock data!
     //FIXME: compiler throws "not a function"-error
-    todoArray.push(newTodoObj);
+    //todoArray.push(newTodoObj);
 
     console.log("New Todo: " + JSON.stringify(newTodoObj));
     console.log("todoArray: " + JSON.stringify(todoArray));
@@ -86,18 +125,19 @@ function collectData() {
     return newTodoObj;
 }
 
-export function clickEventAcceptTodo() {
-    //let test = collectData();
-    todoTaskToXmlFormatter("todo", collectData());
-    //forwardToOverview();
-}
-
+/**
+ * TODO: comment schreiben
+ * @param event
+ */
 function todoOpenTask(event) {
     console.log("Task clicked: " + event.target.innerText);
 
     location.href = urlWebsiteRoot + "task.html"; //TODO: mock work-around! für prod einfügen: /?id=" + element.id;
 }
 
+/**
+ * TODO: comment schreiben
+ */
 function todoDisplayToggleTasks() {
     if (classContainerHiddenTasks.classList.contains('containerHiddenTasksHide')) {
         console.log("show tasks");
@@ -110,6 +150,13 @@ function todoDisplayToggleTasks() {
     }
 }
 
+/**
+ * TODO: still needed?
+ * TODO: comment schreiben
+ * @param todoOrTask
+ * @param inputObj
+ * @returns {string}
+ */
 function todoTaskToXmlFormatter(todoOrTask, inputObj) {
     if (todoOrTask === "todo") {
         const xmlTodo = `

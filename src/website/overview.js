@@ -37,10 +37,6 @@ function overviewAddNewTodo() {
     location.href = urlWebsiteRoot + "todo.html";
 }
 
-/**
- * set up the html files with content from the DB
- */
-
 //TODO: how to debug, if the function fails? return false?
 /**
  * create html elements and provide information
@@ -106,7 +102,9 @@ function overviewTodoClick(event) {
     }
 }
 
-
+/**
+ * TODO: comment schreiben
+ */
 function overviewPopupMenuWindowControl() {
     if (classHeaderOverviewPopupMenuWindow.classList.contains('popupMenuWindowHide')) {
         console.log("show popup menu");
@@ -117,13 +115,18 @@ function overviewPopupMenuWindowControl() {
     }
 }
 
-
+/**
+ * TODO:comment schreiben
+ */
 function overviewLinkOpenArchiv() {
     console.log("Archiv will be opened ... soon");
 
     location.href = urlWebsiteRoot + "archiv.html";
 }
 
+/**
+ * TODO:comment schreiben
+ */
 function overviewLinkOpenFocus() {
     console.log("Focus mode will be opened ... soon");
 
