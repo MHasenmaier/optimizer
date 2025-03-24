@@ -1,4 +1,4 @@
-import {saveStatus, urlWebsiteRoot, xmlToArray} from "./services.js";
+import {getTodosFromDBAsXml, saveStatus, urlWebsiteRoot, xmlToArray} from "./services.js";
 
 export const bodyTodoPage = document.getElementById("bodyTodoPage");
 
@@ -11,122 +11,51 @@ const btnTodoAddTodo = document.getElementById("buttonAddTodo");
 const btnTodoShowTasks = document.getElementById("buttonShowTasks");
 const btnTodoHideTasks = document.getElementById("buttonHideTasks");
 
-//FIXME: MOCK-DATA - xml => id, title, description, status, task
-const mockXMLDataTodo = `<todos>
-    <todo>
-        <id>1</id>
-        <title>todoTitle 1</title>
-        <description>Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum </description>
-        <status>3</status>
-        <tasks>
-            <task>1</task>
-            <task>2</task>
-            <task>5</task>
-            <task>10</task>
-            <task>11</task>
-            <task>12</task>
-        </tasks>
-    </todo>
-    <todo>
-        <id>2</id>
-        <title>todoTitle 2</title>
-        <description>Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum </description>
-        <status>1</status>
-        <tasks>
-            <task>3</task>
-            <task>4</task>
-        </tasks>
-    </todo>
-    <todo>
-        <id>3</id>
-        <title>todoTitle 3</title>
-        <description>Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum </description>
-        <status>5</status>
-        <tasks>
-            <task>6</task>
-            <task>7</task>
-            <task>8</task>
-            <task>9</task>
-        </tasks>
-    </todo>
-    <todo>
-        <id>5</id>
-        <title>todoTitle 5</title>
-        <description>Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum </description>
-        <status>4</status>
-        <tasks>
-            <task>13</task>
-        </tasks>
-    </todo>
-        <todo>
-        <id>10</id>
-        <title>todoTitle 10</title>
-        <description>Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum </description>
-        <status>4</status>
-        <tasks>
-            <task>14</task>
-            <task>15</task>
-            <task>16</task>
-            <task>17</task>
-        </tasks>
-    </todo>
-        <todo>
-        <id>21</id>
-        <title>todo ohne task 21</title>
-        <description>Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum </description>
-        <status>4</status>
-        <tasks>
-        </tasks>
-    </todo>
-</todos>`;
-
-
 document.addEventListener('DOMContentLoaded', todoPageLoaded);
 
-function todoPageLoaded () {
-    if (bodyTodoPage) {
-        console.log("Todo page loading . . .")
-        //TODO: click "Todo anlegen"
-        btnTodoAddTodo.addEventListener("click", clickEventAcceptTodo);
-        //TODO: click "+ Tasks"
-        btnTodoShowTasks.addEventListener("click", todoDisplayToggleTasks);
-        btnTodoHideTasks.addEventListener("click", todoDisplayToggleTasks);
-        //TODO: click a task at todo page
-        classContainerHiddenTasksContainedTasks.querySelector("p").addEventListener("click", todoOpenTask);
+function todoPageLoaded() {
+    if (!bodyTodoPage) return;
 
-        statusPopupTodo.addEventListener("change", () => saveStatus(
-            "todo",
-            statusPopupTodo.options[statusPopupTodo.selectedIndex].value
-        ));
+    console.log("Todo page loading...");
+
+    // Daten aus der URL holen und in die Felder eintragen
+    const params = new URLSearchParams(window.location.search);
+    const index = params.get("index");
+
+    if (index !== null) {
+        setTodoData(index);
+    }
+
+    // Event-Listener für Buttons und Interaktionen setzen
+    btnTodoAddTodo.addEventListener("click", clickEventAcceptTodo);
+    btnTodoShowTasks.addEventListener("click", todoDisplayToggleTasks);
+    btnTodoHideTasks.addEventListener("click", todoDisplayToggleTasks);
+
+    const taskParagraph = classContainerHiddenTasksContainedTasks.querySelector("p");
+    if (taskParagraph) {
+        taskParagraph.addEventListener("click", todoOpenTask);
+    }
+
+    statusPopupTodo.addEventListener("change", handleStatusChange);
+}
+
+function setTodoData(index) {
+    const todos = xmlToArray(getTodosFromDBAsXml());
+    const todo = todos[index];
+
+    if (todo) {
+        todoTitleInput.value = todo.title;
+        todoDescriptionTextarea.value = todo.description;
+        statusPopupTodo.value = todo.status;
     }
 }
 
-export async function callExistingTodo (inputTodo) {
-    console.log("todo existiert bereits:" + JSON.stringify(inputTodo));
-    await changePageToTodo();
-    showExistingTodo(inputTodo);
-
+function handleStatusChange() {
+    saveStatus("todo", statusPopupTodo.options[statusPopupTodo.selectedIndex].value);
 }
-
-export function showExistingTodo (inputTodo) {
-    console.log("showExistingTodo work!" + JSON.stringify(inputTodo));
-    //statusPopupTodo.options[statusPopupTodo.selectedIndex].value = inputTodo.status;
-    console.log(todoTitleInput.value);
-    console.log(todoDescriptionTextarea.value);
-
-    todoTitleInput.value = inputTodo.title;
-    todoDescriptionTextarea.value = inputTodo.description;
-    return true;
-}
-
-
-
-/**
- * 1. spezielle showExistingTodo function aufrufen und todo als parameter übergeben
- */
 
 function collectData() {
-    let todoArray = xmlToArray(mockXMLDataTodo);
+    let todoArray = getTodosFromDBAsXml();
 
     const paragraphs = classContainerHiddenTasksContainedTasks.querySelectorAll("p");
     const dataIndices = [];
@@ -148,6 +77,7 @@ function collectData() {
     }
 
     //TODO: mock data!
+    //FIXME: compiler throws "not a function"-error
     todoArray.push(newTodoObj);
 
     console.log("New Todo: " + JSON.stringify(newTodoObj));
@@ -202,7 +132,7 @@ function todoTaskToXmlFormatter(todoOrTask, inputObj) {
             <description>${inputObj.description}</description>
             <status>${inputObj.status}</status>
         </task>`;
-        console.log("Task array -> task xml start . . .");
+        console.log("Task array -> task xml start . . ." + xmlTask);
     } else {
         console.error("todo.js/arrayToXmlFormatter didnt get /todo nor /task as a first parameter . . .");
     }

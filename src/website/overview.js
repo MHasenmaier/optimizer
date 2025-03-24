@@ -1,6 +1,5 @@
 import {getTodosFromDBAsXml, getTasksFromDBAsXml, urlWebsiteRoot, xmlToArray} from "./services.js";
 import {updateDateTime} from "./clock.js";
-import {bodyTodoPage, showExistingTodo} from "./todo.js";
 
 const bodyOverview = document.getElementById("bodyOverview");
 const classContentOverview = document.querySelector('.contentOverview');
@@ -12,21 +11,20 @@ const headerOverviewArchivButton = document.getElementById('headerOverviewArchiv
 
 document.addEventListener('DOMContentLoaded', overviewPageLoaded);
 
-function overviewPageLoaded () {
-    if (bodyOverview) {
-        console.log("Overview loading. . .");
-        updateDateTime();
-        createTodoOverview(xmlToArray(getTodosFromDBAsXml()));    //TODO: mocked data
-        console.log("debug mock data: " + JSON.stringify(xmlToArray(getTodosFromDBAsXml())));
+function overviewPageLoaded() {
+    if (!bodyOverview) return;
+    console.log("Overview loading. . .");
+    updateDateTime();
+    createTodoOverview(xmlToArray(getTodosFromDBAsXml()));    //TODO: mocked data
+    console.log("debug mock data: " + JSON.stringify(xmlToArray(getTodosFromDBAsXml())));
 
-        classContentOverview.addEventListener('click', overviewTodoClick);
-        classContentOverview.addEventListener('change', overviewCheckboxClick);
-        footerOverviewAddTodoButton.addEventListener('click', overviewAddNewTodo);
-        headerOverviewFocusButton.addEventListener('click', overviewLinkOpenFocus);
-        headerOverviewArchivButton.addEventListener('click', overviewLinkOpenArchiv);
-        headerOverviewDisplayPopupMenuButton.addEventListener("click", overviewPopupMenuWindowControl);
-        headerOverviewDisplayPopupMenuButton.querySelector("span").addEventListener("click", overviewPopupMenuWindowControl);
-    }
+    classContentOverview.addEventListener('click', overviewTodoClick);
+    classContentOverview.addEventListener('change', overviewCheckboxClick);
+    footerOverviewAddTodoButton.addEventListener('click', overviewAddNewTodo);
+    headerOverviewFocusButton.addEventListener('click', overviewLinkOpenFocus);
+    headerOverviewArchivButton.addEventListener('click', overviewLinkOpenArchiv);
+    headerOverviewDisplayPopupMenuButton.addEventListener("click", overviewPopupMenuWindowControl);
+    headerOverviewDisplayPopupMenuButton.querySelector("span").addEventListener("click", overviewPopupMenuWindowControl);
 }
 
 /**
@@ -97,38 +95,17 @@ function overviewCheckboxClick(event) {
     }
 }
 
-async function overviewTodoClick(event) {
-    console.log("Todo ->" + event + "<- clicked.");
-
-    await overviewLinkOpenTodo;
-    await bodyTodoPage;
-    showExistingTodo(overviewCollectDataOfClickedItem(event));
-}
-
 /**
- * Function for the event if the title of a todo (overview.html) is clicked
- * @param event (click event)
+ * function calls todo.html with an id of an already existing todo
+ * @param event - click event, to check if the event is triggered by the correct html element
  */
-function overviewCollectDataOfClickedItem(event) {
-    if (event.target.tagName === 'P') {  //click todo
-        console.log("Paragraph clicked:", event.target.innerText);
+function overviewTodoClick(event) {
+    if (event.target.tagName === 'P') {
         const index = event.target.getAttribute("data-index");
-        const element = xmlToArray(getTodosFromDBAsXml())[index];
-        console.log("JSON element = " + JSON.stringify(element));
-        return element;
+        location.href = `todo.html?index=${index}`;
     }
 }
 
-/**
- * 1. function um click entgegen zu nehmen
- * 2. function um todo objekt temporär zu speichern
- * [ok] 3. function um neue seite aufzurufen
- *  -->     overviewLinkOpenTodo
- * 4. function um bei seitenaufruf mit todo objekt info felder zu befüllen
- *
- *         //TODO: include DB content like: const dbTodo = urlToIndex + "?id=" + element.id;
- *         const dbTodo = "imagine here is what the DB contains" //TODO: connect the DB here
- */
 
 function overviewPopupMenuWindowControl() {
     if (classHeaderOverviewPopupMenuWindow.classList.contains('popupMenuWindowHide')) {
@@ -140,9 +117,6 @@ function overviewPopupMenuWindowControl() {
     }
 }
 
-function overviewLinkOpenTodo() {
-    location.href = urlWebsiteRoot + "todo.html"; //TODO: work-around entfernen /?id=" + element.id;
-}
 
 function overviewLinkOpenArchiv() {
     console.log("Archiv will be opened ... soon");
