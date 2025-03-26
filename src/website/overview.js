@@ -1,4 +1,4 @@
-import {getTodosFromDBAsXml, getTasksFromDBAsXml, urlWebsiteRoot, xmlToArray} from "./services.js";
+import {getTodosFromDBAsXml, urlWebsiteRoot, xmlToArray} from "./services.js";
 import {updateDateTime} from "./clock.js";
 
 const bodyOverview = document.getElementById("bodyOverview");

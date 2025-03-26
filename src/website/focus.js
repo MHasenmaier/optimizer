@@ -1,4 +1,4 @@
-import {forwardToOverview} from "./services.js";
+import {forwardToOverview, getFocusDataFromDB, parser} from "./services.js";
 
 const bodyFocus = document.getElementById("bodyFocus");
 const slideTodoFocus = document.getElementById("focusTodoCheck");
@@ -15,13 +15,29 @@ let maxTasks = 1;
 
 document.addEventListener("DOMContentLoaded", focusPageLoaded);
 
-function focusPageLoaded () {
-    if (bodyFocus) {
-        console.log("Focus page loaded . . .");
-        slideTodoFocus.addEventListener("change", () => focusSetDisplayOfPopup("todo"));
-        slideTaskFocus.addEventListener("change", () => focusSetDisplayOfPopup("task"));
-        btnFocusBack.addEventListener("click", () => closePageAndSetFocusEvent());
-    }
+function focusPageLoaded() {
+    if (!bodyFocus) return;
+    console.log("Focus page loaded . . .");
+
+    loadFocusSettings();
+
+    slideTodoFocus.addEventListener("change", () => focusSetDisplayOfPopup("todo"));
+    slideTaskFocus.addEventListener("change", () => focusSetDisplayOfPopup("task"));
+    btnFocusBack.addEventListener("click", () => closePageAndSetFocusEvent());
+}
+
+/**
+ * get focus data from db and set value
+ */
+function loadFocusSettings() {
+    const xmlString = getFocusDataFromDB(); // Holt den XML-String
+    const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+
+    maxTodos = parseInt(xmlDoc.querySelector("todo > anzahl").textContent, 10);
+    maxTasks = parseInt(xmlDoc.querySelector("task > anzahl").textContent, 10);
+
+    inputFocusMaxTodos.value = maxTodos;
+    inputFocusMaxTasks.value = maxTasks;
 }
 
 /** show/hide the popup window
@@ -57,13 +73,41 @@ function focusSetDisplayOfPopup(todoOrTask) {
 /**
  * Event handles what happen if user click the "Zurück" button
  */
-function closePageAndSetFocusEvent () {
+function closePageAndSetFocusEvent() {
     setFocus();
     forwardToOverview();
 }
 
 /**
- *
+ * TODO: comment schreiben
+ * @param todo
+ * @param task
+ */
+export function saveFocusDataToDB(todo, task) {
+    const xmlData = `
+    <focus>
+        <todo>
+            <anzahl>${todo}</anzahl>
+        </todo>
+        <task>
+            <anzahl>${task}</anzahl>
+        </task>
+    </focus>`;
+
+    console.log("MOCK: Speichere Fokus-Daten als XML:", xmlData);
+
+    // TODO: Hier später den echten API-Call einfügen
+    /*
+    fetch("/api/focus", {
+        method: "POST",
+        headers: { "Content-Type": "application/xml" },
+        body: xmlData,
+    });
+    */
+}
+
+/**
+ * TODO: comment schreiben
  */
 function setFocus() {
     maxTodos = inputFocusMaxTodos.value;
@@ -71,12 +115,6 @@ function setFocus() {
 
     maxTasks = inputFocusMaxTasks.value;
     console.log("max Tasks: " + maxTasks);
-}
 
-export function maxTodoSetByFocus () {
-    return maxTodos;
-}
-
-export function maxTaskSetByFocus () {
-    return maxTasks;
+    saveFocusDataToDB(maxTodos, maxTasks)
 }

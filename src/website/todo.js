@@ -1,4 +1,11 @@
-import {forwardToOverview, getTodosFromDBAsXml, saveStatus, urlWebsiteRoot, xmlToArray} from "./services.js";
+import {
+    forwardToOverview,
+    getTodosFromDBAsXml,
+    saveStatus,
+    sendTodoToDB,
+    urlWebsiteRoot,
+    xmlToArray
+} from "./services.js";
 
 export const bodyTodoPage = document.getElementById("bodyTodoPage");
 
@@ -29,7 +36,7 @@ function todoPageLoaded() {
     }
 
     // Event-Listener für Buttons und Interaktionen setzen
-    btnTodoAddTodo.addEventListener("click", () => saveOrUpdateTodo(index));
+    btnTodoAddTodo.addEventListener("click", handleTodoSave);
     btnTodoShowTasks.addEventListener("click", todoDisplayToggleTasks);
     btnTodoHideTasks.addEventListener("click", todoDisplayToggleTasks);
 
@@ -57,30 +64,13 @@ function setTodoData(index) {
 
 /**
  * TODO: comment schreiben
- * @param index
  */
-function saveOrUpdateTodo(index) {
-    const updatedTodo = {
-        id: index !== null ? todos[index].id : todos.length + 1, // use already existing todo or create a new one
-        title: todoTitleInput.value,
-        description: todoDescriptionTextarea.value,
-        status: statusPopupTodo.value,
-    };
-
-    if (index !== null) {
-        //update todo
-        todos[index] = updatedTodo;
-        console.log(`Todo mit Index ${index} aktualisiert:`, updatedTodo);
-    } else {
-        //create new todo
-        todos.push(updatedTodo);
-        console.log("Neues Todo hinzugefügt:", updatedTodo);
-    }
-
-    console.log("Aktualisierte Todos:", todos);
-
+function handleTodoSave() {
+    const xmlData = collectData();
+    sendTodoToDB(xmlData);
     forwardToOverview();
 }
+
 
 /**
  * TODO: comment schreiben
@@ -91,38 +81,46 @@ function handleStatusChange() {
 
 /**
  * TODO: comment schreiben
- * @returns {{id: number, title, description, status, task: *[]}}
+ * @returns {string}
  */
 function collectData() {
-    let todoArray = getTodosFromDBAsXml();
-
     const paragraphs = classContainerHiddenTasksContainedTasks.querySelectorAll("p");
     const dataIndices = [];
 
-    //TODO: ist das sinnvoll? "neuer task erstellen" fragt id von db an und zeigt hier nur die ids an
     paragraphs.forEach(p => {
         const dataIndex = p.getAttribute("data-index");
         if (dataIndex) {
             dataIndices.push(parseInt(dataIndex, 10));
         }
-    })
+    });
 
     const newTodoObj = {
-        id: -1, //-1 => placeholder for new Todo, real ID given by DB
+        id: -1, // Neues Todo bekommt -1 als ID
         title: todoTitleInput.value,
         description: todoDescriptionTextarea.value,
         status: statusPopupTodo.options[statusPopupTodo.selectedIndex].value,
         task: dataIndices
-    }
+    };
 
-    //TODO: mock data!
-    //FIXME: compiler throws "not a function"-error
-    //todoArray.push(newTodoObj);
+    return convertTodoToXml(newTodoObj);
+}
 
-    console.log("New Todo: " + JSON.stringify(newTodoObj));
-    console.log("todoArray: " + JSON.stringify(todoArray));
-
-    return newTodoObj;
+/**
+ * TODO: comment schreiben
+ * @param todo
+ * @returns {string}
+ */
+function convertTodoToXml(todo) {
+    return `
+    <todo>
+        <id>${todo.id}</id>
+        <title>${todo.title}</title>
+        <description>${todo.description}</description>
+        <status>${todo.status}</status>
+        <tasks>
+            ${todo.task.map(taskId => `<task>${taskId}</task>`).join("\n")}
+        </tasks>
+    </todo>`;
 }
 
 /**
@@ -130,9 +128,12 @@ function collectData() {
  * @param event
  */
 function todoOpenTask(event) {
-    console.log("Task clicked: " + event.target.innerText);
-
-    location.href = urlWebsiteRoot + "task.html"; //TODO: mock work-around! für prod einfügen: /?id=" + element.id;
+    if (event.target.tagName === 'P') {
+        const taskId = event.target.getAttribute("data-task-id");
+        if (taskId) {
+            location.href = `task.html?task=${taskId}`;
+        }
+    }
 }
 
 /**
@@ -147,41 +148,6 @@ function todoDisplayToggleTasks() {
         console.log("hide tasks");
         classContainerHiddenTasks.classList.replace('containerHiddenTasksShow', 'containerHiddenTasksHide');
         btnTodoShowTasks.classList.replace('containerButtonShowTasksHide', 'containerButtonShowTasksShow');
-    }
-}
-
-/**
- * TODO: still needed?
- * TODO: comment schreiben
- * @param todoOrTask
- * @param inputObj
- * @returns {string}
- */
-function todoTaskToXmlFormatter(todoOrTask, inputObj) {
-    if (todoOrTask === "todo") {
-        const xmlTodo = `
-        <todo>
-            <id>${inputObj.id}</id>
-            <title>${inputObj.title}</title>
-            <description>${inputObj.description}</description>
-            <status>${inputObj.status}</status>
-            <tasks>
-                ${inputObj.task}
-            </tasks>
-        </todo>`;
-        console.log(xmlTodo);
-        return xmlTodo;
-    } else if (todoOrTask === "task") {
-        const xmlTask = `
-        <task>
-            <id>${inputObj.id}</id>
-            <title>${inputObj.title}</title>
-            <description>${inputObj.description}</description>
-            <status>${inputObj.status}</status>
-        </task>`;
-        console.log("Task array -> task xml start . . ." + xmlTask);
-    } else {
-        console.error("todo.js/arrayToXmlFormatter didnt get /todo nor /task as a first parameter . . .");
     }
 }
 

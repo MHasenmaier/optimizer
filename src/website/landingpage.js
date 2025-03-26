@@ -7,7 +7,7 @@ const btnLandingImg = document.getElementById("imageLanding");
 
 document.addEventListener('DOMContentLoaded', landingPageLoaded);
 
-function landingPageLoaded () {
+function landingPageLoaded() {
     if (bodyLandingPage) {
         btnLanding.addEventListener("click", landingStartApp);
         btnLandingImg.addEventListener("click", landingStartApp);
@@ -15,30 +15,32 @@ function landingPageLoaded () {
 }
 
 
-//TODO: mocked function
+/**
+ * TODO: write comment
+ * @param event
+ */
 function landingStartApp(event) {
-    console.log("Change page to overview.html" + event);
+    console.log("Change page to overview.html", event);
 
-    //TODO: install function to check existence of DB and tables, return true/false
-    const checkedDB = checkDB();
-    const checkedDBTables = checkDBTables();
-
-    if (!checkedDB) {
-        console.log("DB will be set up ... soon");
+    if (!checkDB()) {
+        console.log("DB wird erstellt...");
         if (!setupNewDB()) {
-            console.error("DB couldn't set up\nCheck DB!");
+            console.error("DB konnte nicht erstellt werden!");
+            return;
         }
     }
 
-    if (!checkedDBTables) {
-        console.log("Tables will be set up ... soon")
+    if (!checkDBTables()) {
+        console.log("Tabellen werden erstellt...");
         if (!setupDBTables()) {
-            console.error("DB Tables couldn't set up!\nCheck DB!");
+            console.error("DB-Tabellen konnten nicht erstellt werden!");
+            return;
         }
     }
 
     location.href = urlWebsiteRoot + "overview.html";
 }
+
 
 /**
  * DB and table status functions
@@ -49,11 +51,9 @@ function landingStartApp(event) {
  * @returns {boolean}
  */
 function checkDB() {
-    console.log("DB will be checked ... soon");
-    //TODO: install DB call to check if DB is accessible
-    const dbState = true;
-    console.log("Status DB is: " + dbState);
-    return dbState;
+    console.log("Mock: Überprüfung der DB...");
+    const dbExists = true; // TODO: Später durch echte DB-Abfrage ersetzen
+    return dbExists;
 }
 
 /**
@@ -61,8 +61,7 @@ function checkDB() {
  * @returns {true}
  */
 function setupNewDB() {
-    console.log("DB and tables will be ready for business ... soon");
-    //TODO: contact URL for set up a new DB
+    console.log("Mock: Datenbank wird erstellt...");
     return true;
 }
 
@@ -71,11 +70,9 @@ function setupNewDB() {
  * @returns {boolean}
  */
 function checkDBTables() {
-    console.log("Tables will be checked ... soon");
-    //TODO: install DB call to check if the tables are accessible
-    const tableState = true;
-    console.log("Status Tables is: " + tableState);
-    return tableState;
+    console.log("Mock: Überprüfung der Tabellen...");
+    const tablesExist = true; // TODO: Später durch echte DB-Abfrage ersetzen
+    return tablesExist;
 }
 
 /**
@@ -106,41 +103,39 @@ function setupDBTables() {
      *                      todoImFokus     int
      *                      taskImFokus     int
      */
+    console.log("Mock: Erstelle Tabellen für Todos, Tasks, Links & Fokus...");
+
+    // SQL-Code auskommentiert für zukünftige Implementierung
+    /*
+    CREATE TABLE todotable (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        title VARCHAR(255),
+        description TEXT,
+        status INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE tasktable (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        title VARCHAR(255),
+        description TEXT,
+        status INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE linktable (
+        todoId INT,
+        taskId INT,
+        FOREIGN KEY (todoId) REFERENCES todotable(id),
+        FOREIGN KEY (taskId) REFERENCES tasktable(id)
+    );
+
+    CREATE TABLE focustable (
+        item VARCHAR(10) PRIMARY KEY,
+        anzahl INT
+    );
+    */
+
+    console.log("Tabellen erfolgreich (mocked) erstellt.");
     return true;
-}
-
-
-/**
- * necessitate of function unknown
- */
-
-//TODO: check DB connection / valid DB data return
-/**
- * take the provided ID and fetch the todo data of it from the DB
- * returns the XML formatted todo data if promise is fulfilled
- * @param inputSpecificID
- * @returns {Promise<Document>}
- */
-async function fetchDBTodo(inputSpecificID) {
-    console.log(`function fetchDBTodo started with element #${inputSpecificID} . . .`);
-    const parser = new DOMParser();
-    //to prevent invalid IDs
-    if (inputSpecificID > 0) {
-        try {
-            const response = await fetch(urlToIndex + `todo/?id=${inputSpecificID}`, {
-                mode: "cors",
-                method: 'GET'
-            });
-            const body = await response.text();
-            await console.log(`body: ${body}`);
-
-            const xmlTodo = await parser.parseFromString(body, "text/xml");
-            await console.log('Todo async loaded\nXML formatted (xmlTodo loaded): \n', xmlTodo, '\n');
-
-            console.log(`function fetchDBTodo: xmlTodo = ${xmlTodo}`);
-            return xmlTodo;
-        } catch (err) {
-            console.log("frontend error in getSpecificTodo:\n", err, "\n");
-        }
-    }
 }

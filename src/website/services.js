@@ -312,3 +312,191 @@ export function saveStatus(todoOrTask, elementStatus) {
     console.log("js/saveStatus set to: " + elementStatus);
     return true;
 }
+
+/**
+ * TODO: comment schreiben
+ * @param todo
+ */
+export function sendTodoToDB(todo) {
+    if (todo.id === -1) {
+        console.log("MOCK: Neues Todo wird in der DB erstellt:", todo);
+        // TODO: API-Call für neuen Eintrag (später aktivieren)
+        /*
+        fetch("/api/todos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(todo),
+        }).then(response => response.json())
+          .then(data => console.log("Neues Todo erfolgreich gespeichert:", data))
+          .catch(error => console.error("Fehler beim Speichern des Todos:", error));
+        */
+    } else {
+        console.log("MOCK: Bestehendes Todo wird aktualisiert:", todo);
+        // TODO: API-Call für Update (später aktivieren)
+        /*
+        fetch(`/api/todos/${todo.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(todo),
+        }).then(response => response.json())
+          .then(data => console.log("Todo erfolgreich aktualisiert:", data))
+          .catch(error => console.error("Fehler beim Aktualisieren des Todos:", error));
+        */
+    }
+}
+
+/**
+ * get focus data from db
+ */
+export function getFocusDataFromDB() {
+    console.log("MOCK: Lade Fokus-Daten als XML...");
+    return `
+    <focus>
+        <todo>
+            <anzahl>3</anzahl>
+        </todo>
+        <task>
+            <anzahl>3</anzahl>
+        </task>
+    </focus>`;
+}
+
+/**
+ * saves focus data in db
+ */
+export function saveFocusDataToDB(todo, task) {
+    console.log(`MOCK: Speichere Fokus-Daten - Todos: ${todo}, Tasks: ${task}`);
+}
+
+
+// ----------------
+// maybe deprecated
+//-----------------
+
+//von todo.js
+/**
+ * TODO: still needed?
+ * TODO: comment schreiben
+ * @param todoOrTask
+ * @param inputObj
+ * @returns {string}
+ */
+function todoTaskToXmlFormatter(todoOrTask, inputObj) {
+    if (todoOrTask === "todo") {
+        const xmlTodo = `
+        <todo>
+            <id>${inputObj.id}</id>
+            <title>${inputObj.title}</title>
+            <description>${inputObj.description}</description>
+            <status>${inputObj.status}</status>
+            <tasks>
+                ${inputObj.task}
+            </tasks>
+        </todo>`;
+        console.log(xmlTodo);
+        return xmlTodo;
+    } else if (todoOrTask === "task") {
+        const xmlTask = `
+        <task>
+            <id>${inputObj.id}</id>
+            <title>${inputObj.title}</title>
+            <description>${inputObj.description}</description>
+            <status>${inputObj.status}</status>
+        </task>`;
+        console.log("Task array -> task xml start . . ." + xmlTask);
+    } else {
+        console.error("todo.js/arrayToXmlFormatter didnt get /todo nor /task as a first parameter . . .");
+    }
+}
+
+//von todo.js
+/**
+ * TODO: comment schreiben
+ * @param index
+ */
+function saveOrUpdateTodo(index) {
+    const isNew = index === null || index === "-1";
+
+    //new todo get -1 as temp id
+    const updatedTodo = {
+        id: isNew ? -1 : todos[index].id,
+        title: todoTitleInput.value,
+        description: todoDescriptionTextarea.value,
+        status: statusPopupTodo.value,
+    };
+
+    if (isNew) {
+        todos.push(updatedTodo);
+        console.log("Neues Todo hinzugefügt:", updatedTodo);
+    } else {
+        todos[index] = updatedTodo;
+        console.log(`Todo mit Index ${index} aktualisiert:`, updatedTodo);
+    }
+
+    console.log("Aktualisierte Todos:", todos);
+
+    sendTodoToDB(updatedTodo);
+
+    forwardToOverview();
+}
+
+
+//von task.js
+function taskToXmlFormatter(inputObj) {
+    const xmlTask = `
+        <task>
+            <id>${inputObj.id}</id>
+            <title>${inputObj.title}</title>
+            <description>${inputObj.description}</description>
+            <status>${inputObj.status}</status>
+        </task>`;
+    console.log("Task formatted: \n" + xmlTask);
+    return xmlTask;
+}
+
+
+
+//von landingpage.js
+//TODO: check DB connection / valid DB data return
+/**
+ * take the provided ID and fetch the todo data of it from the DB
+ * returns the XML formatted todo data if promise is fulfilled
+ * @param inputSpecificID
+ * @returns {Promise<Document>}
+ */
+async function fetchDBTodo(inputSpecificID) {
+    console.log(`function fetchDBTodo started with element #${inputSpecificID} . . .`);
+    const parser = new DOMParser();
+    //to prevent invalid IDs
+    if (inputSpecificID > 0) {
+        try {
+            const response = await fetch(urlToIndex + `todo/?id=${inputSpecificID}`, {
+                mode: "cors",
+                method: 'GET'
+            });
+            const body = await response.text();
+            await console.log(`body: ${body}`);
+
+            const xmlTodo = await parser.parseFromString(body, "text/xml");
+            await console.log('Todo async loaded\nXML formatted (xmlTodo loaded): \n', xmlTodo, '\n');
+
+            console.log(`function fetchDBTodo: xmlTodo = ${xmlTodo}`);
+            return xmlTodo;
+        } catch (err) {
+            console.log("frontend error in getSpecificTodo:\n", err, "\n");
+        }
+    }
+}
+
+
+
+//von focus.js
+/**
+ * set focus values in db
+ */
+function saveFocusSettings() {
+    //maxTodos = inputFocusMaxTodos.value;
+    //maxTasks = inputFocusMaxTasks.value;
+
+    saveFocusDataToDB(maxTodos, maxTasks);
+}

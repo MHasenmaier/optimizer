@@ -1,31 +1,34 @@
-import {saveStatus} from "./services.js";
+import {getTasksFromDBAsXml, saveStatus, xmlToArray} from "./services.js";
 
 const bodyTask = document.getElementById("taskBody");
 
 export const statusPopupTask = document.getElementById("statusPopupTask");
 
-document.addEventListener("DOMContentLoaded", taskPageLoaded);
+document.addEventListener('DOMContentLoaded', taskPageSetup);
 
-function taskPageLoaded () {
-    if (bodyTask) {
-        console.log("Task page loading . . .");
+function taskPageSetup() {
+    if (!bodyTask) return;
 
-        //save status change
-        statusPopupTask.addEventListener("change", () => saveStatus(
-            "task",
-            statusPopupTask.options[statusPopupTask.selectedIndex].value
-        ));
+    console.log("Task page loading...");
+
+    const params = new URLSearchParams(window.location.search);
+    const taskId = params.get("task");
+
+    if (taskId !== null) {
+        setTaskData(taskId);
     }
 }
 
-function taskToXmlFormatter(inputObj) {
-    const xmlTask = `
-        <task>
-            <id>${inputObj.id}</id>
-            <title>${inputObj.title}</title>
-            <description>${inputObj.description}</description>
-            <status>${inputObj.status}</status>
-        </task>`;
-    console.log("Task formatted: \n" + xmlTask);
-    return xmlTask;
+function setTaskData(taskId) {
+    const tasks = xmlToArray(getTasksFromDBAsXml());
+    const task = tasks.find(t => t.id === Number(taskId));
+
+    if (task) {
+        document.getElementById("labelItemTitle").value = task.title;
+        document.getElementById("textareaItemDescription").value = task.description;
+        document.getElementById("statusPopupTask").value = task.status;
+    } else {
+        console.error("Task nicht gefunden!");
+    }
 }
+
