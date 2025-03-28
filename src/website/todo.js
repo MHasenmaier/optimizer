@@ -1,11 +1,5 @@
-import {
-    buildXmlFromItem,
-    forwardToOverview,
-    getTodosFromDBAsXml,
-    sendTodoToDB,
-    urlWebsiteRoot,
-    xmlToArray
-} from "./services.js";
+import {forwardToOverview, sendItemToDB, xmlToArray} from "./services.js";
+import {getTodosFromDBAsXml} from "./mockdata.js";
 
 export const bodyTodoPage = document.getElementById("bodyTodoPage");
 
@@ -66,8 +60,8 @@ function setTodoData(index) {
  * TODO: comment schreiben
  */
 async function handleTodoSave() {
-    const xmlData = collectData();
-    await sendTodoToDB(xmlData);
+    const xmlData = collectDataNewTodo();
+    await sendItemToDB("todo", xmlData);
     forwardToOverview();
 }
 
@@ -81,9 +75,10 @@ function handleStatusChange() {
 
 /**
  * TODO: comment schreiben
- * @returns {Promise<void>}
+ * collects data from the textarea, input, dropdown and task
+ * @returns {{id: number, title: *, description: *, status, task: *[]}}
  */
-async function collectData() {
+function collectDataNewTodo() {
     const paragraphs = classContainerHiddenTasksContainedTasks.querySelectorAll("p");
     const dataIndices = [];
 
@@ -94,16 +89,13 @@ async function collectData() {
         }
     });
 
-    const newTodoObj = {
-        id: -1, // Neues Todo bekommt -1 als ID
+    return {
+        id: -1,
         title: todoTitleInput.value,
         description: todoDescriptionTextarea.value,
         status: statusPopupTodo.options[statusPopupTodo.selectedIndex].value,
         task: dataIndices
     };
-
-    const xmlString = buildXmlFromItem(newTodoObj, "todo");
-    return sendTodoToDB(xmlString);
 }
 
 /**

@@ -1,10 +1,12 @@
-import {buildXmlFromItem, forwardToOverview, getTasksFromDBAsXml, sendTaskToDB, xmlToArray} from "./services.js";
-import {statusPopupTodo} from "./todo";
+import {buildXmlFromObj, forwardToOverview, sendItemToDB, xmlToArray} from "./services.js";
+import {statusPopupTodo} from "./todo.js";
+import {getTasksFromDBAsXml} from "./mockdata.js";
 
 const taskBody = document.getElementById("taskBody");
 const btnAddTask = document.getElementById("buttonAddTask");
 const taskTitleInput = document.getElementById("labelItemTitle");
 const taskDescriptionTextarea = document.getElementById("textareaItemDescription");
+export const statusPopupTask = document.getElementById("statusPopupTask")
 
 
 document.addEventListener('DOMContentLoaded', taskPageSetup);
@@ -29,7 +31,7 @@ function taskPageSetup() {
  */
 async function handleTaskSave() {
     const xmlData = saveOrUpdateTask();
-    await sendTaskToDB(xmlData);
+    await sendItemToDB('tasks', xmlData);
     forwardToOverview();
 }
 
@@ -41,9 +43,10 @@ function setTaskData(taskId) {
     const specificTask = allTasks.find(task => String(task.id) === taskId);
 
     if (specificTask) {
+        console.log("Task contains: " + JSON.stringify(specificTask));
         taskTitleInput.value = specificTask.title;
         taskDescriptionTextarea.value = specificTask.description;
-        statusPopupTodo.value = specificTask.status;
+        statusPopupTask.value = specificTask.status;
     } else {
         console.error("Task nicht gefunden!");
     }
@@ -59,12 +62,14 @@ function saveOrUpdateTask() {
 
     const isNew = taskId === null || taskId === "-1";
 
+    isNew ? console.log("Neuer Task angelegt") : console.log("Task wurde aktualisiert");
+
     const taskData = {
         id: isNew ? -1 : taskId,
         title: taskTitleInput.value,
         description: taskDescriptionTextarea.value,
-        status: statusPopupTodo.value
+        status: statusPopupTask.value
     };
-    const xmlString = buildXmlFromItem(taskData, "task");
-    return sendTaskToDB(xmlString);
+    const xmlString = buildXmlFromObj(taskData, "task");
+    return sendItemToDB("task", xmlString)
 }

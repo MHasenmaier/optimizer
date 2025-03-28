@@ -1,8 +1,8 @@
 //TODO: include data import from DB
 import {statusPopupTodo} from "./todo.js";
-import {getTodosFromDBAsXml, getTasksFromDBAsXml} from "./mockdata.js";
+import {statusPopupTask} from "./task.js";
+import {getTasksFromDBAsXml, getTodosFromDBAsXml} from "./mockdata.js";
 
-export const parser = new DOMParser();
 export const urlToIndex = "http://localhost:8080/optimizer/src/backend/index.php/";
 export const urlWebsiteRoot = "http://localhost:8080/optimizer/src/website/";
 
@@ -14,6 +14,7 @@ export const urlWebsiteRoot = "http://localhost:8080/optimizer/src/website/";
  * @returns {Array} - Array of todo- or task-objects
  */
 export function xmlToArray(xml, type) {
+    const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xml, "text/xml");
 
     if (type === "todo") {
@@ -54,37 +55,13 @@ export function xmlToArray(xml, type) {
 
 
 /**
- * get the todos from the db
- * @returns {*} Array[{todo-obj}, {todo-obj}, {...}]
- */
-export async function getTodos() {
-    // Momentan Mock-Daten (synchron):
-    return xmlToArray(getTodosFromDBAsXml(),"todos");
-
-    // Zukünftige DB-Abfrage via fetch mit async/await:
-    /*
-    try {
-      const response = await fetch(urlToIndex + 'todos', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/xml' }
-      });
-      const xmlString = await response.text();
-      return xmlToArray(xmlString);
-    } catch (error) {
-      console.error('Error fetching todos:', error);
-      return [];
-    }
-    */
-}
-
-/**
  * @function buildXmlFromItem
- * @description Builds an XML string for a todo or a task item.
+ * @description Builds an XML string for a todo or a task object.
  * @param {string} type - "todo" or "task"
  * @param {Object} item - The item data
  * @returns {boolean, string}
  */
-export function buildXmlFromItem(item, type) {
+export function buildXmlFromObj(item, type) {
     if (type === "todo") {
         return `
       <todo>
@@ -123,19 +100,22 @@ export function forwardToOverview() {
 /** TODO: comment schreiben
  * Sendet ein Item (Todo oder Task) als XML an das Backend.
  * @param {string} todoOrTask - Der API-Endpunkt ("todos" oder "tasks").
- * @param {string} xmlData - Der XML-String, der das Item beschreibt.
+ * @param {{id: number, title: *, description: *, status, task: *[]}} xmlData - Der XML-String, der das Item beschreibt.
  */
 export async function sendItemToDB(todoOrTask, xmlData) {
     console.log(`MOCK: Sende ${todoOrTask} als XML:`, xmlData);
 
     // Extrahiere die ID aus dem XML-String
+    //FIXME: was hat es mit dem "match is not a function" auf sich?
     const idMatch = xmlData.match(/<id>(.*?)<\/id>/);
     const id = idMatch ? parseInt(idMatch[1], 10) : -1;
-    // Wähle Methode und URL abhängig davon, ob das Item neu ist oder existiert.
+
     const method = id === -1 ? 'POST' : 'PUT';
     const url = id === -1 ? (urlToIndex + todoOrTask) : (urlToIndex + `${todoOrTask}?id=${id}`);
 
-    // Zukünftiger echter API-Aufruf mit async/await:
+    console.log("Task (ID: " + id + ") zur DB gesendet\nMethode: " + method + "\nUrl: " + url);
+
+    // Zukünftiger echter API-Aufruf
     /*
     try {
       const response = await fetch(url, {
@@ -153,24 +133,6 @@ export async function sendItemToDB(todoOrTask, xmlData) {
 
 /**
  * TODO: comment schreiben
- * @param xmlTodo
- * @returns {Promise<void>}
- */
-export function sendTodoToDB(xmlTodo) {
-    return sendItemToDB('todos', xmlTodo);
-}
-
-/**
- * TODO: comment schreiben
- * @param xmlData
- * @returns {Promise<void>}
- */
-export function sendTaskToDB(xmlData) {
-    return sendItemToDB('tasks', xmlData);
-}
-
-/**
- * TODO: comment schreiben
  * @returns {{todos: number, tasks: number}}
  */
 export async function getFocusLimitsObj() {
@@ -181,24 +143,6 @@ export async function getFocusLimitsObj() {
     const tasksAnzahl = parseInt(xmlDoc.querySelector("task > anzahl").textContent, 10);
     return { todos: todosAnzahl, tasks: tasksAnzahl };
 }
-
-/**
- * TODO: comment schreiben
- * @returns {Promise<void>}
- */
-async function handleStatusChange() {
-    const selectedStatus = statusPopupTodo.value;
-
-    const limitOk = validateBegonnenStatus("todo", selectedStatus);
-
-    if (!limitOk) {
-        console.warn("to many 'in progress' todos");
-        statusPopupTodo.value = "";
-        return;
-    }
-    // TODO: Erfolgsfall → status darf gesetzt werden
-}
-
 
 /** TODO: comment schreiben
  * Zählt, wie viele Items des Typs (todo/task) den Status "begonnen" (4) haben.
@@ -221,9 +165,9 @@ function countBegonnenItems(itemType) {
 }
 
 /** TODO: comment schreiben
- * Prüft, ob das Setzen des Status "begonnen" (4) für den angegebenen Itemtyp zulässig ist.
- * Gibt true zurück, wenn noch nicht das Limit erreicht ist,
- * andernfalls false. Zusätzlich wird ein negatives Feedback (über console.warn) ausgegeben.
+ * Prüft, ob das Setzen des Status "begonnen" (4) für das angegebene Item zulässig ist.
+ * Gibt true zurück, wenn das Limit noch nicht erreicht wurde, andernfalls false.
+ * Zusätzlich wird ein negatives Feedback (über console.warn) ausgegeben.
  *
  * @param {string} itemType - "todo" oder "task"
  * @param {string} selectedStatus - Der ausgewählte Status (als String), z. B. "4"
@@ -248,8 +192,7 @@ function validateBegonnenStatus(itemType, selectedStatus) {
  */
 export async function getFocusDataFromDBXML() {
     console.log("MOCK: Lade Fokus-Daten als XML...");
-    // Momentan werden Mock-Daten zurückgegeben:
-    const xmlMock = `
+    return `
     <focus>
         <todo>
             <anzahl>3</anzahl>
@@ -258,7 +201,6 @@ export async function getFocusDataFromDBXML() {
             <anzahl>3</anzahl>
         </task>
     </focus>`;
-    return xmlMock;
 
     // Zukünftiger echter API-Aufruf mit async/await:
     /*

@@ -12,7 +12,7 @@ body {
     "footer";
     width: 360px;
     height: 800px;
-    background: #fafafa;
+    background: darkgray /*#fafafa*/;
     border: 1px solid #000000;
     font-family: sans-serif;
     font-style: normal;

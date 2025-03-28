@@ -1,5 +1,7 @@
-import {getTodosFromDBAsXml, urlWebsiteRoot, xmlToArray} from "./services.js";
+
+import {urlWebsiteRoot, xmlToArray} from "./services.js";
 import {updateDateTime} from "./clock.js";
+import {getTodosFromDBAsXml} from "./mockdata.js";
 
 const bodyOverview = document.getElementById("bodyOverview");
 const classContentOverview = document.querySelector('.contentOverview');
