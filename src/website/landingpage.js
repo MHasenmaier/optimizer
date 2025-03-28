@@ -50,10 +50,20 @@ function landingStartApp(event) {
  * checks if a DB exists
  * @returns {boolean}
  */
-function checkDB() {
+async function checkDB() {
     console.log("Mock: Überprüfung der DB...");
-    const dbExists = true; // TODO: Später durch echte DB-Abfrage ersetzen
-    return dbExists;
+    return true;    //TODO: MOCK return
+
+    //TODO: für produktiv auskommentieren
+    //try {
+    //    // TODO: url korrigieren
+    //    const response = await fetch(urlToIndex + 'dbstatus');
+    //    const status = await response.json();
+    //    return status.dbExists;
+    //} catch (err) {
+    //    console.error("Fehler bei DB-Check:", err);
+    //    return false;
+    //}
 }
 
 /**

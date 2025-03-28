@@ -1,7 +1,7 @@
 import {
+    buildXmlFromItem,
     forwardToOverview,
     getTodosFromDBAsXml,
-    saveStatus,
     sendTodoToDB,
     urlWebsiteRoot,
     xmlToArray
@@ -20,7 +20,7 @@ const btnTodoHideTasks = document.getElementById("buttonHideTasks");
 
 document.addEventListener('DOMContentLoaded', todoPageLoaded);
 
-let todos = xmlToArray(getTodosFromDBAsXml());
+let todos = xmlToArray(getTodosFromDBAsXml(), "todo");
 
 function todoPageLoaded() {
     if (!bodyTodoPage) return;
@@ -65,9 +65,9 @@ function setTodoData(index) {
 /**
  * TODO: comment schreiben
  */
-function handleTodoSave() {
+async function handleTodoSave() {
     const xmlData = collectData();
-    sendTodoToDB(xmlData);
+    await sendTodoToDB(xmlData);
     forwardToOverview();
 }
 
@@ -76,14 +76,14 @@ function handleTodoSave() {
  * TODO: comment schreiben
  */
 function handleStatusChange() {
-    saveStatus("todo", statusPopupTodo.options[statusPopupTodo.selectedIndex].value);
+    console.log("Platzhalter");
 }
 
 /**
  * TODO: comment schreiben
- * @returns {string}
+ * @returns {Promise<void>}
  */
-function collectData() {
+async function collectData() {
     const paragraphs = classContainerHiddenTasksContainedTasks.querySelectorAll("p");
     const dataIndices = [];
 
@@ -102,25 +102,8 @@ function collectData() {
         task: dataIndices
     };
 
-    return convertTodoToXml(newTodoObj);
-}
-
-/**
- * TODO: comment schreiben
- * @param todo
- * @returns {string}
- */
-function convertTodoToXml(todo) {
-    return `
-    <todo>
-        <id>${todo.id}</id>
-        <title>${todo.title}</title>
-        <description>${todo.description}</description>
-        <status>${todo.status}</status>
-        <tasks>
-            ${todo.task.map(taskId => `<task>${taskId}</task>`).join("\n")}
-        </tasks>
-    </todo>`;
+    const xmlString = buildXmlFromItem(newTodoObj, "todo");
+    return sendTodoToDB(xmlString);
 }
 
 /**
@@ -129,7 +112,7 @@ function convertTodoToXml(todo) {
  */
 function todoOpenTask(event) {
     if (event.target.tagName === 'P') {
-        const taskId = event.target.getAttribute("data-task-id");
+        const taskId = event.target.getAttribute("data-index");
         if (taskId) {
             location.href = `task.html?task=${taskId}`;
         }

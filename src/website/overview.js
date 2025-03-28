@@ -15,8 +15,9 @@ function overviewPageLoaded() {
     if (!bodyOverview) return;
     console.log("Overview loading. . .");
     updateDateTime();
-    createTodoOverview(xmlToArray(getTodosFromDBAsXml()));    //TODO: mocked data
-    console.log("debug mock data: " + JSON.stringify(xmlToArray(getTodosFromDBAsXml())));
+    const allTodos = xmlToArray(getTodosFromDBAsXml(), "todo");
+    createTodoOverview(allTodos);
+    console.log("debug mock data: " + JSON.stringify(allTodos));
 
     classContentOverview.addEventListener('click', overviewTodoClick);
     classContentOverview.addEventListener('change', overviewCheckboxClick);

@@ -1,4 +1,4 @@
-import {forwardToOverview, getFocusDataFromDB, parser} from "./services.js";
+import {forwardToOverview, getFocusLimitsObj} from "./services.js";
 
 const bodyFocus = document.getElementById("bodyFocus");
 const slideTodoFocus = document.getElementById("focusTodoCheck");
@@ -8,10 +8,6 @@ const popupFocusMaxTasks = document.getElementById("focusMaxTasksPopup");
 const inputFocusMaxTodos = document.getElementById("focusMaxTodos");
 const inputFocusMaxTasks = document.getElementById("focusMaxTasks");
 const btnFocusBack = document.getElementById("closeFocusButton");
-
-//TODO: temporär globale variable
-let maxTodos = 1;
-let maxTasks = 1;
 
 document.addEventListener("DOMContentLoaded", focusPageLoaded);
 
@@ -26,19 +22,21 @@ function focusPageLoaded() {
     btnFocusBack.addEventListener("click", () => closePageAndSetFocusEvent());
 }
 
-/**
- * get focus data from db and set value
+/**get focus data from db and set value
+ * @function loadFocusSettings
+ * @description Loads focus settings from the backend (or mock) and applies them to the form fields.
  */
-function loadFocusSettings() {
-    const xmlString = getFocusDataFromDB(); // Holt den XML-String
-    const xmlDoc = parser.parseFromString(xmlString, "text/xml");
-
-    maxTodos = parseInt(xmlDoc.querySelector("todo > anzahl").textContent, 10);
-    maxTasks = parseInt(xmlDoc.querySelector("task > anzahl").textContent, 10);
-
-    inputFocusMaxTodos.value = maxTodos;
-    inputFocusMaxTasks.value = maxTasks;
+async function loadFocusSettings() {
+    try {
+        const limits = await getFocusLimitsObj();
+        inputFocusMaxTodos.value = limits.todos;
+        inputFocusMaxTasks.value = limits.tasks;
+        console.log("Fokus-Einstellungen geladen:", limits);
+    } catch (error) {
+        console.error("Fehler beim Laden der Fokus-Einstellungen:", error);
+    }
 }
+
 
 /** show/hide the popup window
  * Change the display property of the popup window if slider is toggled
@@ -70,51 +68,73 @@ function focusSetDisplayOfPopup(todoOrTask) {
     }
 }
 
-/**
- * Event handles what happen if user click the "Zurück" button
+/** TODO: comment schreiben / console.logs schreiben
+ * Beim Klick auf "Zurück" wird setFocus() aufgerufen.
+ * Abhängig vom Rückgabewert wird eine Erfolgsmeldung ausgegeben und forwardToOverview() aufgerufen,
+ * oder es erscheint eine Warnung in der Konsole.
  */
-function closePageAndSetFocusEvent() {
-    setFocus();
-    forwardToOverview();
+async function closePageAndSetFocusEvent() {
+    const success = await setFocus();
+    if (success) {
+        console.log("Fokus-Daten erfolgreich gespeichert. Wechsle zur Übersicht.");
+        forwardToOverview();
+    } else {
+        console.warn("Warnung: Fokus-Daten konnten nicht gespeichert werden. Wechsel zur Übersicht abgebrochen.");
+    }
 }
 
 /**
  * TODO: comment schreiben
- * @param todo
- * @param task
+ * @param howManyTodos
+ * @param howManyTasks
  */
-export function saveFocusDataToDB(todo, task) {
+export async function saveFocusDataToDB(howManyTodos, howManyTasks) {
     const xmlData = `
     <focus>
         <todo>
-            <anzahl>${todo}</anzahl>
+            <anzahl>${howManyTodos}</anzahl>
         </todo>
         <task>
-            <anzahl>${task}</anzahl>
+            <anzahl>${howManyTasks}</anzahl>
         </task>
     </focus>`;
-
     console.log("MOCK: Speichere Fokus-Daten als XML:", xmlData);
-
-    // TODO: Hier später den echten API-Call einfügen
+    // Echter API-Aufruf – auskommentiert:
     /*
-    fetch("/api/focus", {
-        method: "POST",
-        headers: { "Content-Type": "application/xml" },
-        body: xmlData,
-    });
+    try {
+        const response = await fetch(urlToIndex + 'focus', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/xml' },
+            body: xmlData,
+        });
+        const data = await response.text();
+        console.log("Fokus-Daten erfolgreich gespeichert:", data);
+    } catch (error) {
+        console.error("Fehler beim Speichern der Fokus-Daten:", error);
+    }
     */
 }
 
-/**
- * TODO: comment schreiben
+/** TODO: comment schreiben
+ * Liest die aktuellen Fokus-Werte aus den Eingabefeldern,
+ * speichert diese via saveFocusDataToDB() und gibt true zurück,
+ * wenn die Daten erfolgreich übertragen wurden, andernfalls false.
  */
-function setFocus() {
-    maxTodos = inputFocusMaxTodos.value;
-    console.log("max Todos: " + maxTodos);
+async function setFocus() {
+    // Lese die aktuellen Werte aus den Input-Feldern und speichere sie in einem Objekt
+    const focusLimits = {
+        todos: inputFocusMaxTodos.value,
+        tasks: inputFocusMaxTasks.value
+    };
 
-    maxTasks = inputFocusMaxTasks.value;
-    console.log("max Tasks: " + maxTasks);
+    console.log("max Todos: " + focusLimits.todos);
+    console.log("max Tasks: " + focusLimits.tasks);
 
-    saveFocusDataToDB(maxTodos, maxTasks)
+    try {
+        await saveFocusDataToDB(focusLimits.todos, focusLimits.tasks);
+        return true;
+    } catch (error) {
+        console.error("Fehler beim Speichern der Fokus-Daten:", error);
+        return false;
+    }
 }
