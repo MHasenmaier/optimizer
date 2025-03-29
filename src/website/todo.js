@@ -1,4 +1,11 @@
-import {forwardToOverview, sendItemToDB, xmlToArray} from "./services.js";
+import {
+    buildXmlFromObj,
+    forwardToOverview,
+    sendItemToDB,
+    urlWebsiteRoot,
+    validateBegonnenStatus,
+    xmlToArray
+} from "./services.js";
 import {getTodosFromDBAsXml} from "./mockdata.js";
 
 export const bodyTodoPage = document.getElementById("bodyTodoPage");
@@ -61,21 +68,25 @@ function setTodoData(index) {
  */
 async function handleTodoSave() {
     const xmlData = collectDataNewTodo();
-    await sendItemToDB("todo", xmlData);
-    forwardToOverview();
+    await forwardToOverview();
+    await sendItemToDB("todo", buildXmlFromObj(xmlData,"todo"));
 }
-
 
 /**
  * TODO: comment schreiben
  */
 function handleStatusChange() {
-    console.log("Platzhalter");
+    console.log("Platzhalter bei status änderung durch this.value: " + this.value);
+    if (validateBegonnenStatus("todo", this.value)) {
+        console.log("Status erlaubt.");
+    } else {
+        console.warn("Status nicht erlaubt. Zu viele todo auf 'Begonnen'");
+    }
 }
 
 /**
  * TODO: comment schreiben
- * collects data from the textarea, input, dropdown and task
+ * collects data from the textarea, input, dropdown and task, returns obj {}
  * @returns {{id: number, title: *, description: *, status, task: *[]}}
  */
 function collectDataNewTodo() {

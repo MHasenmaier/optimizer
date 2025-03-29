@@ -31,6 +31,7 @@ function taskPageSetup() {
  */
 async function handleTaskSave() {
     const xmlData = saveOrUpdateTask();
+    if (!xmlData) { return false; }
     await sendItemToDB('tasks', xmlData);
     forwardToOverview();
 }
@@ -70,6 +71,6 @@ function saveOrUpdateTask() {
         description: taskDescriptionTextarea.value,
         status: statusPopupTask.value
     };
-    const xmlString = buildXmlFromObj(taskData, "task");
-    return sendItemToDB("task", xmlString)
+
+    return buildXmlFromObj(taskData, "task");
 }

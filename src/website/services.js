@@ -1,6 +1,3 @@
-//TODO: include data import from DB
-import {statusPopupTodo} from "./todo.js";
-import {statusPopupTask} from "./task.js";
 import {getTasksFromDBAsXml, getTodosFromDBAsXml} from "./mockdata.js";
 
 export const urlToIndex = "http://localhost:8080/optimizer/src/backend/index.php/";
@@ -53,6 +50,14 @@ export function xmlToArray(xml, type) {
     return [];
 }
 
+/**
+ * TODO:comment schreiben
+ */
+export function forwardToOverview() {
+    console.log("Open link to overview.html");
+
+    location.href = urlWebsiteRoot + "overview.html";
+}
 
 /**
  * @function buildXmlFromItem
@@ -87,20 +92,10 @@ export function buildXmlFromObj(item, type) {
     return false;
 }
 
-/**
- * TODO:comment schreiben
- */
-export function forwardToOverview() {
-    console.log("Open link to overview.html");
-
-    location.href = urlWebsiteRoot + "overview.html";
-}
-
-
 /** TODO: comment schreiben
  * Sendet ein Item (Todo oder Task) als XML an das Backend.
  * @param {string} todoOrTask - Der API-Endpunkt ("todos" oder "tasks").
- * @param {{id: number, title: *, description: *, status, task: *[]}} xmlData - Der XML-String, der das Item beschreibt.
+ * @param {boolean|string} xmlData - Der XML-String, der das Item beschreibt.
  */
 export async function sendItemToDB(todoOrTask, xmlData) {
     console.log(`MOCK: Sende ${todoOrTask} als XML:`, xmlData);
@@ -132,16 +127,20 @@ export async function sendItemToDB(todoOrTask, xmlData) {
 }
 
 /**
- * TODO: comment schreiben
- * @returns {{todos: number, tasks: number}}
+ * Returns the number of focus limit of an item ("todo" or "task")
+ * @param todoOrTask    "todo" or "task"
+ * @returns {number}    integer of the maximum "Begonnen" of an item
  */
-export async function getFocusLimitsObj() {
-    // Der XML-String wird asynchron abgerufen.
-    const xmlString = await getFocusDataFromDBXML();
-    const xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
-    const todosAnzahl = parseInt(xmlDoc.querySelector("todo > anzahl").textContent, 10);
-    const tasksAnzahl = parseInt(xmlDoc.querySelector("task > anzahl").textContent, 10);
-    return { todos: todosAnzahl, tasks: tasksAnzahl };
+export function getFocusLimits(todoOrTask) {
+    const parser = new DOMParser();
+
+    const xmlString = getFocusDataFromDBXML();
+    const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+    console.log("services.js/getFocusLimitObj -> xmlstring = " + JSON.stringify(xmlString))
+
+    const anzahlElement = xmlDoc.querySelector(`${todoOrTask} anzahl`);
+
+    return parseInt(anzahlElement.textContent.trim(), 10);
 }
 
 /** TODO: comment schreiben
@@ -155,11 +154,13 @@ function countBegonnenItems(itemType) {
         allTodos.forEach(todo => {
             if (todo.status === 4) count++;
         });
+        console.log("Todos auf 'Begonnen: " + count);
     } else if (itemType === "task") {
         const allTasks = xmlToArray(getTasksFromDBAsXml(), "task");
         allTasks.forEach(task => {
             if (task.status === 4) count++;
         });
+        console.log("Tasks auf 'Begonnen: " + count);
     }
     return count;
 }
@@ -173,24 +174,24 @@ function countBegonnenItems(itemType) {
  * @param {string} selectedStatus - Der ausgewählte Status (als String), z. B. "4"
  * @returns {boolean} true, wenn der Status gesetzt werden darf, sonst false.
  */
-function validateBegonnenStatus(itemType, selectedStatus) {
+export function validateBegonnenStatus(itemType, selectedStatus) {
     if (selectedStatus !== "4") return true;
 
-    const limits = getFocusLimitsObj();
+    const limits = getFocusLimits(itemType);
     const currentCount = countBegonnenItems(itemType);
-    const allowedLimit = itemType === "todo" ? limits.todos : limits.tasks;
 
-    if (currentCount >= allowedLimit) {
-        console.warn(`Negatives Feedback: Die maximale Anzahl an ${itemType}s mit "Begonnen" (${allowedLimit}) wurde erreicht.`);
+    if (currentCount >= limits) {
+        console.warn(`Negatives Feedback: Die maximale Anzahl an ${itemType}s mit "Begonnen" (${limits}) wurde überschritten.`);
         return false;
     }
+    console.log("Status (Value: " + selectedStatus + ") darf gesetzt werden: Aktuelles Limit: " + limits + " des Items: " + itemType + "\nDerzeitige Items auf 'Begonnen': " + currentCount);
     return true;
 }
 
 /**
  * get focus data from db
  */
-export async function getFocusDataFromDBXML() {
+export function getFocusDataFromDBXML() {
     console.log("MOCK: Lade Fokus-Daten als XML...");
     return `
     <focus>

@@ -1,5 +1,3 @@
-import {saveStatus} from "./services.js";
-
 const bodyArchiv = document.getElementById("doneBody");
 
 document.addEventListener("DOMContentLoaded", taskPageLoaded);

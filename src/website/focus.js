@@ -1,4 +1,4 @@
-import {forwardToOverview, getFocusLimitsObj} from "./services.js";
+import {forwardToOverview, getFocusLimits} from "./services.js";
 
 const bodyFocus = document.getElementById("bodyFocus");
 const slideTodoFocus = document.getElementById("focusTodoCheck");
@@ -26,12 +26,13 @@ function focusPageLoaded() {
  * @function loadFocusSettings
  * @description Loads focus settings from the backend (or mock) and applies them to the form fields.
  */
-async function loadFocusSettings() {
+function loadFocusSettings() {
     try {
-        const limits = await getFocusLimitsObj();
-        inputFocusMaxTodos.value = limits.todos;
-        inputFocusMaxTasks.value = limits.tasks;
-        console.log("Fokus-Einstellungen geladen:", limits);
+        const todoLimits = getFocusLimits("todo");
+        const taskLimits = getFocusLimits("task");
+        inputFocusMaxTodos.value = todoLimits;
+        inputFocusMaxTasks.value = taskLimits;
+        console.log("Fokus-Einstellungen geladen:\nTodo: " + todoLimits + "\nTask: " + taskLimits);
     } catch (error) {
         console.error("Fehler beim Laden der Fokus-Einstellungen:", error);
     }
