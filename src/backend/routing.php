@@ -1,248 +1,182 @@
 <?php
-include_once("api.php");
-include_once ("server.php");
+	include_once("api.php");
+	include_once("server.php");
 
-/**
- * routing function with switch-case for $_SERVER['REQUEST_METHOD']
- * parameter possibly wrong / not complete
- * @return bool - true if routing was successful
- */
-function routing(): bool
-{
-    //http://localhost:8080/optimizer/src/backend/index.php/ --- REST
-    //                      [0]                         --- [1]
-    $requestedPHPURL = explode('.php', $_SERVER['REQUEST_URI']);
-	echo "routing 1 success";
-    //check if the URL starts correctly
-    //ignore the "http://localhost" part of the URL, otherwise the function will break
-    if (!($requestedPHPURL[0] === '/optimizer/src/backend/index')) {
-		echo "routing fail in 'ignore_part'";
-        return statuscode(404);
-    }
+	function routing(): bool
+	{
+		$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+		$queryString = parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY);
+		parse_str($queryString ?? '', $queryParams);
 
-    //check if there is something more than just the index.php called
-    if (isset($requestedPHPURL[1])) {
-        //split by / to work with /todo/?id=
-        $requestedFinalURL = explode('/', $requestedPHPURL[1]);
+		$basePath = '/optimizer/src/backend/index.php';
+		if (!str_starts_with($requestUri, $basePath)) {
+			return statuscode(404, "Ungültiger Pfad");
+		}
 
-        //switch for request method
-        switch ($_SERVER['REQUEST_METHOD']) {
-            case 'GET':
+		$path = trim(substr($requestUri, strlen($basePath)), '/');
+		$segments = explode('/', $path);
+		$resource = $segments[0] ?? '';
+		$method = $_SERVER['REQUEST_METHOD'];
 
-                //switch for requested URL
-                switch ($requestedFinalURL[1]) {
-                    //for overview page
-                    case 'activetodos':
-						//echo checkTable("todotable");
-                        $getAllActiveTodos = getAllActiveTodos();
-                        if (empty($getAllActiveTodos)) {
-                            return false;
-                        }
-                        echo xmlFormatter($getAllActiveTodos);
-                        return statuscode(200);
+		return match ($method) {
+			'GET' => handleGET($resource, $queryParams),
+			'POST' => handlePOST($resource),
+			'PUT' => handlePUT($resource, $queryParams),
+			default => statuscode(405, "HTTP-Methode nicht erlaubt"),
+		};
+	}
 
-					//to check if DB exists
-	                case 'setUpDB':
-						echo "routing to setUpDB successfully";
-						$setUpDB = setupDatabase();
-						echo "database is set up?\n" . $setUpDB . "\n----\n";
-						if (!$setUpDB) {
-							echo "Error in routing/GET/setUpDB - DB couldn't be found";
-							return statuscode(500);
-						}
-						return statuscode(200);
+	/** takes care of all GET-requests
+	 * @param string $resource
+	 * @param array  $query
+	 *
+	 * @return bool
+	 */
+	function handleGET(string $resource, array $query): bool
+	{
+		switch ($resource) {
+			case 'activetodos':
+				$data = getAllActiveTodos();
+				if ($data === null) return statuscode(500);
+				echo xmlFormatter($data, 'todo', true);
+				return statuscode(200);
 
-                    //for archive and "marked as deleted"
-                    case 'inactivetodos':
-                        $getAllInactiveTodos = getAllInactiveTodos();
-                        if (!$getAllInactiveTodos) {
-                            return false;
-                        }
-                        echo xmlFormatter($getAllInactiveTodos);
-                        return statuscode(200);
-                    case 'countaktivetodos' :
-                        //returns number of all active todos (status != 5)
-                        $countActiveTodos = countActiveTodos();
-                        if (!$countActiveTodos) {
-                            return false;
-                        }
-                        echo $countActiveTodos;
-                        return statuscode(200);
+			case 'inactivetodos':
+				$data = getAllInactiveTodos();
+				if ($data === null) return statuscode(500);
+				echo xmlFormatter($data, 'todo', true);
+				return statuscode(200);
 
-                    //for getting a specific todo
-                    case 'todo' :
-                        //check if a second part (f.e. ?id=) is missing
-                            if (!isset($requestedFinalURL[2])) {
-                                return statuscode(404);
-                            }
-                            $IdToTest = $_GET['id'];
-                            $formattedId = intval(htmlspecialchars($IdToTest));
-                            if (is_numeric($IdToTest) &&
-                                (($formattedId !== 0) | ($formattedId !== 1))) {
+			case 'countaktivetodos':
+				$count = countActiveTodos();
+				if ($count === null) return statuscode(500);
+				echo $count;
+				return statuscode(200);
 
-                                //get the todo from backend
-                                $getTodoById = getTodoById($formattedId);
+			case 'todo':
+				if (!isset($query['id'])) return statuscode(400, "ID fehlt");
+				$todo = getTodoById((int)$query['id']);
+				if ($todo === null) return statuscode(404, "Todo nicht gefunden");
+				echo xmlFormatter($todo);
+				return statuscode(200);
 
-                                if (!isset($getTodoById)) {
+			case 'task':
+				if (!isset($query['id'])) return statuscode(400, "ID fehlt");
+				$task = getTaskById((int)$query['id']);
+				if ($task === null) return statuscode(404);
+				echo xmlFormatter($task, 'task');
+				return statuscode(200);
 
-                                    return statuscode(404);
-                                }
-                                //check if ID is known by the backend
-                                if (is_null($getTodoById) | empty($getTodoById) | ($getTodoById === false) | !(isset($getTodoById) === true)) {
-                                    return statuscode(404);
-                                }
+			case 'tasks':
+				if (!isset($query['todoid'])) return statuscode(400, "todoid fehlt");
+				$tasks = getSpecificTaskOfTodoById(0, (int)$query['todoid']);
+				if ($tasks === null) return statuscode(404);
+				echo xmlFormatter($tasks, 'task', true);
+				return statuscode(200);
 
-                                //header("Location: /http://localhost/optimizer/src/website/todo.html");
+			case 'focus':
+				$focus = getFocusLimits();
+				if ($focus === null) return statuscode(500);
+				echo xmlFormatterFocus($focus);
+				return statuscode(200);
 
-                                echo xmlFormatterSingle($getTodoById);
-                                return statuscode(200);
-                            } else {
-                                return statuscode(404);
-                            }
+			case 'setUpDB':
+				if (!setupDatabase()) return statuscode(500);
+				return statuscode(200);
 
-                    default:
-                        return statuscode(404);
-                }
+			case 'active':
+				$todos = getTodosByStatusList([1, 5], true); // NOT IN (1,5)
+				if ($todos === null) return statuscode(500);
+				echo xmlFormatter($todos, 'todo', true);
+				return statuscode(200);
 
-	        case 'POST':
-				//createTodo
-                if ((strcmp($requestedFinalURL[1], "todo") == 0) && strcmp(end($requestedFinalURL), $requestedFinalURL[1]) == 0) {
+			case 'inactive':
+				$todos = getTodosByStatusList([1, 5]); // IN (1,5)
+				if ($todos === null) return statuscode(500);
+				echo xmlFormatter($todos, 'todo', true);
+				return statuscode(200);
 
-                    //grab the body -> string
-                    $entityBody = file_get_contents('php://input');
+			default:
+				return statuscode(404, "Ressource nicht gefunden");
+		}
+	}
 
-                    //check if body is empty
-                    if (!$entityBody) {
-                        return statuscode(404);
-                    }
+	/** takes care of all POST-requests
+	 *
+	 * @param string $resource
+	 *
+	 * @return bool
+	 */
+	function handlePOST(string $resource): bool
+	{
+		$body = file_get_contents('php://input');
+		if (empty($body)) return statuscode(400, "Leerer Request-Body");
 
-                    $createTodo = createTodo($entityBody);
+		switch ($resource) {
+			case 'todo':
+				$todo = createTodo($body);
+				if ($todo === null) return statuscode(500);
+				echo xmlFormatter($todo, 'todo', false);
+				return statuscode(201);
 
-                    //check if createTodo works properly
-                    if (!$createTodo) {
-                        echo "test createTodo in routing/POST";
-                        return statuscode(500);
-                    }
+			case 'task':
+				$task = createTask($body);
+				if ($task === null) return statuscode(500);
+				echo xmlFormatter($task, 'task', false);
+				return statuscode(201);
 
-                    echo xmlFormatterSingle($createTodo);
-                    return statuscode(201);
+			case 'focus':
+				if (!updateFocusLimits($body)) return statuscode(500);
+				$updatedFocus = getFocusLimits();
+				echo xmlFormatterFocus($updatedFocus);
+				return statuscode(200);
 
-                } elseif (str_contains($requestedFinalURL[1], '?id=') && strcmp(end($requestedFinalURL), $requestedFinalURL[1
-	                ]) == 0) {
-                    //updateTodo
-                    //parse to int: $id
-                    $id = intval(htmlspecialchars($_GET['id']));
+			default:
+				return statuscode(404);
+		}
+	}
 
-                    //grab the body
-                    $entityBody = file_get_contents('php://input');
+	/** takes care of all PUT-requests
+	 * @param string $resource
+	 * @param array  $query
+	 *
+	 * @return bool
+	 */
+	function handlePUT(string $resource, array $query): bool
+	{
+		$body = file_get_contents('php://input');
+		if (empty($body)) return statuscode(400, "Leerer Request-Body");
 
-                    $updateTodo = updateTodo($entityBody, $id);
-                    if (is_null($updateTodo) | empty($updateTodo) | ($updateTodo === false)) {
-                        return statuscode(500);
-                    }
+		switch ($resource) {
+			case 'todo':
+				if (!isset($query['id'])) return statuscode(400, "Todo-ID fehlt");
+				$id = (int)$query['id'];
+				if ($id <= 0) return statuscode(400, "Ungültige Todo-ID");
 
-                    echo xmlFormatterSingle($updateTodo);
-                    return statuscode(200);
-                }
+				$updated = updateTodo($body, $id);
+				if ($updated === null) return statuscode(500, "Todo konnte nicht aktualisiert werden");
 
-                return statuscode(404);
+				echo xmlFormatter($updated);
+				return statuscode(200, "Todo erfolgreich aktualisiert");
 
-            case 'DELETE':
-                //Delete specific to do
+			case 'task':
+				if (!isset($query['id'])) return statuscode(400, "Task-ID fehlt");
+				$id = (int)$query['id'];
+				if ($id <= 0) return statuscode(400, "Ungültige Task-ID");
 
-                //grab ID
-                $IdToTest = $_GET['id'];
+				$updated = updateTask($body, $id);
+				if ($updated === null) return statuscode(500, "Task konnte nicht aktualisiert werden");
 
-                //cast string to int
-                $formattedId = intval(htmlspecialchars($IdToTest));
+				echo xmlFormatter($updated, 'task');
+				return statuscode(200, "Task erfolgreich aktualisiert");
 
-                if (str_contains($requestedFinalURL[1], 'todo') && strcmp($requestedFinalURL[2], '?id=') &&
-                    (($formattedId !== 0)  | ($formattedId !== 1))
-                ) {
+			case 'focus':
+				if (!updateFocusLimits($body)) return statuscode(500);
+				$updatedFocus = getFocusLimits();
+				echo xmlFormatterFocus($updatedFocus);
+				return statuscode(200);
 
-                    $getTodoById = getTodoById($formattedId);
-                    if (!$getTodoById) {
-                        return statuscode(500);
-                    }
-
-                    if (deleteTodo($formattedId)) {
-                        echo xmlFormatterSingle($getTodoById);
-                         return statuscode(200);
-                    }
-                    return statuscode(500);
-                }
-                break;
-
-            default:
-                statuscode(405);
-        }
-        return false;
-    }
-    echo "
-    X_X_X_X_X
-    what are you doing here????
-    check your request method and URL!!
-    X_X_X_X_X";
-    return false;
-}
-
-/**
- * @param $statuscode
- * return false if unknown error code -> non-http error code
- *
- * @return true|false
- */
-function statuscode(int $statuscode): bool {
-    switch ($statuscode) {
-        case 200:   //all good
-            http_response_code(200);
-            echo json_encode(['message' => 'OK']);
-            break;
-
-        case 201:   //created
-            http_response_code(201);
-            echo json_encode(['message' => 'created']);
-            break;
-
-        case 202:   //accepted
-            http_response_code(202);
-            echo json_encode(['message' => 'accepted']);
-            break;
-
-        case 204:   //no content -> content has been deleted
-            http_response_code(204);
-            echo json_encode(['message' => 'No Content -> content has been deleted']);
-            break;
-
-        case 400:   //bad request - malformed syntax
-            http_response_code(400);
-            echo json_encode(['message' => 'Bad Request']);
-            break;
-
-	    case 403: //forbidden
-		    http_response_code(403);
-			echo json_encode(['message' => 'Forbidden']);
-			break;
-
-        case 404:   //not found - server has not found anything matching the request-uri
-            http_response_code(404);
-            echo json_encode(['message' => 'Not Found']);
-            break;
-
-        case 405:   //Not allowed
-            http_response_code(405);
-            echo json_encode(['message' => 'Method Not Allowed']);
-            break;
-
-        case 500:
-            http_response_code(500);
-            echo json_encode(['message' => 'Internal Server Error']);
-            break;
-
-        default:
-            http_response_code($statuscode);
-            echo json_encode(['message' => "Unknown Error: $statuscode"]);
-            return false;
-    }
-    return true;
-}
+			default:
+				return statuscode(404, "Ressource nicht gefunden");
+		}
+	}
