@@ -189,29 +189,17 @@ export function validateBegonnenStatus(itemType, selectedStatus) {
 }
 
 /**
- * get focus data from db
+ * call backend for focus information stored in db
+ * returns default-mock data if an error occurs
+ * @returns {Promise<string>}
  */
-export function getFocusDataFromDBXML() {
-    console.log("MOCK: Lade Fokus-Daten als XML...");
-    return `
-    <focus>
-        <todo>
-            <anzahl>3</anzahl>
-        </todo>
-        <task>
-            <anzahl>3</anzahl>
-        </task>
-    </focus>`;
-
-    // Zukünftiger echter API-Aufruf mit async/await:
-    /*
+export async function getFocusDataFromDBXML() {
     try {
         const response = await fetch(urlToIndex + 'focus', {
             method: 'GET',
-            headers: { 'Content-Type': 'application/xml' }
+            headers: {'Content-Type': 'application/xml'}
         });
-        const xmlString = await response.text();
-        return xmlString;
+        return await response.text();
     } catch (error) {
         console.error("Fehler beim Laden der Fokus-Daten:", error);
         // Fallback: Rückgabe von Default-Mock-Daten
@@ -225,5 +213,4 @@ export function getFocusDataFromDBXML() {
             </task>
         </focus>`;
     }
-    */
 }

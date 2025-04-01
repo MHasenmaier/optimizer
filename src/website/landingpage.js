@@ -1,4 +1,4 @@
-import {urlWebsiteRoot} from "./services.js";
+import {urlToIndex, urlWebsiteRoot} from "./services.js";
 
 const bodyLandingPage = document.getElementById("bodyLanding");
 const btnLanding = document.getElementById("buttonLanding");
@@ -70,9 +70,19 @@ async function checkDB() {
  * set DB up if none is found
  * @returns {true}
  */
-function setupNewDB() {
-    console.log("Mock: Datenbank wird erstellt...");
-    return true;
+async function setupNewDB() {
+    console.log("call: landingpage.js/setupNewDB");
+
+    try {
+        const response = await fetch(urlToIndex + 'setupdb', {
+            method: 'GET',
+            headers: {'Content-Type': 'application/xml'}
+        });
+        return true;
+    } catch (error) {
+        console.error("Fehler beim Laden der Fokus-Daten:", error);
+        return false;
+    }
 }
 
 /**
@@ -83,69 +93,4 @@ function checkDBTables() {
     console.log("Mock: Überprüfung der Tabellen...");
     const tablesExist = true; // TODO: Später durch echte DB-Abfrage ersetzen
     return tablesExist;
-}
-
-/**
- * TODO:comment schreiben
- * @returns {boolean}
- */
-function setupDBTables() {
-    console.log("Tables of the DB will be ready for business ... soon");
-    /** TODO: SQL line to set up tables in the DB
-     * table name           column name     type            comments
-     * --------------------|---------------|---------------|-----------------
-     * Tabelle 1: todos
-     *                      id              int             (autoincr.) (primary key)
-     *                      titel           string
-     *                      beschreibung    string (long)
-     *                      status          int
-     *                      erstelldatum    string          (von db erstellt)
-     * Tabelle 2: tasks
-     *                      id              int             (autoincr.) (primary key)
-     *                      titel           string
-     *                      beschreibung    string (long)
-     *                      status          int
-     *                      erstelldatum    string          (von db erstellt)
-     * Tabelle 3: link
-     *                      todoId          int
-     *                      taskId          int
-     * Tabelle 4: focus
-     *                      todoImFokus     int
-     *                      taskImFokus     int
-     */
-    console.log("Mock: Erstelle Tabellen für Todos, Tasks, Links & Fokus...");
-
-    // SQL-Code auskommentiert für zukünftige Implementierung
-    /*
-    CREATE TABLE todotable (
-        id INT PRIMARY KEY AUTO_INCREMENT,
-        title VARCHAR(255),
-        description TEXT,
-        status INT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE tasktable (
-        id INT PRIMARY KEY AUTO_INCREMENT,
-        title VARCHAR(255),
-        description TEXT,
-        status INT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE linktable (
-        todoId INT,
-        taskId INT,
-        FOREIGN KEY (todoId) REFERENCES todotable(id),
-        FOREIGN KEY (taskId) REFERENCES tasktable(id)
-    );
-
-    CREATE TABLE focustable (
-        item VARCHAR(10) PRIMARY KEY,
-        anzahl INT
-    );
-    */
-
-    console.log("Tabellen erfolgreich (mocked) erstellt.");
-    return true;
 }

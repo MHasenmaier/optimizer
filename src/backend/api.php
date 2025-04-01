@@ -11,17 +11,32 @@
 	 * Erstellt ein neues Todo aus XML-Daten
 	 *
 	 * @param string $inputXML
+	 *
 	 * @return array|null
 	 */
-	function createTodo(string $inputXML): array|null {
-		global $dbPDO;
+	function createTodo(string $inputXML): array|null
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) {
+			logDebug("createTodo", "getPDO() fehlgeschlagen");
+			return null;
+		}
 
 		$xml = simplexml_load_string($inputXML);
-		if (!$xml) return null;
+		if (!$xml) {
+			logDebug("createTodo", "Fehler beim Parsen des XML");
+			return null;
+		}
 
 		$data = xmlToArray($xml);
 		$todo = convertXmlEntity('todo', $data);
-		if ($todo === null) return null;
+
+
+		if ($todo === null) {
+			logDebug("createTodo", "Kein <todo>-Knoten gefunden oder invalid");
+			return null;
+		}
+
 
 		$todo['status'] = statusCheck($todo['status'] ?? 2);
 		$todo['lastUpdate'] = $todo['lastUpdate'] ?? date('Y-m-d');
@@ -46,54 +61,21 @@
 		}
 	}
 
-
-	/**
-	 * Gibt alle aktiven Todos (status != 1 und != 5) zurück
-	 *
-	 * @return array|null
-	 */
-	function getAllActiveTodos(): array|null {
-		global $dbPDO;
-
-		try {
-			$sql = 'SELECT * FROM todotable WHERE status NOT IN (1, 5)';
-			$stmt = $dbPDO->prepare($sql);
-			$stmt->execute();
-			return $stmt->fetchAll(PDO::FETCH_ASSOC);
-		} catch (PDOException $e) {
-			logDebug("getAllActiveTodos", $e->getMessage());
-			return null;
-		}
-	}
-
-	/**
-	 * Gibt alle inaktiven Todos (status == 1 oder 5) zurück
-	 *
-	 * @return array|null
-	 */
-	function getAllInactiveTodos(): array|null {
-		global $dbPDO;
-
-		try {
-			$sql = 'SELECT * FROM todotable WHERE status IN (1, 5)';
-			$stmt = $dbPDO->prepare($sql);
-			$stmt->execute();
-			return $stmt->fetchAll(PDO::FETCH_ASSOC);
-		} catch (PDOException $e) {
-			logDebug("getAllInactiveTodos", $e->getMessage());
-			return null;
-		}
-	}
-
 	/**
 	 * Gibt alle Todos mit Status IN (Liste) oder NOT IN (negiert) zurück
 	 *
 	 * @param array $statusList
-	 * @param bool $negate - true = NOT IN, false = IN
+	 * @param bool  $negate - true = NOT IN, false = IN
+	 *
 	 * @return array|null
 	 */
-	function getTodosByStatusList(array $statusList, bool $negate = false): array|null {
-		global $dbPDO;
+	function getTodosByStatusList(array $statusList, bool $negate = false): array|null
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) {
+			logDebug("getTodosByStatusList", "getPDO() fehlgeschlagen");
+			return null;
+		}
 
 		if (empty($statusList)) return null;
 		$placeholders = implode(',', array_fill(0, count($statusList), '?'));
@@ -114,10 +96,16 @@
 	 * Gibt ein Todo anhand seiner ID zurück
 	 *
 	 * @param int $id
+	 *
 	 * @return array|null
 	 */
-	function getTodoById(int $id): array|null {
-		global $dbPDO;
+	function getTodoById(int $id): array|null
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) {
+			logDebug("getTodoById", "getPDO() fehlgeschlagen");
+			return null;
+		}
 
 		if (!checkID($id)) return null;
 
@@ -135,11 +123,17 @@
 	 * Aktualisiert ein Todo anhand seiner ID
 	 *
 	 * @param string $inputXML
-	 * @param int $id
+	 * @param int    $id
+	 *
 	 * @return array|null
 	 */
-	function updateTodo(string $inputXML, int $id): array|null {
-		global $dbPDO;
+	function updateTodo(string $inputXML, int $id): array|null
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) {
+			logDebug("updateTodo", "getPDO() fehlgeschlagen");
+			return null;
+		}
 
 		if ($id <= 0) return null;
 
@@ -181,8 +175,13 @@
 	 *
 	 * @return int|null
 	 */
-	function countActiveTodos(): int|null {
-		global $dbPDO;
+	function countActiveTodos(): int|null
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) {
+			logDebug("countActiveTodos", "getPDO() fehlgeschlagen");
+			return null;
+		}
 
 		try {
 			$sql = 'SELECT COUNT(*) as dbSize FROM todotable WHERE status NOT IN (1, 5)';
@@ -207,10 +206,16 @@
 	 * Erstellt einen neuen Task aus XML-Daten
 	 *
 	 * @param string $inputXML
+	 *
 	 * @return array|null
 	 */
-	function createTask(string $inputXML): array|null {
-		global $dbPDO;
+	function createTask(string $inputXML): array|null
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) {
+			logDebug("createTodo", "getPDO() fehlgeschlagen");
+			return null;
+		}
 
 		$xml = simplexml_load_string($inputXML);
 		if (!$xml) return null;
@@ -246,10 +251,16 @@
 	 * Gibt einen Task anhand seiner ID zurück
 	 *
 	 * @param int $id
+	 *
 	 * @return array|null
 	 */
-	function getTaskById(int $id): array|null {
-		global $dbPDO;
+	function getTaskById(int $id): array|null
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) {
+			logDebug("getTaskById", "getPDO() fehlgeschlagen");
+			return null;
+		}
 
 		try {
 			$stmt = $dbPDO->prepare("SELECT * FROM tasktable WHERE id = :id");
@@ -265,11 +276,17 @@
 	 * Aktualisiert einen Task anhand seiner ID
 	 *
 	 * @param string $inputXML
-	 * @param int $id
+	 * @param int    $id
+	 *
 	 * @return array|null
 	 */
-	function updateTask(string $inputXML, int $id): array|null {
-		global $dbPDO;
+	function updateTask(string $inputXML, int $id): array|null
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) {
+			logDebug("updateTask", "getPDO() fehlgeschlagen");
+			return null;
+		}
 
 		if ($id <= 0) return null;
 
@@ -312,10 +329,16 @@
 	 *
 	 * @param int $taskId (wird in der Praxis meist 0 sein → alle Tasks zu Todo)
 	 * @param int $todoId
+	 *
 	 * @return array|null
 	 */
-	function getSpecificTaskOfTodoById(int $taskId, int $todoId): array|null {
-		global $dbPDO;
+	function getSpecificTaskOfTodoById(int $taskId, int $todoId): array|null
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) {
+			logDebug("getSpecificTaskOfTodoById", "getPDO() fehlgeschlagen");
+			return null;
+		}
 
 		try {
 			$sql = "
@@ -359,8 +382,13 @@
 	 *
 	 * @return array|null
 	 */
-	function getFocusLimits(): array|null {
-		global $dbPDO;
+	function getFocusLimits(): array|null
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) {
+			logDebug("getFocusLimits", "getPDO() fehlgeschlagen");
+			return null;
+		}
 
 		try {
 			$stmt = $dbPDO->query("SELECT * FROM fokustable");
@@ -388,12 +416,19 @@
 
 	/**
 	 * Aktualisiert die Fokus-Limits aus XML-Daten
+	 * returns null if internal error occurs
 	 *
 	 * @param string $inputXML
-	 * @return bool
+	 *
+	 * @return bool|null
 	 */
-	function updateFocusLimits(string $inputXML): bool {
-		global $dbPDO;
+	function updateFocusLimits(string $inputXML): ?bool
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) {
+			logDebug("updateFocusLimits", "getPDO() fehlgeschlagen");
+			return null;
+		}
 
 		try {
 			$xml = simplexml_load_string($inputXML);
@@ -430,9 +465,11 @@
 	 * Gibt die Fokus-Limits im XML-Format zurück
 	 *
 	 * @param array $focus
+	 *
 	 * @return string
 	 */
-	function xmlFormatterFocus(array $focus): string {
+	function xmlFormatterFocus(array $focus): string
+	{
 		$xml = new SimpleXMLElement('<focus/>');
 		$todo = $xml->addChild('todo');
 		$todo->addChild('anzahl', $focus['todo']);
@@ -454,14 +491,16 @@
 	 * Konvertiert einen XML-Tag abhängig vom Feldnamen in den passenden Datentyp
 	 *
 	 * @param string $key
-	 * @param mixed $value
+	 * @param mixed  $value
+	 *
 	 * @return int|string|null
 	 */
-	function tagTypeConvert(string $key, mixed $value): int|string|null {
-		return match($key) {
+	function tagTypeConvert(string $key, mixed $value): int|string|null
+	{
+		return match ($key) {
 			'status' => (int)$value,
 			'title', 'description', 'lastUpdate' => (string)$value,
-			default => null // bei unbekanntem Tag abbrechen
+			default => null
 		};
 	}
 
@@ -470,9 +509,11 @@
 	 * Wandelt ein SimpleXMLElement in ein assoziatives Array um
 	 *
 	 * @param SimpleXMLElement $xml
+	 *
 	 * @return array
 	 */
-	function xmlToArray(SimpleXMLElement $xml): array {
+	function xmlToArray(SimpleXMLElement $xml): array
+	{
 		return json_decode(json_encode($xml), true);
 	}
 
@@ -481,21 +522,30 @@
 	 * Validiert einen Statuswert (1–5). Gibt 2 zurück, wenn ungültig.
 	 *
 	 * @param int $statusInput
+	 *
 	 * @return int
 	 */
-	function statusCheck(int $statusInput): int {
+	function statusCheck(int $statusInput): int
+	{
 		return ($statusInput >= 1 && $statusInput <= 5) ? $statusInput : 2;
 	}
 
 
 	/**
 	 * Prüft, ob die angegebene Todo-ID existiert
+	 * returns null if internal error occurs
 	 *
 	 * @param int $id
-	 * @return bool
+	 *
+	 * @return bool|null
 	 */
-	function checkID(int $id): bool {
-		global $dbPDO;
+	function checkID(int $id): ?bool
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) {
+			logDebug("createTodo", "getPDO() fehlgeschlagen");
+			return null;
+		}
 
 		try {
 			$stmt = $dbPDO->prepare("SELECT id FROM todotable WHERE id = :id LIMIT 1");
@@ -512,32 +562,40 @@
 	 * Extrahiert und wandelt ein XML-Objekt für eine Entität (z. B. "todo" oder "task")
 	 *
 	 * @param string $entityName - Name des XML-Knotens (z. B. "todo")
-	 * @param array $xmlData - Das XML als Array
+	 * @param array  $xmlData    - Das XML als Array
+	 *
 	 * @return array|null - Konvertierte Daten oder null bei Fehler
 	 */
-	function convertXmlEntity(string $entityName, array $xmlData): array|null {
-		$node = $xmlData[$entityName] ?? null;
-		if (!$node || !is_array($node)) return null;
+	function convertXmlEntity(string $entityName, array $xmlData): array|null
+	{
+		if (isset($xmlData[$entityName]) && is_array($xmlData[$entityName])) $node = $xmlData[$entityName];
+
+		elseif (array_key_exists('title', $xmlData)) $node = $xmlData;
+
+		else return null;
 
 		$converted = [];
-
 		foreach ($node as $key => $value) {
 			$converted[$key] = tagTypeConvert($key, $value);
+
 			if ($converted[$key] === null) return null;
 		}
 
 		return empty($converted) ? null : $converted;
 	}
 
+
 	/**
 	 * Wandelt ein Array oder Objekt in XML um (für todo oder task)
 	 *
 	 * @param array|object $data
-	 * @param string $type - "todo" oder "task"
-	 * @param bool $multiple - true für Liste, false für einzelnes Element
+	 * @param string       $type     - "todo" oder "task"
+	 * @param bool         $multiple - true für Liste, false für einzelnes Element
+	 *
 	 * @return string
 	 */
-	function xmlFormatter(array|object $data, string $type = 'todo', bool $multiple = false): string {
+	function xmlFormatter(array|object $data, string $type = 'todo', bool $multiple = false): string
+	{
 		$rootName = $multiple ? $type . 's' : $type;
 		$xml = new SimpleXMLElement("<$rootName/>");
 

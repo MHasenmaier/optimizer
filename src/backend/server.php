@@ -18,17 +18,29 @@
 	const MYSQL_LINKTABLE = 'linktable';
 	const MYSQL_FOKUSTABLE = 'fokustable';
 
-	// Datenbankverbindung aufbauen
-	try {
-		$dsn = "mysql:host=" . MYSQL_HOST . ";port=" . MYSQL_PORT . ";dbname=" . MYSQL_DB;
-		$dbPDO = new PDO($dsn, MYSQL_USERNAME, MYSQL_PASSWORD, [
-			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-		]);
-	} catch (PDOException $e) {
-		statuscode(500, "DB-Verbindung fehlgeschlagen: " . $e->getMessage());
-		exit;
-	}
+
+	/**
+	 * table name           column name     type            comments
+	 * --------------------|---------------|---------------|-----------------
+	 * table 1: todos
+	 *                      id              int             (autoincr.) (primary key)
+	 *                      titel           string
+	 *                      description     string (long)
+	 *                      status          int
+	 *                      lastUpdate      string          (date format)
+	 * table 2: tasks
+	 *                      id              int             (autoincr.) (primary key)
+	 *                      titel           string
+	 *                      description     string (long)
+	 *                      status          int
+	 *                      lastUpdate      string          (date format)
+	 * table 3: link
+	 *                      todoId          int
+	 *                      taskId          int             (primary key)
+	 * table 4: focus
+	 *                      todo_focus      int
+	 *                      task_focus      int
+	 */
 
 
 	//
@@ -42,7 +54,40 @@
 	 *
 	 * @return bool
 	 */
-	function setupDatabase(): bool {
+	function setupDatabase(): bool
+	{
+		try {
+			$dsn = "mysql:host=" . MYSQL_HOST . ";port=" . MYSQL_PORT;
+			$dbRootPDO = new PDO($dsn, MYSQL_USERNAME, MYSQL_PASSWORD, [
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+			]);
+
+
+			$stmt = $dbRootPDO->prepare("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?");
+			$stmt->execute([MYSQL_DB]);
+
+
+			if ($stmt->rowCount() === 0) {
+				$dbRootPDO->exec("CREATE DATABASE `" . MYSQL_DB . "` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+			}
+
+		} catch (PDOException $e) {
+			logDebug("setupDatabase (DB-Erstellung)", $e->getMessage());
+			return false;
+		}
+
+		global $dbPDO;
+		try {
+			$dsn = "mysql:host=" . MYSQL_HOST . ";port=" . MYSQL_PORT . ";dbname=" . MYSQL_DB;
+			$dbPDO = new PDO($dsn, MYSQL_USERNAME, MYSQL_PASSWORD, [
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+			]);
+		} catch (PDOException $e) {
+			logDebug("setupDatabase (DB-Verbindung)", $e->getMessage());
+			return false;
+		}
 		return (
 			createTable(MYSQL_TODOTABLE) &&
 			createTable(MYSQL_TASKTABLE) &&
@@ -56,9 +101,11 @@
 	 * Erstellt die angegebene Tabelle, wenn sie nicht existiert
 	 *
 	 * @param string $tableName
+	 *
 	 * @return bool
 	 */
-	function createTable(string $tableName): bool {
+	function createTable(string $tableName): bool
+	{
 		global $dbPDO;
 
 		try {
@@ -130,13 +177,38 @@
 	//
 
 	/**
+	 * @return PDO|null
+	 */
+	function getPDO(): PDO|null
+	{
+		global $dbPDO;
+		if (isset($dbPDO) && $dbPDO instanceof PDO) return $dbPDO;
+
+		// Notfallverbindung (wenn setupDatabase nicht lief)
+		try {
+			$dsn = "mysql:host=" . MYSQL_HOST . ";port=" . MYSQL_PORT . ";dbname=" . MYSQL_DB;
+			$dbPDO = new PDO($dsn, MYSQL_USERNAME, MYSQL_PASSWORD, [
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+			]);
+			return $dbPDO;
+		} catch (PDOException $e) {
+			logDebug("getPDO fallback", $e->getMessage());
+			return null;
+		}
+	}
+
+
+	/**
 	 * Gibt eine XML-Antwort mit HTTP-Statuscode zurück
 	 *
-	 * @param int $statuscode
+	 * @param int    $statuscode
 	 * @param string $message
+	 *
 	 * @return bool
 	 */
-	function statuscode(int $statuscode, string $message = ''): bool {
+	function statuscode(int $statuscode, string $message = ''): bool
+	{
 		http_response_code($statuscode);
 		$response = new SimpleXMLElement('<response/>');
 		$response->addChild('status', $statuscode);
@@ -152,10 +224,12 @@
 	 * Gibt Debug-Ausgabe in die PHP-Errorlog (nur im Debug-Modus)
 	 *
 	 * @param string $context
-	 * @param mixed $data
+	 * @param mixed  $data
+	 *
 	 * @return void
 	 */
-	function logDebug(string $context, mixed $data): void {
+	function logDebug(string $context, mixed $data): void
+	{
 		if (DEBUG_MODE) {
 			error_log("[$context] " . var_export($data, true));
 		}

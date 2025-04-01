@@ -2,6 +2,7 @@
 	include_once("api.php");
 	include_once("server.php");
 
+
 	function routing(): bool
 	{
 		$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -15,6 +16,7 @@
 
 		$path = trim(substr($requestUri, strlen($basePath)), '/');
 		$segments = explode('/', $path);
+
 		$resource = $segments[0] ?? '';
 		$method = $_SERVER['REQUEST_METHOD'];
 
@@ -26,7 +28,9 @@
 		};
 	}
 
+
 	/** takes care of all GET-requests
+	 *
 	 * @param string $resource
 	 * @param array  $query
 	 *
@@ -35,18 +39,6 @@
 	function handleGET(string $resource, array $query): bool
 	{
 		switch ($resource) {
-			case 'activetodos':
-				$data = getAllActiveTodos();
-				if ($data === null) return statuscode(500);
-				echo xmlFormatter($data, 'todo', true);
-				return statuscode(200);
-
-			case 'inactivetodos':
-				$data = getAllInactiveTodos();
-				if ($data === null) return statuscode(500);
-				echo xmlFormatter($data, 'todo', true);
-				return statuscode(200);
-
 			case 'countaktivetodos':
 				$count = countActiveTodos();
 				if ($count === null) return statuscode(500);
@@ -80,21 +72,23 @@
 				echo xmlFormatterFocus($focus);
 				return statuscode(200);
 
-			case 'setUpDB':
+			case 'setupdb':
 				if (!setupDatabase()) return statuscode(500);
+				echo "DB anlegen?";
 				return statuscode(200);
 
-			case 'active':
+			case 'activetodos':
 				$todos = getTodosByStatusList([1, 5], true); // NOT IN (1,5)
 				if ($todos === null) return statuscode(500);
 				echo xmlFormatter($todos, 'todo', true);
 				return statuscode(200);
 
-			case 'inactive':
+			case 'inactivetodos':
 				$todos = getTodosByStatusList([1, 5]); // IN (1,5)
 				if ($todos === null) return statuscode(500);
 				echo xmlFormatter($todos, 'todo', true);
 				return statuscode(200);
+
 
 			default:
 				return statuscode(404, "Ressource nicht gefunden");
@@ -110,6 +104,8 @@
 	function handlePOST(string $resource): bool
 	{
 		$body = file_get_contents('php://input');
+		header('Content-Type: text/plain');
+
 		if (empty($body)) return statuscode(400, "Leerer Request-Body");
 
 		switch ($resource) {
@@ -137,6 +133,7 @@
 	}
 
 	/** takes care of all PUT-requests
+	 *
 	 * @param string $resource
 	 * @param array  $query
 	 *
