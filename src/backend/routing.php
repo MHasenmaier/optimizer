@@ -61,8 +61,10 @@
 
 			case 'tasks':
 				if (!isset($query['todoid'])) return statuscode(400, "todoid fehlt");
-				$tasks = getSpecificTaskOfTodoById(0, (int)$query['todoid']);
+
+				$tasks = getSpecificTasksOfTodoById(0, (int)$query['todoid']);
 				if ($tasks === null) return statuscode(404);
+
 				echo xmlFormatter($tasks, 'task', true);
 				return statuscode(200);
 
@@ -89,6 +91,9 @@
 				echo xmlFormatter($todos, 'todo', true);
 				return statuscode(200);
 
+			case 'dbcheck' :
+				if (!checkDatabaseExists()) return statuscode(503, "Datenbankverbindung fehlgeschlagen");
+				return statuscode(200, "Datenbankverbindung erfolgreich");
 
 			default:
 				return statuscode(404, "Ressource nicht gefunden");

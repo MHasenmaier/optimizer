@@ -1,12 +1,11 @@
 import {
-    buildXmlFromObj,
+    buildXmlFromObj, fetchActiveTodosFromDBXml,
     forwardToOverview,
     sendItemToDB,
     urlWebsiteRoot,
     validateBegonnenStatus,
     xmlToArray
 } from "./services.js";
-import {getTodosFromDBAsXml} from "./mockdata.js";
 
 export const bodyTodoPage = document.getElementById("bodyTodoPage");
 
@@ -21,7 +20,11 @@ const btnTodoHideTasks = document.getElementById("buttonHideTasks");
 
 document.addEventListener('DOMContentLoaded', todoPageLoaded);
 
-let todos = xmlToArray(getTodosFromDBAsXml(), "todo");
+let todos = [];
+(async () => {
+    const xml = await fetchActiveTodosFromDBXml();
+    todos = xmlToArray(xml, "todo");
+})();
 
 function todoPageLoaded() {
     if (!bodyTodoPage) return;
@@ -32,9 +35,7 @@ function todoPageLoaded() {
     const params = new URLSearchParams(window.location.search);
     const index = params.get("index");
 
-    if (index !== null) {
-        setTodoData(index);
-    }
+    if (index !== null) setTodoData(index);
 
     // Event-Listener für Buttons und Interaktionen setzen
     btnTodoAddTodo.addEventListener("click", handleTodoSave);
@@ -42,9 +43,8 @@ function todoPageLoaded() {
     btnTodoHideTasks.addEventListener("click", todoDisplayToggleTasks);
 
     const taskParagraph = classContainerHiddenTasksContainedTasks.querySelector("p");
-    if (taskParagraph) {
-        taskParagraph.addEventListener("click", todoOpenTask);
-    }
+
+    if (taskParagraph) taskParagraph.addEventListener("click", todoOpenTask);
 
     statusPopupTodo.addEventListener("change", handleStatusChange);
 }

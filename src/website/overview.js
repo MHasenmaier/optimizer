@@ -1,7 +1,6 @@
 
-import {urlWebsiteRoot, xmlToArray} from "./services.js";
+import {fetchActiveTodosFromDBXml, urlWebsiteRoot, xmlToArray} from "./services.js";
 import {updateDateTime} from "./clock.js";
-import {getTodosFromDBAsXml} from "./mockdata.js";
 
 const bodyOverview = document.getElementById("bodyOverview");
 const classContentOverview = document.querySelector('.contentOverview');
@@ -13,13 +12,13 @@ const headerOverviewArchivButton = document.getElementById('headerOverviewArchiv
 
 document.addEventListener('DOMContentLoaded', overviewPageLoaded);
 
-function overviewPageLoaded() {
+async function overviewPageLoaded() {
     if (!bodyOverview) return;
     console.log("Overview loading. . .");
     updateDateTime();
-    const allTodos = xmlToArray(getTodosFromDBAsXml(), "todo");
-    createTodoOverview(allTodos);
-    console.log("debug mock data: " + JSON.stringify(allTodos));
+    const xml = await fetchActiveTodosFromDBXml();
+    createTodoOverview(xmlToArray(xml, "todo"));
+    console.log("db data: " + JSON.stringify(xml));
 
     classContentOverview.addEventListener('click', overviewTodoClick);
     classContentOverview.addEventListener('change', overviewCheckboxClick);

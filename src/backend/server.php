@@ -172,7 +172,7 @@
 
 	//
 	// ===============================
-	// Helferfunktionen
+	// DB-Support-Funktionen
 	// ===============================
 	//
 
@@ -184,7 +184,6 @@
 		global $dbPDO;
 		if (isset($dbPDO) && $dbPDO instanceof PDO) return $dbPDO;
 
-		// Notfallverbindung (wenn setupDatabase nicht lief)
 		try {
 			$dsn = "mysql:host=" . MYSQL_HOST . ";port=" . MYSQL_PORT . ";dbname=" . MYSQL_DB;
 			$dbPDO = new PDO($dsn, MYSQL_USERNAME, MYSQL_PASSWORD, [
@@ -198,6 +197,19 @@
 		}
 	}
 
+	/** TODO: comment schreiben
+	 * @return bool
+	 */
+	function checkDatabaseExists(): bool {
+		$pdo = getPDO();
+		return $pdo !== null;
+	}
+
+	//
+	// ===============================
+	// Helferfunktionen
+	// ===============================
+	//
 
 	/**
 	 * Gibt eine XML-Antwort mit HTTP-Statuscode zurück

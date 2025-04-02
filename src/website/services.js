@@ -189,6 +189,58 @@ export function validateBegonnenStatus(itemType, selectedStatus) {
 }
 
 /**
+ * call backend for inactive todos
+ * @returns {Promise<string>}
+ */
+export async function fetchInactiveTodosFromDBXml() {
+    try {
+        const response = await fetch(urlToIndex + 'inactivetodos', {
+            method: 'GET',
+            headers: {'Content-Type': 'application/xml'}
+        });
+        return await response.text();
+    } catch (err) {
+        console.error("Fehler beim Laden der inactivetodos:", err);
+        return "<todos></todos>";
+    }
+}
+
+/**
+ * call backend for active todos
+ * @returns {Promise<string>}
+ */
+export async function fetchActiveTodosFromDBXml() {
+    try {
+        const response = await fetch(urlToIndex + 'activetodos', {
+            method: 'GET',
+            headers: {'Content-Type': 'application/xml'}
+        });
+        return await response.text();
+    } catch (err) {
+        console.error("Fehler beim Laden der activetodos:", err);
+        return "<todos></todos>";
+    }
+}
+
+/**
+ * call backend for tasks
+ * @returns {Promise<string>}
+ */
+export async function fetchTasksFromDBXml() {
+    try {
+        const response = await fetch(urlToIndex + 'tasks', {
+            method: 'GET',
+            headers: {'Content-Type': 'application/xml'}
+        });
+        return await response.text();
+    } catch (err) {
+        console.error("Fehler beim Laden der Tasks:", err);
+        return "<tasks></tasks>";
+    }
+}
+
+
+/**
  * call backend for focus information stored in db
  * returns default-mock data if an error occurs
  * @returns {Promise<string>}

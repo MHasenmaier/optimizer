@@ -4,7 +4,6 @@ const bodyLandingPage = document.getElementById("bodyLanding");
 const btnLanding = document.getElementById("buttonLanding");
 const btnLandingImg = document.getElementById("imageLanding");
 
-
 document.addEventListener('DOMContentLoaded', landingPageLoaded);
 
 function landingPageLoaded() {
@@ -14,61 +13,53 @@ function landingPageLoaded() {
     }
 }
 
-
 /**
- * TODO: write comment
+ * Startet die App – prüft, ob eine DB vorhanden ist, erstellt ggf. eine neue
+ * und wechselt zur Overview-Seite.
  * @param event
  */
-function landingStartApp(event) {
+async function landingStartApp(event) {
     console.log("Change page to overview.html", event);
 
-    if (!checkDB()) {
-        console.log("DB wird erstellt...");
-        if (!setupNewDB()) {
+    const dbExists = await checkDB();
+
+    if (!dbExists) {
+        console.log("Keine DB vorhanden… versuche, eine neue anzulegen.");
+        const setupSuccess = await setupNewDB();
+        if (!setupSuccess) {
             console.error("DB konnte nicht erstellt werden!");
             return;
         }
-    }
 
-    if (!checkDBTables()) {
-        console.log("Tabellen werden erstellt...");
-        if (!setupDBTables()) {
-            console.error("DB-Tabellen konnten nicht erstellt werden!");
+        const dbExistsAfterSetup = await checkDB();
+        if (!dbExistsAfterSetup) {
+            console.error("DB-Check nach Setup fehlgeschlagen!");
             return;
         }
     }
-
     location.href = urlWebsiteRoot + "overview.html";
 }
 
-
 /**
- * DB and table status functions
- */
-
-/**
- * checks if a DB exists
- * @returns {boolean}
+ * Prüft, ob eine Datenbank existiert.
+ * @returns {Promise<boolean>}
  */
 async function checkDB() {
-    console.log("Mock: Überprüfung der DB...");
-    return true;    //TODO: MOCK return
+    console.log("Überprüfung der DB. . .");
 
-    //TODO: für produktiv auskommentieren
-    //try {
-    //    // TODO: url korrigieren
-    //    const response = await fetch(urlToIndex + 'dbstatus');
-    //    const status = await response.json();
-    //    return status.dbExists;
-    //} catch (err) {
-    //    console.error("Fehler bei DB-Check:", err);
-    //    return false;
-    //}
+    try {
+        const response = await fetch(urlToIndex + 'dbcheck');
+        if (response.status === 200) console.log("DB existiert. . .");
+        return response.status === 200;
+    } catch (err) {
+        console.error("Fehler bei DB-Check:", err);
+        return false;
+    }
 }
 
 /**
- * set DB up if none is found
- * @returns {true}
+ * Legt eine neue Datenbank an, wenn keine existiert.
+ * @returns {Promise<boolean>}
  */
 async function setupNewDB() {
     console.log("call: landingpage.js/setupNewDB");
@@ -78,19 +69,9 @@ async function setupNewDB() {
             method: 'GET',
             headers: {'Content-Type': 'application/xml'}
         });
-        return true;
+        return response.status === 200;
     } catch (error) {
-        console.error("Fehler beim Laden der Fokus-Daten:", error);
+        console.error("Fehler beim Einrichten der DB:", error);
         return false;
     }
-}
-
-/**
- * TODO:comment schreiben
- * @returns {boolean}
- */
-function checkDBTables() {
-    console.log("Mock: Überprüfung der Tabellen...");
-    const tablesExist = true; // TODO: Später durch echte DB-Abfrage ersetzen
-    return tablesExist;
 }

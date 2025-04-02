@@ -195,7 +195,6 @@
 		}
 	}
 
-
 	//
 	// ===============================
 	// TASK-Funktionen
@@ -209,13 +208,8 @@
 	 *
 	 * @return array|null
 	 */
-	function createTask(string $inputXML): array|null
-	{
-		$dbPDO = getPDO();
-		if (!$dbPDO) {
-			logDebug("createTodo", "getPDO() fehlgeschlagen");
-			return null;
-		}
+	function createTask(string $inputXML): array|null {
+		global $dbPDO;
 
 		$xml = simplexml_load_string($inputXML);
 		if (!$xml) return null;
@@ -239,8 +233,13 @@
 				'lastUpdate' => $task['lastUpdate']
 			]);
 
-			return $dbPDO->query("SELECT * FROM tasktable ORDER BY id DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+			// Link erstellen, wenn todoId vorhanden
+			if (isset($task['todoId'])) {
+				$newTaskId = $dbPDO->lastInsertId();
+				createLinkEntry((int)$newTaskId, (int)$task['todoId']);
+			}
 
+			return $dbPDO->query("SELECT * FROM tasktable ORDER BY id DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 		} catch (PDOException $e) {
 			logDebug("createTask", $e->getMessage());
 			return null;
@@ -332,7 +331,7 @@
 	 *
 	 * @return array|null
 	 */
-	function getSpecificTaskOfTodoById(int $taskId, int $todoId): array|null
+	function getSpecificTasksOfTodoById(int $taskId, int $todoId): array|null
 	{
 		$dbPDO = getPDO();
 		if (!$dbPDO) {
@@ -480,7 +479,6 @@
 		return $xml->asXML();
 	}
 
-
 	//
 	// ===============================
 	// Utility-Funktionen
@@ -495,15 +493,32 @@
 	 *
 	 * @return int|string|null
 	 */
-	function tagTypeConvert(string $key, mixed $value): int|string|null
-	{
-		return match ($key) {
-			'status' => (int)$value,
+	function tagTypeConvert(string $key, mixed $value): int|string|null {
+		return match($key) {
+			'status', 'todoId' => (int)$value,
 			'title', 'description', 'lastUpdate' => (string)$value,
 			default => null
 		};
 	}
 
+	/**
+	 * @param int $taskId
+	 * @param int $todoId
+	 *
+	 * @return bool
+	 */
+	function createLinkEntry(int $taskId, int $todoId): bool {
+		global $dbPDO;
+
+		try {
+			$stmt = $dbPDO->prepare("INSERT INTO linktable (task_id, todo_id) VALUES (:taskId, :todoId)");
+			$stmt->execute(['taskId' => $taskId, 'todoId' => $todoId]);
+			return true;
+		} catch (PDOException $e) {
+			logDebug("createLinkEntry", $e->getMessage());
+			return false;
+		}
+	}
 
 	/**
 	 * Wandelt ein SimpleXMLElement in ein assoziatives Array um
@@ -517,7 +532,6 @@
 		return json_decode(json_encode($xml), true);
 	}
 
-
 	/**
 	 * Validiert einen Statuswert (1–5). Gibt 2 zurück, wenn ungültig.
 	 *
@@ -529,7 +543,6 @@
 	{
 		return ($statusInput >= 1 && $statusInput <= 5) ? $statusInput : 2;
 	}
-
 
 	/**
 	 * Prüft, ob die angegebene Todo-ID existiert
@@ -557,7 +570,6 @@
 		}
 	}
 
-
 	/**
 	 * Extrahiert und wandelt ein XML-Objekt für eine Entität (z. B. "todo" oder "task")
 	 *
@@ -583,7 +595,6 @@
 
 		return empty($converted) ? null : $converted;
 	}
-
 
 	/**
 	 * Wandelt ein Array oder Objekt in XML um (für todo oder task)
