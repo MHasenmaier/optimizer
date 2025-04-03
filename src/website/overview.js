@@ -1,5 +1,5 @@
 
-import {fetchActiveTodosFromDBXml, urlWebsiteRoot, xmlToArray} from "./services.js";
+import {fetchActiveTodosFromDBXml, urlToIndex, urlWebsiteRoot, xmlToArray} from "./services.js";
 import {updateDateTime} from "./clock.js";
 
 const bodyOverview = document.getElementById("bodyOverview");
@@ -17,8 +17,8 @@ async function overviewPageLoaded() {
     console.log("Overview loading. . .");
     updateDateTime();
     const xml = await fetchActiveTodosFromDBXml();
-    createTodoOverview(xmlToArray(xml, "todo"));
-    console.log("db data: " + JSON.stringify(xml));
+    await createTodoOverview(xmlToArray(xml, "todo"));
+    console.log("db data: >>>   " + JSON.stringify(xml));
 
     classContentOverview.addEventListener('click', overviewTodoClick);
     classContentOverview.addEventListener('change', overviewCheckboxClick);
@@ -45,15 +45,18 @@ function overviewAddNewTodo() {
  * @param todoData
  * return true if successful
  */
-function createTodoOverview(todoData) {
+async function createTodoOverview(todoData) {
     classContentOverview.innerHTML = "";
-    todoData.forEach((todo, arrayIndex) => {
+
+    for (let i = 0; i < todoData.length; i++) {
+        const todo = todoData[i];
+
         const div = document.createElement("div");
         const label = document.createElement("label");
         const input = document.createElement("input");
         input.setAttribute("type", "checkbox");
         const paragraph = document.createElement("p");
-        paragraph.setAttribute("data-index", arrayIndex);
+        paragraph.setAttribute("data-id", todo.id);
         const button = document.createElement("button");
 
         classContentOverview.appendChild(div);
@@ -62,13 +65,21 @@ function createTodoOverview(todoData) {
         div.appendChild(button);
         label.appendChild(input);
 
-        if (todo.status === 5) {
-            input.checked = true;
-        }
+        if (todo.status === 5) input.checked = true;
 
         paragraph.innerText = todo.title;
-        button.innerText = todo.task.length.toString();
-    });
+
+        const taskCount = await countTasksForTodo(todo.id);
+
+        if (taskCount === 0) {
+            button.innerText = "ø";
+            button.style.opacity = 0.5;
+            button.title = "ø = keine Tasks";
+        } else {
+            button.innerText = taskCount.toString();
+        }
+
+    }
 
     return true;
 }
@@ -99,8 +110,8 @@ function overviewCheckboxClick(event) {
  */
 function overviewTodoClick(event) {
     if (event.target.tagName === 'P') {
-        const index = event.target.getAttribute("data-index");
-        location.href = `todo.html?index=${index}`;
+        const todoId = event.target.getAttribute("data-id");
+        location.href = `todo.html?id=${todoId}`;
     }
 }
 
@@ -133,4 +144,21 @@ function overviewLinkOpenFocus() {
     console.log("Focus mode will be opened ... soon");
 
     location.href = urlWebsiteRoot + "focus.html";
+}
+
+/**
+ * für jedes Todo Tasks laden
+ * @param todoId
+ * @returns {Promise<number>}
+ */
+async function countTasksForTodo(todoId) {
+    try {
+        const response = await fetch(urlToIndex + `todotasks?todoid=${todoId}`);
+        const xml = await response.text();
+        const tasks = xmlToArray(xml, "task");
+        return tasks.length;
+    } catch (err) {
+        console.error(`Fehler beim Laden der Tasks für Todo ${todoId}:`, err);
+        return 0;
+    }
 }

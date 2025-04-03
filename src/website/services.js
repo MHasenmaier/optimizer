@@ -1,5 +1,3 @@
-import {getTasksFromDBAsXml, getTodosFromDBAsXml} from "./mockdata.js";
-
 export const urlToIndex = "http://localhost:8080/optimizer/src/backend/index.php/";
 export const urlWebsiteRoot = "http://localhost:8080/optimizer/src/website/";
 
@@ -24,25 +22,24 @@ export function xmlToArray(xml, type) {
             const title = t.getElementsByTagName("title")[0].textContent;
             const description = t.getElementsByTagName("description")[0].textContent;
             const status = parseInt(t.getElementsByTagName("status")[0].textContent, 10);
-
             const tasks = Array.from(t.getElementsByTagName("task")).map(taskNode => parseInt(taskNode.textContent, 10));
 
-            result.push({ id, title, description, status, task: tasks });
+            result.push({id, title, description, status, task: tasks});
         }
         return result;
-    }
 
-    else if (type === "task") {
+    } else if (type === "task") {
         const tasks = xmlDoc.getElementsByTagName("task");
         const result = [];
         for (let i = 0; i < tasks.length; i++) {
             const ta = tasks[i];
+
             const id = parseInt(ta.getElementsByTagName("id")[0].textContent, 10);
             const title = ta.getElementsByTagName("title")[0].textContent;
             const description = ta.getElementsByTagName("description")[0].textContent;
             const status = parseInt(ta.getElementsByTagName("status")[0].textContent, 10);
-            // Optional: das zugehörige todo kann man hier auslesen
-            result.push({ id, title, description, status });
+
+            result.push({id, title, description, status});
         }
         return result;
     }
@@ -54,8 +51,6 @@ export function xmlToArray(xml, type) {
  * TODO:comment schreiben
  */
 export function forwardToOverview() {
-    console.log("Open link to overview.html");
-
     location.href = urlWebsiteRoot + "overview.html";
 }
 
@@ -64,7 +59,7 @@ export function forwardToOverview() {
  * @description Builds an XML string for a todo or a task object.
  * @param {string} type - "todo" or "task"
  * @param {Object} item - The item data
- * @returns {boolean, string}
+ * @returns {string}
  */
 export function buildXmlFromObj(item, type) {
     if (type === "todo") {
@@ -78,8 +73,7 @@ export function buildXmlFromObj(item, type) {
           ${item.task.map(t => `<task>${t}</task>`).join("\n")}
         </tasks>
       </todo>`;
-    }
-    else if (type === "task") {
+    } else if (type === "task") {
         return `
       <task>
         <id>${item.id}</id>
@@ -89,7 +83,7 @@ export function buildXmlFromObj(item, type) {
       </task>`;
     }
     console.error("services.js/buildXmlFromItem got invalid parameters and occured an error.");
-    return false;
+    return "";
 }
 
 /** TODO: comment schreiben
@@ -98,32 +92,23 @@ export function buildXmlFromObj(item, type) {
  * @param {boolean|string} xmlData - Der XML-String, der das Item beschreibt.
  */
 export async function sendItemToDB(todoOrTask, xmlData) {
-    console.log(`MOCK: Sende ${todoOrTask} als XML:`, xmlData);
-
-    // Extrahiere die ID aus dem XML-String
-    //FIXME: was hat es mit dem "match is not a function" auf sich?
     const idMatch = xmlData.match(/<id>(.*?)<\/id>/);
     const id = idMatch ? parseInt(idMatch[1], 10) : -1;
 
     const method = id === -1 ? 'POST' : 'PUT';
     const url = id === -1 ? (urlToIndex + todoOrTask) : (urlToIndex + `${todoOrTask}?id=${id}`);
 
-    console.log("Task (ID: " + id + ") zur DB gesendet\nMethode: " + method + "\nUrl: " + url);
-
-    // Zukünftiger echter API-Aufruf
-    /*
     try {
-      const response = await fetch(url, {
-        method: method,
-        headers: { 'Content-Type': 'application/xml' },
-        body: xmlData,
-      });
-      const data = await response.text();
-      console.log(`${todoOrTask.slice(0, -1)} erfolgreich gespeichert:`, data);
+        const response = await fetch(url, {
+            method: method,
+            headers: {'Content-Type': 'application/xml'},
+            body: xmlData,
+        });
+        const result = await response.text();
+        console.log(`${todoOrTask.slice(0, -1)} erfolgreich gespeichert:`, result);
     } catch (error) {
-      console.error(`Fehler beim Speichern des ${todoOrTask.slice(0, -1)}:`, error);
+        console.error(`Fehler beim Speichern des ${todoOrTask.slice(0, -1)}:`, error);
     }
-    */
 }
 
 /**
@@ -143,25 +128,27 @@ export function getFocusLimits(todoOrTask) {
     return parseInt(anzahlElement.textContent.trim(), 10);
 }
 
-/** TODO: comment schreiben
- * Zählt, wie viele Items des Typs (todo/task) den Status "begonnen" (4) haben.
- * Hier wird angenommen, dass die Daten via xmlToArray aus den Mock-Daten geholt werden.
+/**
+ * catch the amount of active todos
+ * @returns {Promise<number>}
  */
-function countBegonnenItems(itemType) {
+export async function countBegonnenItems(itemType) {
     let count = 0;
+
     if (itemType === "todo") {
-        const allTodos = xmlToArray(getTodosFromDBAsXml(), "todo");
+        const allTodos = xmlToArray(await fetchActiveTodosFromDBXml(), "todo");
         allTodos.forEach(todo => {
             if (todo.status === 4) count++;
         });
-        console.log("Todos auf 'Begonnen: " + count);
+        console.log("Todos auf 'Begonnen': " + count);
     } else if (itemType === "task") {
-        const allTasks = xmlToArray(getTasksFromDBAsXml(), "task");
+        const allTasks = xmlToArray(await fetchTasksFromDBXml(), "task");
         allTasks.forEach(task => {
             if (task.status === 4) count++;
         });
-        console.log("Tasks auf 'Begonnen: " + count);
+        console.log("Tasks auf 'Begonnen': " + count);
     }
+
     return count;
 }
 
@@ -170,21 +157,20 @@ function countBegonnenItems(itemType) {
  * Gibt true zurück, wenn das Limit noch nicht erreicht wurde, andernfalls false.
  * Zusätzlich wird ein negatives Feedback (über console.warn) ausgegeben.
  *
- * @param {string} itemType - "todo" oder "task"
  * @param {string} selectedStatus - Der ausgewählte Status (als String), z. B. "4"
  * @returns {boolean} true, wenn der Status gesetzt werden darf, sonst false.
  */
-export function validateBegonnenStatus(itemType, selectedStatus) {
+export function validateBegonnenStatus(selectedStatus) {
     if (selectedStatus !== "4") return true;
 
-    const limits = getFocusLimits(itemType);
-    const currentCount = countBegonnenItems(itemType);
+    const limits = getFocusLimits("todos");
+    const currentCount = countBegonnenTodos();
 
     if (currentCount >= limits) {
-        console.warn(`Negatives Feedback: Die maximale Anzahl an ${itemType}s mit "Begonnen" (${limits}) wurde überschritten.`);
+        console.warn(`Negatives Feedback: Die maximale Anzahl an todos mit "Begonnen" (${limits}) wurde überschritten.`);
         return false;
     }
-    console.log("Status (Value: " + selectedStatus + ") darf gesetzt werden: Aktuelles Limit: " + limits + " des Items: " + itemType + "\nDerzeitige Items auf 'Begonnen': " + currentCount);
+    console.log("Status (Value: " + selectedStatus + ") darf gesetzt werden: Aktuelles Limit: " + limits + " des Items: todo\nDerzeitige Items auf 'Begonnen': " + currentCount);
     return true;
 }
 
@@ -222,20 +208,27 @@ export async function fetchActiveTodosFromDBXml() {
     }
 }
 
-/**
- * call backend for tasks
- * @returns {Promise<string>}
+/** TODO: benötigt wird nur die anzahl der tasks auf "begonnen" = === 4
+ * Ruft vom Backend die Anzahl aller Tasks mit Status "Begonnen" (4) ab.
+ * @returns {Promise<number>} - Anzahl begonnener Tasks oder -1 bei Fehler
  */
-export async function fetchTasksFromDBXml() {
+export async function countBegonnenTodos() {
     try {
-        const response = await fetch(urlToIndex + 'tasks', {
+        const response = await fetch(urlToIndex + 'tasksbegonnen', {
             method: 'GET',
-            headers: {'Content-Type': 'application/xml'}
+            headers: {'Content-Type': 'text/plain'}
         });
-        return await response.text();
+
+        if (!response.ok) {
+            console.error("Fehlerhafte Serverantwort:", response.status);
+            return -1;
+        }
+
+        const text = await response.text();
+        return parseInt(text.trim(), 10);
     } catch (err) {
-        console.error("Fehler beim Laden der Tasks:", err);
-        return "<tasks></tasks>";
+        console.error("Fehler beim Abrufen der begonnenen Tasks:", err);
+        return -1;
     }
 }
 
@@ -264,5 +257,64 @@ export async function getFocusDataFromDBXML() {
                 <anzahl>3</anzahl>
             </task>
         </focus>`;
+    }
+}
+
+/**
+ * Holt ein einzelnes Todo anhand seiner ID vom Server
+ * @param {string} todoId
+ * @returns {Promise<Object|null>}
+ */
+export async function loadTodoById(todoId) {
+    try {
+        const response = await fetch(`${urlToIndex}todo?id=${todoId}`, {
+            method: 'GET',
+            headers: {'Content-Type': 'application/xml'}
+        });
+        const xml = await response.text();
+        const todoArray = xmlToArray(xml, "todo");
+        return todoArray[0] || null;
+    } catch (err) {
+        console.error("Fehler beim Laden des Todos:", err);
+        return null;
+    }
+}
+
+/**
+ * Holt alle Tasks zu einem Todo anhand der Todo-ID
+ * @param {string} todoId
+ * @returns {Promise<Array>}
+ */
+export async function loadTasksByTodoId(todoId) {
+    try {
+        const response = await fetch(`${urlToIndex}todotasks?todoid=${todoId}`, {
+            method: 'GET',
+            headers: {'Content-Type': 'application/xml'}
+        });
+        const xml = await response.text();
+        return xmlToArray(xml, "task");
+    } catch (err) {
+        console.error("services.js/loadTasksByTodoId: Fehler beim Laden des Tasks:", err);
+        return [];
+    }
+}
+
+/**
+ * Lädt einen Task anhand seiner ID aus der DB
+ * @param {string} taskId
+ * @returns {Promise<Object|null>}
+ */
+export async function loadTaskById(taskId) {
+    try {
+        const response = await fetch(`${urlToIndex}task?id=${taskId}`, {
+            method: 'GET',
+            headers: {'Content-Type': 'application/xml'}
+        });
+        const xml = await response.text();
+        const taskArray = xmlToArray(xml, "task");
+        return taskArray[0] || null;
+    } catch (err) {
+        console.error("services.js/loadTaskById: Fehler beim Laden des Tasks:", err);
+        return null;
     }
 }

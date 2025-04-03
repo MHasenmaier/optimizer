@@ -1,112 +1,110 @@
 import {
-    buildXmlFromObj, fetchActiveTodosFromDBXml,
-    forwardToOverview,
+    buildXmlFromObj,
+    forwardToOverview, loadTasksByTodoId, loadTodoById,
     sendItemToDB,
-    urlWebsiteRoot,
     validateBegonnenStatus,
-    xmlToArray
 } from "./services.js";
 
-export const bodyTodoPage = document.getElementById("bodyTodoPage");
+document.addEventListener("DOMContentLoaded", async () => {
+    await todoPageLoaded();
+});
 
-const classContainerHiddenTasksContainedTasks = document.querySelector(".containerHiddenTasksContainedTasks");
-const classContainerHiddenTasks = document.querySelector(".containerHiddenTasks");
-export const statusPopupTodo = document.getElementById("statusPopupTodo");
-const todoTitleInput = document.getElementById("todoTitleInput");
-const todoDescriptionTextarea = document.getElementById("todoDescriptionTextarea");
-const btnTodoAddTodo = document.getElementById("buttonAddTodo");
-const btnTodoShowTasks = document.getElementById("buttonShowTasks");
-const btnTodoHideTasks = document.getElementById("buttonHideTasks");
+function initDomReferences() {
+    return {
+        body: document.getElementById("bodyTodoPage"),
+        titleInput: document.getElementById("todoTitleInput"),
+        descriptionTextarea: document.getElementById("todoDescriptionTextarea"),
+        statusSelect: document.getElementById("statusPopupTodo"),
+        addButton: document.getElementById("buttonAddTodo"),
+        showTasksButton: document.getElementById("buttonShowTasks"),
+        hideTasksButton: document.getElementById("buttonHideTasks"),
+        tasksContainer: document.querySelector(".containerHiddenTasksContainedTasks"),
+        tasksWrapper: document.querySelector(".containerHiddenTasks")
+    };
+}
 
-document.addEventListener('DOMContentLoaded', todoPageLoaded);
+/**
+ *
+ * @returns {Promise<void>}
+ */
+async function todoPageLoaded() {
+    const {
+        body,
+        titleInput,
+        descriptionTextarea,
+        statusSelect,
+        addButton,
+        showTasksButton,
+        hideTasksButton,
+        tasksContainer,
+        tasksWrapper
+    } = initDomReferences();
 
-let todos = [];
-(async () => {
-    const xml = await fetchActiveTodosFromDBXml();
-    todos = xmlToArray(xml, "todo");
-})();
+    if (!body) return;
 
-function todoPageLoaded() {
-    if (!bodyTodoPage) return;
 
     console.log("Todo page loading...");
 
-    // Daten aus der URL holen und in die Felder eintragen
     const params = new URLSearchParams(window.location.search);
-    const index = params.get("index");
+    const todoId = params.get("id");
 
-    if (index !== null) setTodoData(index);
+    if (todoId) {
+        const todo = await loadTodoById(todoId);
+        const tasks = await loadTasksByTodoId(todoId);
 
-    // Event-Listener für Buttons und Interaktionen setzen
-    btnTodoAddTodo.addEventListener("click", handleTodoSave);
-    btnTodoShowTasks.addEventListener("click", todoDisplayToggleTasks);
-    btnTodoHideTasks.addEventListener("click", todoDisplayToggleTasks);
+        if (todo) {
+            titleInput.value = todo.title;
+            descriptionTextarea.value = todo.description;
+            statusSelect.value = todo.status;
+        }
 
-    const taskParagraph = classContainerHiddenTasksContainedTasks.querySelector("p");
-
-    if (taskParagraph) taskParagraph.addEventListener("click", todoOpenTask);
-
-    statusPopupTodo.addEventListener("change", handleStatusChange);
-}
-
-/**
- * TODO: comment schreiben
- * @param index
- */
-function setTodoData(index) {
-    const todo = todos[index];
-
-    if (todo) {
-        todoTitleInput.value = todo.title;
-        todoDescriptionTextarea.value = todo.description;
-        statusPopupTodo.value = todo.status;
+        renderTasks(tasks, tasksContainer);
     }
+
+    addButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        handleTodoSave()
+    });
+    showTasksButton.addEventListener("click", () => toggleTaskVisibility(true, tasksWrapper, showTasksButton));
+    hideTasksButton.addEventListener("click", () => toggleTaskVisibility(false, tasksWrapper, showTasksButton));
+    statusSelect.addEventListener("change", handleStatusChange);
 }
 
 /**
- * TODO: comment schreiben
+ * Speichert ein neues oder geändertes Todo
  */
 async function handleTodoSave() {
-    const xmlData = collectDataNewTodo();
-    await forwardToOverview();
-    await sendItemToDB("todo", buildXmlFromObj(xmlData,"todo"));
-}
+    const {
+        titleInput,
+        descriptionTextarea,
+        statusSelect,
+        tasksContainer
+    } = initDomReferences();
 
-/**
- * TODO: comment schreiben
- */
-function handleStatusChange() {
-    console.log("Platzhalter bei status änderung durch this.value: " + this.value);
-    if (validateBegonnenStatus("todo", this.value)) {
-        console.log("Status erlaubt.");
-    } else {
-        console.warn("Status nicht erlaubt. Zu viele todo auf 'Begonnen'");
-    }
-}
+    const params = new URLSearchParams(window.location.search);
+    const todoId = params.get("id");
 
-/**
- * TODO: comment schreiben
- * collects data from the textarea, input, dropdown and task, returns obj {}
- * @returns {{id: number, title: *, description: *, status, task: *[]}}
- */
-function collectDataNewTodo() {
-    const paragraphs = classContainerHiddenTasksContainedTasks.querySelectorAll("p");
-    const dataIndices = [];
+    const paragraphs = tasksContainer.querySelectorAll("p");
+    const taskIds = Array.from(paragraphs).map(p => parseInt(p.getAttribute("data-index"), 10));
 
-    paragraphs.forEach(p => {
-        const dataIndex = p.getAttribute("data-index");
-        if (dataIndex) {
-            dataIndices.push(parseInt(dataIndex, 10));
-        }
-    });
-
-    return {
-        id: -1,
-        title: todoTitleInput.value,
-        description: todoDescriptionTextarea.value,
-        status: statusPopupTodo.options[statusPopupTodo.selectedIndex].value,
-        task: dataIndices
+    const todoData = {
+        id: todoId ? parseInt(todoId, 10) : -1,
+        title: titleInput.value,
+        description: descriptionTextarea.value,
+        status: statusSelect.value,
+        task: taskIds
     };
+
+    await sendItemToDB("todo", buildXmlFromObj(todoData, "todo"));
+    await forwardToOverview();
+}
+
+
+/**
+ * TODO: comment schreiben
+ */
+function handleStatusChange(event) {
+    if (!validateBegonnenStatus(event.target.value)) console.warn("Status 'Begonnen' überschreitet das Limit.");
 }
 
 /**
@@ -116,24 +114,36 @@ function collectDataNewTodo() {
 function todoOpenTask(event) {
     if (event.target.tagName === 'P') {
         const taskId = event.target.getAttribute("data-index");
-        if (taskId) {
-            location.href = `task.html?task=${taskId}`;
-        }
+        if (taskId) location.href = `task.html?task=${taskId}`;
     }
 }
 
 /**
- * TODO: comment schreiben
+ * Sichtbarkeit der Taskliste toggeln
  */
-function todoDisplayToggleTasks() {
-    if (classContainerHiddenTasks.classList.contains('containerHiddenTasksHide')) {
-        console.log("show tasks");
-        classContainerHiddenTasks.classList.replace('containerHiddenTasksHide', 'containerHiddenTasksShow');
-        btnTodoShowTasks.classList.replace('containerButtonShowTasksShow', 'containerButtonShowTasksHide');
+function toggleTaskVisibility(show, wrapper, showButton) {
+    if (show) {
+        wrapper.classList.replace("containerHiddenTasksHide", "containerHiddenTasksShow");
+        showButton.classList.replace("containerButtonShowTasksShow", "containerButtonShowTasksHide");
     } else {
-        console.log("hide tasks");
-        classContainerHiddenTasks.classList.replace('containerHiddenTasksShow', 'containerHiddenTasksHide');
-        btnTodoShowTasks.classList.replace('containerButtonShowTasksHide', 'containerButtonShowTasksShow');
+        wrapper.classList.replace("containerHiddenTasksShow", "containerHiddenTasksHide");
+        showButton.classList.replace("containerButtonShowTasksHide", "containerButtonShowTasksShow");
     }
 }
 
+/**
+ * Zeigt eine Liste von Tasks im HTML an
+ * @param {Array} tasks
+ * @param container
+ */
+function renderTasks(tasks, container) {
+    container.innerHTML = "";
+
+    tasks.forEach(task => {
+        const p = document.createElement("p");
+        p.setAttribute("data-index", task.id);
+        p.innerText = task.title;
+        p.addEventListener("click", todoOpenTask);
+        container.appendChild(p);
+    });
+}

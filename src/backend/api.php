@@ -208,8 +208,13 @@
 	 *
 	 * @return array|null
 	 */
-	function createTask(string $inputXML): array|null {
-		global $dbPDO;
+	function createTask(string $inputXML): array|null
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) {
+			logDebug("createTask", "getPDO() fehlgeschlagen");
+			return null;
+		}
 
 		$xml = simplexml_load_string($inputXML);
 		if (!$xml) return null;
@@ -233,8 +238,7 @@
 				'lastUpdate' => $task['lastUpdate']
 			]);
 
-			// Link erstellen, wenn todoId vorhanden
-			if (isset($task['todoId'])) {
+			if (isset($task['todoId']) && is_numeric($task['todoId'])) {
 				$newTaskId = $dbPDO->lastInsertId();
 				createLinkEntry((int)$newTaskId, (int)$task['todoId']);
 			}
@@ -262,14 +266,23 @@
 		}
 
 		try {
-			$stmt = $dbPDO->prepare("SELECT * FROM tasktable WHERE id = :id");
+			$sql = "
+            SELECT t.*, l.todo_id 
+            FROM tasktable t
+            JOIN linktable l ON t.id = l.task_id
+            WHERE t.id = :id
+        ";
+
+			$stmt = $dbPDO->prepare($sql);
 			$stmt->execute(['id' => $id]);
+
 			return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 		} catch (PDOException $e) {
 			logDebug("getTaskById($id)", $e->getMessage());
 			return null;
 		}
 	}
+
 
 	/**
 	 * Aktualisiert einen Task anhand seiner ID
@@ -331,13 +344,9 @@
 	 *
 	 * @return array|null
 	 */
-	function getSpecificTasksOfTodoById(int $taskId, int $todoId): array|null
-	{
+	function getTasksOfTodoById(int $todoId, int $taskId = 0): array|null {
 		$dbPDO = getPDO();
-		if (!$dbPDO) {
-			logDebug("getSpecificTaskOfTodoById", "getPDO() fehlgeschlagen");
-			return null;
-		}
+		if (!$dbPDO) return null;
 
 		try {
 			$sql = "
@@ -347,7 +356,6 @@
 			WHERE linktable.todo_id = :todoId
 		";
 
-			// optional: Filter für spezifischen Task
 			if ($taskId > 0) {
 				$sql .= " AND tasktable.id = :taskId";
 			}
@@ -364,11 +372,32 @@
 			return $result ?: null;
 
 		} catch (PDOException $e) {
-			logDebug("getSpecificTaskOfTodoById", $e->getMessage());
+			logDebug("getTasksOfTodoById", $e->getMessage());
 			return null;
 		}
 	}
 
+	/**TODO: comment schreiben
+	 * @return string|null
+	 */
+	function getBegonnenTaskCount(): ?string
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) return null;
+
+		try {
+			$sql = "SELECT COUNT(*) FROM task WHERE status = 4";
+			$stmt = $dbPDO->query($sql);
+			$count = $stmt->fetchColumn();
+
+			header("Content-Type: text/plain");
+			return (string)$count;
+		} catch (PDOException $e) {
+			error_log("DB-Fehler in getBegonnenTaskCount: " . $e->getMessage());
+			http_response_code(500);
+			return "-1";
+		}
+	}
 
 	//
 	// ===============================
@@ -493,8 +522,9 @@
 	 *
 	 * @return int|string|null
 	 */
-	function tagTypeConvert(string $key, mixed $value): int|string|null {
-		return match($key) {
+	function tagTypeConvert(string $key, mixed $value): int|string|null
+	{
+		return match ($key) {
 			'status', 'todoId' => (int)$value,
 			'title', 'description', 'lastUpdate' => (string)$value,
 			default => null
@@ -507,8 +537,10 @@
 	 *
 	 * @return bool
 	 */
-	function createLinkEntry(int $taskId, int $todoId): bool {
-		global $dbPDO;
+	function createLinkEntry(int $taskId, int $todoId): bool
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) return false;
 
 		try {
 			$stmt = $dbPDO->prepare("INSERT INTO linktable (task_id, todo_id) VALUES (:taskId, :todoId)");

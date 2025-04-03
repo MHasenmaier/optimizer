@@ -59,14 +59,22 @@
 				echo xmlFormatter($task, 'task');
 				return statuscode(200);
 
-			case 'tasks':
+			case 'todotasks':
 				if (!isset($query['todoid'])) return statuscode(400, "todoid fehlt");
 
-				$tasks = getSpecificTasksOfTodoById(0, (int)$query['todoid']);
-				if ($tasks === null) return statuscode(404);
+				$todoId = $query['todoid'];
+
+				$tasks = getTasksOfTodoById((int)$todoId);
+				if ($tasks === null) return statuscode(404, "Tasks zu diesem Todo nicht gefunden");
 
 				echo xmlFormatter($tasks, 'task', true);
 				return statuscode(200);
+
+			//TODO: alle tasks für fokus modus/tasks auf status === 4 zählen; return reicht die anzahl der tasks
+
+			case "tasksbegonnen":
+				echo getBegonnenTaskCount();
+				return statuscode(200, getBegonnenTaskCount());
 
 			case 'focus':
 				$focus = getFocusLimits();

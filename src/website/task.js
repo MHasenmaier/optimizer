@@ -1,76 +1,62 @@
-import {buildXmlFromObj, forwardToOverview, sendItemToDB, xmlToArray} from "./services.js";
-import {statusPopupTodo} from "./todo.js";
-import {getTasksFromDBAsXml} from "./mockdata.js";
+import {buildXmlFromObj, forwardToOverview, loadTaskById, sendItemToDB} from "./services.js";
 
-const taskBody = document.getElementById("taskBody");
-const btnAddTask = document.getElementById("buttonAddTask");
-const taskTitleInput = document.getElementById("labelItemTitle");
-const taskDescriptionTextarea = document.getElementById("textareaItemDescription");
-export const statusPopupTask = document.getElementById("statusPopupTask")
+document.addEventListener("DOMContentLoaded", async () => {
+    await taskPageLoaded();
+});
+function initDomReferences() {
+    return {
+        body: document.getElementById("taskBody"),
+        titleInput: document.getElementById("labelItemTitle"),
+        descriptionTextarea: document.getElementById("textareaItemDescription"),
+        statusSelect: document.getElementById("statusPopupTask"),
+        saveButton: document.getElementById("buttonAddTask")
+    };
+}
 
+async function taskPageLoaded() {
+    const { body, titleInput, descriptionTextarea, statusSelect, saveButton } = initDomReferences();
 
-document.addEventListener('DOMContentLoaded', taskPageSetup);
-
-function taskPageSetup() {
-    if (!taskBody) return;
-
+    if (!body) return;
     console.log("Task page loading...");
 
     const params = new URLSearchParams(window.location.search);
     const taskId = params.get("task");
 
-    if (taskId !== null) {
-        setTaskData(taskId);
+    if (taskId !== null && taskId !== "-1") {
+        const task = await loadTaskById(taskId);
+        if (task) {
+            titleInput.value = task.title;
+            descriptionTextarea.value = task.description;
+            statusSelect.value = task.status;
+        } else {
+            console.warn(`Kein Task mit ID ${taskId} gefunden.`);
+        }
     }
 
-    btnAddTask.addEventListener("click", handleTaskSave);
-}
-
-/**TODO: comment schreiben
- * saves or updates a task
- */
-async function handleTaskSave() {
-    const xmlData = saveOrUpdateTask();
-    if (!xmlData) { return false; }
-    await sendItemToDB('tasks', xmlData);
-    forwardToOverview();
-}
-
-/** TODO: comment schreiben
- * Lädt die Task-Daten und füllt die Felder aus.
- */
-function setTaskData(taskId) {
-    const allTasks = xmlToArray(getTasksFromDBAsXml(), "task");
-    const specificTask = allTasks.find(task => String(task.id) === taskId);
-
-    if (specificTask) {
-        console.log("Task contains: " + JSON.stringify(specificTask));
-        taskTitleInput.value = specificTask.title;
-        taskDescriptionTextarea.value = specificTask.description;
-        statusPopupTask.value = specificTask.status;
-    } else {
-        console.error("Task nicht gefunden!");
-    }
+    saveButton.addEventListener("click", handleTaskSave);
 }
 
 /**
- * creates a new task or updates an existing one
- * @returns {*} XML-string
+ * Liest die Felder aus und speichert den Task (neu oder aktualisiert)
  */
-function saveOrUpdateTask() {
+async function handleTaskSave() {
+    const { titleInput, descriptionTextarea, statusSelect } = initDomReferences();
     const params = new URLSearchParams(window.location.search);
     const taskId = params.get("task");
 
     const isNew = taskId === null || taskId === "-1";
 
-    isNew ? console.log("Neuer Task angelegt") : console.log("Task wurde aktualisiert");
-
     const taskData = {
-        id: isNew ? -1 : taskId,
-        title: taskTitleInput.value,
-        description: taskDescriptionTextarea.value,
-        status: statusPopupTask.value
+        id: isNew ? -1 : parseInt(taskId, 10),
+        title: titleInput.value,
+        description: descriptionTextarea.value,
+        status: statusSelect.value
     };
 
-    return buildXmlFromObj(taskData, "task");
+    const xmlData = buildXmlFromObj(taskData, "task");
+    await sendItemToDB("tasks", xmlData);
+
+    //TODO: link zu dem todo, zu welchem dieser task gehört
+    //location.href = urlWebsiteRoot + "todo.html/todo?id=X"
+
 }
