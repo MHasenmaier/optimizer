@@ -114,7 +114,7 @@ function handleStatusChange(event) {
 function todoOpenTask(event) {
     if (event.target.tagName === 'P') {
         const taskId = event.target.getAttribute("data-index");
-        if (taskId) location.href = `task.html?task=${taskId}`;
+        if (taskId) location.href = `task?id=${taskId}`;
     }
 }
 

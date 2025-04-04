@@ -1,4 +1,4 @@
-import {forwardToOverview, getFocusLimits} from "./services.js";
+import {forwardToOverview, getFocusLimits, urlToIndex} from "./services.js";
 
 const bodyFocus = document.getElementById("bodyFocus");
 const slideTodoFocus = document.getElementById("focusTodoCheck");
@@ -26,10 +26,10 @@ function focusPageLoaded() {
  * @function loadFocusSettings
  * @description Loads focus settings from the backend (or mock) and applies them to the form fields.
  */
-function loadFocusSettings() {
+async function loadFocusSettings() {
     try {
-        const todoLimits = getFocusLimits("todo");
-        const taskLimits = getFocusLimits("task");
+        const todoLimits = await getFocusLimits("todo");
+        const taskLimits = await getFocusLimits("task");
         inputFocusMaxTodos.value = todoLimits;
         inputFocusMaxTasks.value = taskLimits;
         console.log("Fokus-Einstellungen geladen:\nTodo: " + todoLimits + "\nTask: " + taskLimits);
@@ -37,7 +37,6 @@ function loadFocusSettings() {
         console.error("Fehler beim Laden der Fokus-Einstellungen:", error);
     }
 }
-
 
 /** show/hide the popup window
  * Change the display property of the popup window if slider is toggled
@@ -90,30 +89,18 @@ async function closePageAndSetFocusEvent() {
  * @param howManyTasks
  */
 export async function saveFocusDataToDB(howManyTodos, howManyTasks) {
-    const xmlData = `
-    <focus>
-        <todo>
-            <anzahl>${howManyTodos}</anzahl>
-        </todo>
-        <task>
-            <anzahl>${howManyTasks}</anzahl>
-        </task>
-    </focus>`;
-    console.log("MOCK: Speichere Fokus-Daten als XML:", xmlData);
-    // Echter API-Aufruf – auskommentiert:
-    /*
+
     try {
         const response = await fetch(urlToIndex + 'focus', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/xml' },
-            body: xmlData,
+            headers: {'Content-Type': 'application/xml'},
+            body: xmlData,  //TODO: old style - get rid of this
         });
         const data = await response.text();
         console.log("Fokus-Daten erfolgreich gespeichert:", data);
     } catch (error) {
         console.error("Fehler beim Speichern der Fokus-Daten:", error);
     }
-    */
 }
 
 /** TODO: comment schreiben

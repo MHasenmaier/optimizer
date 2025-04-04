@@ -283,7 +283,6 @@
 		}
 	}
 
-
 	/**
 	 * Aktualisiert einen Task anhand seiner ID
 	 *
@@ -386,7 +385,7 @@
 		if (!$dbPDO) return null;
 
 		try {
-			$sql = "SELECT COUNT(*) FROM task WHERE status = 4";
+			$sql = "SELECT COUNT(*) FROM tasktable WHERE status = 4";
 			$stmt = $dbPDO->query($sql);
 			$count = $stmt->fetchColumn();
 

@@ -58,5 +58,4 @@ async function handleTaskSave() {
 
     //TODO: link zu dem todo, zu welchem dieser task gehört
     //location.href = urlWebsiteRoot + "todo.html/todo?id=X"
-
 }

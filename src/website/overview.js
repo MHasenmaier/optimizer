@@ -14,11 +14,10 @@ document.addEventListener('DOMContentLoaded', overviewPageLoaded);
 
 async function overviewPageLoaded() {
     if (!bodyOverview) return;
-    console.log("Overview loading. . .");
     updateDateTime();
     const xml = await fetchActiveTodosFromDBXml();
     await createTodoOverview(xmlToArray(xml, "todo"));
-    console.log("db data: >>>   " + JSON.stringify(xml));
+    console.log("overview.html db aufruf: " + JSON.stringify(xml));
 
     classContentOverview.addEventListener('click', overviewTodoClick);
     classContentOverview.addEventListener('change', overviewCheckboxClick);

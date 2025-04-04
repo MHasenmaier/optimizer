@@ -23,8 +23,12 @@ export function xmlToArray(xml, type) {
             const description = t.getElementsByTagName("description")[0].textContent;
             const status = parseInt(t.getElementsByTagName("status")[0].textContent, 10);
             const tasks = Array.from(t.getElementsByTagName("task")).map(taskNode => parseInt(taskNode.textContent, 10));
+            const lastUpdateNode = t.getElementsByTagName("lastUpdate")[0];
+            const lastUpdateStr = lastUpdateNode ? lastUpdateNode.textContent : "";
+            const lastUpdate = formatDate(lastUpdateStr);
 
-            result.push({id, title, description, status, task: tasks});
+
+            result.push({id, title, description, status, lastUpdate, task: tasks});
         }
         return result;
 
@@ -114,12 +118,12 @@ export async function sendItemToDB(todoOrTask, xmlData) {
 /**
  * Returns the number of focus limit of an item ("todo" or "task")
  * @param todoOrTask    "todo" or "task"
- * @returns {number}    integer of the maximum "Begonnen" of an item
+ * @returns {Promise<number>}    integer of the maximum "Begonnen" of an item
  */
-export function getFocusLimits(todoOrTask) {
+export async function getFocusLimits(todoOrTask) {
     const parser = new DOMParser();
 
-    const xmlString = getFocusDataFromDBXML();
+    const xmlString = await getFocusDataFromDBXML();
     const xmlDoc = parser.parseFromString(xmlString, "application/xml");
     console.log("services.js/getFocusLimitObj -> xmlstring = " + JSON.stringify(xmlString))
 
@@ -160,11 +164,11 @@ export async function countBegonnenItems(itemType) {
  * @param {string} selectedStatus - Der ausgewählte Status (als String), z. B. "4"
  * @returns {boolean} true, wenn der Status gesetzt werden darf, sonst false.
  */
-export function validateBegonnenStatus(selectedStatus) {
+export async function validateBegonnenStatus(selectedStatus) {
     if (selectedStatus !== "4") return true;
 
     const limits = getFocusLimits("todos");
-    const currentCount = countBegonnenTodos();
+    const currentCount = await countBegonnenItems("todos");
 
     if (currentCount >= limits) {
         console.warn(`Negatives Feedback: Die maximale Anzahl an todos mit "Begonnen" (${limits}) wurde überschritten.`);
@@ -231,7 +235,6 @@ export async function countBegonnenTodos() {
         return -1;
     }
 }
-
 
 /**
  * call backend for focus information stored in db
@@ -317,4 +320,27 @@ export async function loadTaskById(taskId) {
         console.error("services.js/loadTaskById: Fehler beim Laden des Tasks:", err);
         return null;
     }
+}
+
+/**
+ *
+ * @param dateString
+ * @returns {*|string}
+ */
+export function formatDate(dateString) {
+
+    if (!dateString) return "";
+
+    const dateOnly = dateString.split(" ")[0];
+    const [year, month, day] = dateOnly.split("-");
+
+    if (!year || !month || !day) {
+        // Fallback, falls Format ganz fehlt
+        return dateString;
+    }
+
+    console.log(`formateDate bekam: ${dateString}`);
+    console.log(`formateDate liefert: ` + [year, month, day]);
+
+    return `${day}. ${month}. ${year}`;
 }
