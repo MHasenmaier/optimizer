@@ -84,24 +84,38 @@ async function closePageAndSetFocusEvent() {
 }
 
 /**
- * TODO: comment schreiben
- * @param howManyTodos
- * @param howManyTasks
+ * @function saveFocusDataToDB
+ * @description Sends the focus data (max active todos/tasks) to the backend as XML.
+ * @param {number} howManyTodos - the max limit of todos in status 'Begonnen'
+ * @param {number} howManyTasks - the max limit of tasks in status 'Begonnen'
  */
 export async function saveFocusDataToDB(howManyTodos, howManyTasks) {
+    const xmlFocusData = `
+        <focus>
+            <todo>
+                <anzahl>${howManyTodos}</anzahl>
+            </todo>
+            <task>
+                <anzahl>${howManyTasks}</anzahl>
+            </task>
+        </focus>
+    `;
 
     try {
         const response = await fetch(urlToIndex + 'focus', {
             method: 'POST',
             headers: {'Content-Type': 'application/xml'},
-            body: xmlData,  //TODO: old style - get rid of this
+            body: xmlFocusData,
         });
+
         const data = await response.text();
         console.log("Fokus-Daten erfolgreich gespeichert:", data);
+
     } catch (error) {
         console.error("Fehler beim Speichern der Fokus-Daten:", error);
     }
 }
+
 
 /** TODO: comment schreiben
  * Liest die aktuellen Fokus-Werte aus den Eingabefeldern,
@@ -109,7 +123,6 @@ export async function saveFocusDataToDB(howManyTodos, howManyTasks) {
  * wenn die Daten erfolgreich übertragen wurden, andernfalls false.
  */
 async function setFocus() {
-    // Lese die aktuellen Werte aus den Input-Feldern und speichere sie in einem Objekt
     const focusLimits = {
         todos: inputFocusMaxTodos.value,
         tasks: inputFocusMaxTasks.value

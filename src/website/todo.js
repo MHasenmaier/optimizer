@@ -87,6 +87,15 @@ async function handleTodoSave() {
     const paragraphs = tasksContainer.querySelectorAll("p");
     const taskIds = Array.from(paragraphs).map(p => parseInt(p.getAttribute("data-index"), 10));
 
+    const isValid = await validateBegonnenStatus("todo", statusSelect.value);
+    let saveStatusSelect = statusSelect.style.border;
+    if (!isValid) {
+        statusSelect.style.border = "2px solid red";
+        statusSelect.focus();
+        return;
+    }
+    statusSelect.style.border = saveStatusSelect;
+
     const todoData = {
         id: todoId ? parseInt(todoId, 10) : -1,
         title: titleInput.value,
@@ -95,16 +104,18 @@ async function handleTodoSave() {
         task: taskIds
     };
 
+    const xml = buildXmlFromObj(todoData, "todo");
+    console.log("[DEBUG] XML zum Speichern:", xml);
+
     await sendItemToDB("todo", buildXmlFromObj(todoData, "todo"));
     await forwardToOverview();
 }
-
 
 /**
  * TODO: comment schreiben
  */
 function handleStatusChange(event) {
-    if (!validateBegonnenStatus(event.target.value)) console.warn("Status 'Begonnen' überschreitet das Limit.");
+    if (!validateBegonnenStatus("todo", event.target.value)) console.warn("Status 'Begonnen' überschreitet das Limit.");
 }
 
 /**
@@ -114,7 +125,7 @@ function handleStatusChange(event) {
 function todoOpenTask(event) {
     if (event.target.tagName === 'P') {
         const taskId = event.target.getAttribute("data-index");
-        if (taskId) location.href = `task?id=${taskId}`;
+        if (taskId) location.href = `task.html?id=${taskId}`;
     }
 }
 

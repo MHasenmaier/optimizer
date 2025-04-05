@@ -67,15 +67,17 @@ export function forwardToOverview() {
  */
 export function buildXmlFromObj(item, type) {
     if (type === "todo") {
+        const tasksXml = (Array.isArray(item.task) && item.task.length > 0)
+            ? `<tasks>\n${item.task.map(t => `<task>${t}</task>`).join("\n")}\n</tasks>`
+            : '';
+
         return `
       <todo>
         <id>${item.id}</id>
         <title>${item.title}</title>
         <description>${item.description}</description>
         <status>${item.status}</status>
-        <tasks>
-          ${item.task.map(t => `<task>${t}</task>`).join("\n")}
-        </tasks>
+        ${tasksXml}
       </todo>`;
     } else if (type === "task") {
         return `
@@ -90,6 +92,7 @@ export function buildXmlFromObj(item, type) {
     return "";
 }
 
+
 /** TODO: comment schreiben
  * Sendet ein Item (Todo oder Task) als XML an das Backend.
  * @param {string} todoOrTask - Der API-Endpunkt ("todos" oder "tasks").
@@ -102,6 +105,11 @@ export async function sendItemToDB(todoOrTask, xmlData) {
     const method = id === -1 ? 'POST' : 'PUT';
     const url = id === -1 ? (urlToIndex + todoOrTask) : (urlToIndex + `${todoOrTask}?id=${id}`);
 
+    console.log("[DEBUG] sendItemToDB() → method:", method);
+    console.log("[DEBUG] sendItemToDB() → URL:", url);
+    console.log("[DEBUG] sendItemToDB() → XML:", xmlData);
+
+
     try {
         const response = await fetch(url, {
             method: method,
@@ -109,9 +117,9 @@ export async function sendItemToDB(todoOrTask, xmlData) {
             body: xmlData,
         });
         const result = await response.text();
-        console.log(`${todoOrTask.slice(0, -1)} erfolgreich gespeichert:`, result);
+        console.log(`${todoOrTask} erfolgreich gespeichert:`, result);
     } catch (error) {
-        console.error(`Fehler beim Speichern des ${todoOrTask.slice(0, -1)}:`, error);
+        console.error(`Fehler beim Speichern des ${todoOrTask}:`, error);
     }
 }
 
@@ -161,20 +169,21 @@ export async function countBegonnenItems(itemType) {
  * Gibt true zurück, wenn das Limit noch nicht erreicht wurde, andernfalls false.
  * Zusätzlich wird ein negatives Feedback (über console.warn) ausgegeben.
  *
+ * @param todoOrTask
  * @param {string} selectedStatus - Der ausgewählte Status (als String), z. B. "4"
  * @returns {boolean} true, wenn der Status gesetzt werden darf, sonst false.
  */
-export async function validateBegonnenStatus(selectedStatus) {
+export async function validateBegonnenStatus(todoOrTask, selectedStatus) {
     if (selectedStatus !== "4") return true;
 
-    const limits = getFocusLimits("todos");
-    const currentCount = await countBegonnenItems("todos");
+    const limits = await getFocusLimits(todoOrTask);
+    const currentCount = await countBegonnenItems(todoOrTask);
 
     if (currentCount >= limits) {
-        console.warn(`Negatives Feedback: Die maximale Anzahl an todos mit "Begonnen" (${limits}) wurde überschritten.`);
+        console.warn(`Negatives Feedback: Die maximale Anzahl an ${todoOrTask} mit "Begonnen" (${limits}) wurde überschritten.`);
         return false;
     }
-    console.log("Status (Value: " + selectedStatus + ") darf gesetzt werden: Aktuelles Limit: " + limits + " des Items: todo\nDerzeitige Items auf 'Begonnen': " + currentCount);
+    console.log("Status (Value: " + selectedStatus + ") darf gesetzt werden: Aktuelles Limit: " + limits + ` des Items (${todoOrTask}: Derzeitige Items auf 'Begonnen': ` + currentCount);
     return true;
 }
 
@@ -209,30 +218,6 @@ export async function fetchActiveTodosFromDBXml() {
     } catch (err) {
         console.error("Fehler beim Laden der activetodos:", err);
         return "<todos></todos>";
-    }
-}
-
-/** TODO: benötigt wird nur die anzahl der tasks auf "begonnen" = === 4
- * Ruft vom Backend die Anzahl aller Tasks mit Status "Begonnen" (4) ab.
- * @returns {Promise<number>} - Anzahl begonnener Tasks oder -1 bei Fehler
- */
-export async function countBegonnenTodos() {
-    try {
-        const response = await fetch(urlToIndex + 'tasksbegonnen', {
-            method: 'GET',
-            headers: {'Content-Type': 'text/plain'}
-        });
-
-        if (!response.ok) {
-            console.error("Fehlerhafte Serverantwort:", response.status);
-            return -1;
-        }
-
-        const text = await response.text();
-        return parseInt(text.trim(), 10);
-    } catch (err) {
-        console.error("Fehler beim Abrufen der begonnenen Tasks:", err);
-        return -1;
     }
 }
 

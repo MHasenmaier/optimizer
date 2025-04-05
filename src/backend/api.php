@@ -154,6 +154,7 @@
 					description = :description,
 					lastUpdate = :lastUpdate
 				WHERE id = :id";
+
 			$stmt = $dbPDO->prepare($sql);
 			$stmt->execute([
 				'id' => $id,
@@ -163,12 +164,48 @@
 				'lastUpdate' => $update['lastUpdate']
 			]);
 
+			if (isset($data['task']) && is_array($data['task'])) {
+				updateTasksForTodo($id, $data['task']);
+			}
+
 			return getTodoById($id);
 		} catch (PDOException $e) {
 			logDebug("updateTodo", $e->getMessage());
 			return null;
 		}
 	}
+
+	/**
+	 * Aktualisiert alle Task-Verknüpfungen für ein gegebenes Todo
+	 *
+	 * @param int   $todoId
+	 * @param array $taskIds
+	 *
+	 * @return bool
+	 */
+	function updateTasksForTodo(int $todoId, array $taskIds): bool
+	{
+		$dbPDO = getPDO();
+		if (!$dbPDO) return false;
+
+		try {
+			// Bestehende Verknüpfungen löschen
+			$stmtDelete = $dbPDO->prepare("DELETE FROM linktable WHERE todo_id = :todoId");
+			$stmtDelete->execute(['todoId' => $todoId]);
+
+			// Neue Verknüpfungen einfügen
+			$stmtInsert = $dbPDO->prepare("INSERT INTO linktable (task_id, todo_id) VALUES (:taskId, :todoId)");
+			foreach ($taskIds as $taskId) {
+				$stmtInsert->execute(['taskId' => (int)$taskId, 'todoId' => $todoId]);
+			}
+
+			return true;
+		} catch (PDOException $e) {
+			logDebug("updateTasksForTodo($todoId)", $e->getMessage());
+			return false;
+		}
+	}
+
 
 	/**
 	 * Gibt die Anzahl aller aktiven Todos zurück
@@ -343,7 +380,8 @@
 	 *
 	 * @return array|null
 	 */
-	function getTasksOfTodoById(int $todoId, int $taskId = 0): array|null {
+	function getTasksOfTodoById(int $todoId, int $taskId = 0): array|null
+	{
 		$dbPDO = getPDO();
 		if (!$dbPDO) return null;
 
@@ -602,30 +640,50 @@
 	}
 
 	/**
-	 * Extrahiert und wandelt ein XML-Objekt für eine Entität (z. B. "todo" oder "task")
+	 * Wandelt XML in ein assoziatives Array um – basierend auf Typ 'todo' oder 'task'.
+	 * Unterstützt beim Typ 'todo' auch eine optionale <tasks>-Liste.
 	 *
-	 * @param string $entityName - Name des XML-Knotens (z. B. "todo")
-	 * @param array  $xmlData    - Das XML als Array
+	 * @param string   $type - "todo" oder "task"
+	 * @param stdClass $xml  - XML-Daten (SimpleXMLElement)
 	 *
-	 * @return array|null - Konvertierte Daten oder null bei Fehler
+	 * @return array|null - Parsed Entity oder null bei Fehler
 	 */
-	function convertXmlEntity(string $entityName, array $xmlData): array|null
+	function convertXmlEntity(string $type, $xml): ?array
 	{
-		if (isset($xmlData[$entityName]) && is_array($xmlData[$entityName])) $node = $xmlData[$entityName];
+		if (!$xml) return null;
 
-		elseif (array_key_exists('title', $xmlData)) $node = $xmlData;
+		$result = [];
 
-		else return null;
+		switch ($type) {
+			case 'todo':
+			case 'task':
+				$requiredFields = ['title', 'description', 'status'];
 
-		$converted = [];
-		foreach ($node as $key => $value) {
-			$converted[$key] = tagTypeConvert($key, $value);
+				foreach ($requiredFields as $field) {
+					if (!isset($xml->{$field})) return null;
+					$result[$field] = ($field === 'status') ? (int)$xml->{$field} : (string)$xml->{$field};
+				}
 
-			if ($converted[$key] === null) return null;
+				if (isset($xml->id)) {
+					$result['id'] = (int)$xml->id;
+				}
+
+				if ($type === 'todo' && isset($xml->tasks)) {
+					$result['task'] = [];
+					foreach ($xml->tasks->task as $taskNode) {
+						$result['task'][] = (int)$taskNode;
+					}
+				}
+
+				return $result;
+
+			default:
+				return null;
 		}
-
-		return empty($converted) ? null : $converted;
 	}
+
+
+
 
 	/**
 	 * Wandelt ein Array oder Objekt in XML um (für todo oder task)

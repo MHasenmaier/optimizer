@@ -1,4 +1,4 @@
-import {buildXmlFromObj, forwardToOverview, loadTaskById, sendItemToDB} from "./services.js";
+import {buildXmlFromObj, forwardToOverview, loadTaskById, sendItemToDB, validateBegonnenStatus} from "./services.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     await taskPageLoaded();
@@ -20,7 +20,7 @@ async function taskPageLoaded() {
     console.log("Task page loading...");
 
     const params = new URLSearchParams(window.location.search);
-    const taskId = params.get("task");
+    const taskId = params.get("id");
 
     if (taskId !== null && taskId !== "-1") {
         const task = await loadTaskById(taskId);
@@ -34,28 +34,50 @@ async function taskPageLoaded() {
     }
 
     saveButton.addEventListener("click", handleTaskSave);
+    statusSelect.addEventListener("change", handleStatusChange);
 }
 
 /**
- * Liest die Felder aus und speichert den Task (neu oder aktualisiert)
+ * Liest die Felder aus und speichert den Task (neu oder aktualisiert),
+ * sofern der gesetzte Status erlaubt ist.
  */
 async function handleTaskSave() {
     const { titleInput, descriptionTextarea, statusSelect } = initDomReferences();
     const params = new URLSearchParams(window.location.search);
-    const taskId = params.get("task");
-
+    const taskId = params.get("id");
     const isNew = taskId === null || taskId === "-1";
+
+    const selectedStatus = statusSelect.value;
+
+    const isValid = await validateBegonnenStatus("task", selectedStatus);
+    let saveStatusSelect = statusSelect.style.border;
+    if (!isValid) {
+        statusSelect.style.border = "2px solid red";
+        statusSelect.focus();
+        return;
+    }
+
+    statusSelect.style.border = saveStatusSelect;
 
     const taskData = {
         id: isNew ? -1 : parseInt(taskId, 10),
         title: titleInput.value,
         description: descriptionTextarea.value,
-        status: statusSelect.value
+        status: selectedStatus
     };
 
     const xmlData = buildXmlFromObj(taskData, "task");
-    await sendItemToDB("tasks", xmlData);
+    await sendItemToDB("task", xmlData);
+}
 
-    //TODO: link zu dem todo, zu welchem dieser task gehört
-    //location.href = urlWebsiteRoot + "todo.html/todo?id=X"
+
+/**
+ * Event-Handler für die Statusänderung bei Tasks
+ * Gibt Warnung aus, falls Limit für "Begonnen" überschritten würde
+ */
+async function handleStatusChange(event) {
+    const isValid = await validateBegonnenStatus("task", event.target.value);
+    if (!isValid) {
+        console.warn("Status 'Begonnen' für Task nicht erlaubt – Limit erreicht.");
+    }
 }
